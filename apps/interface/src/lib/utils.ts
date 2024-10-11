@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { cubicOut } from "svelte/easing";
 import type { TransitionConfig } from "svelte/transition";
 import { twMerge } from "tailwind-merge";
+import { z } from "zod";
 
 export * from "./utils.svelte.js";
 
@@ -62,3 +63,14 @@ export const flyAndScale = (
     easing: cubicOut,
   };
 };
+
+export function zAddress() {
+  return z
+    .string()
+    .startsWith("0x", {
+      message: "Address must start with 0x",
+    })
+    .length(42, {
+      message: "invalid address",
+    });
+}
