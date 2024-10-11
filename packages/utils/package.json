@@ -1,0 +1,36 @@
+{
+  "name": "@repo/utils",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "publishConfig": {
+    "types": "dist/index.d.ts",
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "dev": "pnpm _chore && tsc -w",
+    "build": "pnpm _chore && rm -rf dist && tsc",
+    "test": "pnpm test:lint && pnpm test:unit",
+    "test:unit": "pnpm _chore && vitest run",
+    "test:lint": "pnpm _chore && tsc --noEmit --emitDeclarationOnly false && prettier --check .",
+    "test:lint:fix": "pnpm _chore && prettier --write . && eslint . --fix",
+    "prepublishOnly": "pnpm test:lint && pnpm build",
+    "_chore": "pnpm i"
+  },
+  "dependencies": {
+    "ms": "^2.1.3",
+    "ts-essentials": "^9.4.1",
+    "ufo": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/ms": "^0.7.34",
+    "prettier": "^3.2.5",
+    "typescript": "^5.5.2"
+  }
+}
