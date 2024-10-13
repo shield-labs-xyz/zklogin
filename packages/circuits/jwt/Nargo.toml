@@ -1,0 +1,9 @@
+[package]
+name = "jwt"
+type = "lib"
+authors = ["Oleh Misarosh <olehmisar@gmail.com>"]
+compiler_version = ">=0.34.0"
+
+[dependencies]
+json_parser = { git = "https://github.com/noir-lang/noir_json_parser/", tag = "v0.2.0" }
+noir_rsa = { tag = "v0.3.0", git = "https://github.com/noir-lang/noir_rsa/", directory = "lib" }
