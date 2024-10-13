@@ -3,6 +3,7 @@
   import ConnectWalletOr from "$lib/ConnectWalletOr.svelte";
   import { Ui } from "$lib/ui";
   import { zAddress } from "$lib/utils";
+  import * as web2Auth from "@auth/sveltekit/client";
   import { utils } from "@repo/utils";
   import { ethers } from "ethers";
   import { z } from "zod";
@@ -104,4 +105,17 @@
       </Ui.Form>
     </Ui.Card.Content>
   </Ui.Card>
+
+  <div>
+    <Ui.LoadingButton
+      variant="default"
+      style="width: 100%;"
+      onclick={async () => {
+        await web2Auth.signOut();
+        await web2Auth.signIn();
+      }}
+    >
+      Login with Google
+    </Ui.LoadingButton>
+  </div>
 </Ui.GapContainer>
