@@ -1,2 +1,2 @@
 [workspace]
-members = ["jwt"]
+members = ["jwt", "jwt_account"]

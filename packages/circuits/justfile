@@ -1,0 +1,21 @@
+target := "./target"
+
+compile:
+  nargo compile
+
+prove name:
+  nargo execute witness
+  bb prove -b {{target}}/{{name}}.json
+
+vk name:
+  nargo compile
+  bb write_vk -b {{target}}/{{name}}.json -o {{target}}/{{name}}_vk
+
+contract name: (vk name)
+  bb contract -k {{target}}/{{name}}_vk  -o {{target}}/{{name}}.sol
+
+verify name: (vk name)
+  bb verify -k {{target}}/{{name}}_vk
+
+gates name: compile
+  bb gates -b {{target}}/{{name}}.json
