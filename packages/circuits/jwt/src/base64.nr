@@ -3,11 +3,11 @@
 global MAX_INPUT_LEN = 800;
 global MAX_RESULT_LEN = 1400;
 
-pub fn encode_str<N, M>(input: str<N>, mut result: [u8; M]) -> [u8; M] {
+pub fn encode_str<let N: u32, let M: u32>(input: str<N>, mut result: [u8; M]) -> [u8; M] {
     encode(as_bytes(input), result, false)
 }
 
-pub fn encode<N, M>(input: [u8; N], mut result: [u8; M], url_safe: bool) -> [u8; M] {
+pub fn encode<let N: u32, let M: u32>(input: [u8; N], mut result: [u8; M], url_safe: bool) -> [u8; M] {
     assert(N as u32 <= MAX_INPUT_LEN, "input is too long. Max input length is 600");
     assert(base64_calculate_length(input) == M);
 
@@ -37,7 +37,7 @@ pub fn encode<N, M>(input: [u8; N], mut result: [u8; M], url_safe: bool) -> [u8;
     result
 }
 
-fn convert_chunk<N>(input: [u8; N], url_safe: bool) -> [u8; 4] {
+fn convert_chunk<let N: u32>(input: [u8; N], url_safe: bool) -> [u8; 4] {
     let input_len : u32 = input.len() as u32;
     assert(input_len > 0 & input_len <= 3, "convert_chunk only accepts arrays of length 1, 2 and 3");
     let mut result = [64; 4];
@@ -68,7 +68,7 @@ fn convert_chunk<N>(input: [u8; N], url_safe: bool) -> [u8; 4] {
     result
 }
 
-fn base64_calculate_length<N>(input: [u8; N]) -> u32 {
+fn base64_calculate_length<let N: u32>(input: [u8; N]) -> u32 {
     let remainder: u32 = (input.len() as u32) % 3;
     4 * (input.len() as u32 / 3 + if remainder == 0 { 0 } else { 1 })
 }
@@ -105,7 +105,7 @@ pub fn as_byte(s: str<1>) -> u8 {
     s.as_bytes()[0]
 }
 
-pub fn as_bytes<N>(s: str<N>) -> [u8; N] {
+pub fn as_bytes<let N: u32>(s: str<N>) -> [u8; N] {
     let lookup: [u8; 256] = [
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
         30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
