@@ -11,7 +11,7 @@ fn main(
     header_and_payload: BoundedVec<u8, JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN>,
     payload_json: [u8; JWT_PAYLOAD_JSON_MAX_LEN],
     signature_limbs: [Field; 18],
-    // TODO(security): use jwt_sub_hash
+    // TODO(security): use hash(jwt_sub, salt)
     jwt_sub: pub str<31>,
     pubkey_limbs: pub [Field; 18],
     pubkey_redc_limbs: pub [Field; 18],

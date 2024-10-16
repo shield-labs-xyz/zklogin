@@ -28,7 +28,7 @@ pub fn verify_jwt<
     let signature: BN2048 = BigNum::from_array(signature);
     let pubkey: BigNumInstance<18, Params2048> = BigNumInstance::new(pubkey_limbs, pubkey_redc_limbs);
 
-    payloads_match::<HeaderAndPayloadMaxLen, PayloadJsonMaxLen, PayloadJsonBase64MaxLen>(header_and_payload, payload_json_padded);
+    assert_payloads_match::<HeaderAndPayloadMaxLen, PayloadJsonMaxLen, PayloadJsonBase64MaxLen>(header_and_payload, payload_json_padded);
 
     let hash = std::hash::sha256_var(header_and_payload.storage, header_and_payload.len() as u64);
     rsa.verify_sha256_pkcs1v15(pubkey, hash, signature, 65537)
@@ -43,7 +43,7 @@ pub fn verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], sub_expected
     sub_expected == sub_field.storage
 }
 
-fn payloads_match<let N: u32, let M: u32, let M2: u32>(header_and_payload: BoundedVec<u8, N>, payload_json_padded: [u8; M]) {
+fn assert_payloads_match<let N: u32, let M: u32, let M2: u32>(header_and_payload: BoundedVec<u8, N>, payload_json_padded: [u8; M]) {
     let from_index = unsafe {
         let dot_index = find_dot(header_and_payload.storage);
         assert(header_and_payload.storage[dot_index] == ".".as_bytes()[0], "dot not found");
