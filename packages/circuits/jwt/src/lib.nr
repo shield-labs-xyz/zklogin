@@ -4,8 +4,8 @@ use noir_rsa::bignum::fields::Params2048;
 use noir_rsa::rsa::RSA;
 use json_parser::JSON1kb::JSON;
 
-// TODO: use official noir base64 library
-mod base64;
+// TODO: use official noir base64 library when it supports base64url
+mod noir_base64;
 
 global PUBKEY_LIMBS_LEN: u32 = 18;
 global SIGNATURE_LIMBS_LEN: u32 = 18;
@@ -50,7 +50,8 @@ fn assert_payloads_match<let N: u32, let M: u32, let M2: u32>(header_and_payload
         dot_index + 1
     };
 
-    let encoded: [u8; M2] = crate::base64::encode(payload_json_padded, [0; M2], true);
+    // noir team switched it up, decode is encode
+    let encoded: [u8; M2] = noir_base64::base64url_decode(payload_json_padded);
 
     for i in 0..M2 {
         let j = from_index + i;
