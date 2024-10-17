@@ -37,7 +37,7 @@ pub fn assert_verify_jwt<
     assert(result, "jwt verification failed: signature");
 }
 
-pub fn assert_verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], account_id: Field, salt: Field, block_timestamp_seconds: u64, jwt_valid_for_seconds: u64) {
+pub fn assert_verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], account_id: Field, salt: Field, expected_jwt_iat: u64) {
     // TODO(security): haystack size should be based on N
     let haystack: string_search::StringBody1024 = string_search::StringBody::new(payload_json_padded, payload_json_padded.len());
 
@@ -83,7 +83,7 @@ pub fn assert_verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], accou
         }
         assert(stop, "jwt.iat is too long");
         let iat = nodash::str_to_u64(data);
-        assert(iat + jwt_valid_for_seconds >= block_timestamp_seconds, "jwt.iat is too old");
+        assert(expected_jwt_iat == iat, "jwt.iat mismatch");
     }
 }
 
@@ -149,7 +149,7 @@ mod tests {
     fn test_jwt_payload() {
         let salt = 123;
         let account_id = 0x161cf12a6f018200f9492d0fbbdf3b8f20665708b3f69ba1ab4dd2c71725dd5f;
-        assert_verify_jwt_payload(payload_json_padded, account_id, salt, 1689968000, 99999999);
+        assert_verify_jwt_payload(payload_json_padded, account_id, salt, 1728796346);
     }
 
 

@@ -14,10 +14,9 @@ fn main(
     salt: Field,
     // hash(jwt.sub, salt)
     account_id: pub Field,
+    jwt_iat: pub u64,
     public_key_limbs: pub [Field; 18],
     public_key_redc_limbs: pub [Field; 18],
-    block_timestamp_seconds: pub u64,
-    jwt_valid_for_seconds: pub u64,
 ) {
     jwt::assert_verify_jwt::<JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN, JWT_PAYLOAD_JSON_MAX_LEN, JWT_PAYLOAD_MAX_LEN>(
         header_and_payload,
@@ -27,5 +26,5 @@ fn main(
         signature_limbs
     );
 
-    jwt::assert_verify_jwt_payload(payload_json, account_id, salt, block_timestamp_seconds, jwt_valid_for_seconds);
+    jwt::assert_verify_jwt_payload(payload_json, account_id, salt, jwt_iat);
 }
