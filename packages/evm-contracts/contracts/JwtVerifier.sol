@@ -2,6 +2,7 @@
 pragma solidity 0.8.27;
 
 import {UltraVerifier} from "@repo/circuits/target/jwt_account.sol";
+import {Strings} from "./Strings.sol";
 
 // Note: keep in sync with Noir
 uint256 constant JWT_AUD_MAX_LEN = 256;
@@ -31,16 +32,21 @@ contract JwtVerifier {
         bytes proof;
         uint256 jwtIat;
         string jwtAud;
+        address jwtNonce;
     }
 
     function _verify(
         VerificationData memory verificationData
     ) internal view returns (bool) {
+        bytes memory jwtNonce = bytes(
+            Strings.toHexStringWithoutPrefix(verificationData.jwtNonce)
+        );
+
         uint256 staticInputLength = 2;
-        // TODO(security): check jwt.aud and jwt.nonce
         bytes32[] memory publicInputs = new bytes32[](
             staticInputLength +
                 JWT_AUD_MAX_LEN +
+                jwtNonce.length +
                 publicKeyLimbs.length +
                 publicKeyRedcLimbs.length
         );
@@ -58,14 +64,25 @@ contract JwtVerifier {
             );
         }
 
-        for (uint256 i = 0; i < publicKeyLimbs.length; i++) {
+        for (uint256 i = 0; i < jwtNonce.length; i++) {
             publicInputs[staticInputLength + JWT_AUD_MAX_LEN + i] = bytes32(
-                publicKeyLimbs[i]
+                uint256(uint8(jwtNonce[i]))
             );
         }
+
+        for (uint256 i = 0; i < publicKeyLimbs.length; i++) {
+            publicInputs[
+                staticInputLength + JWT_AUD_MAX_LEN + jwtNonce.length + i
+            ] = bytes32(publicKeyLimbs[i]);
+        }
+
         for (uint256 i = 0; i < publicKeyRedcLimbs.length; i++) {
             publicInputs[
-                staticInputLength + JWT_AUD_MAX_LEN + publicKeyLimbs.length + i
+                staticInputLength +
+                    JWT_AUD_MAX_LEN +
+                    jwtNonce.length +
+                    publicKeyLimbs.length +
+                    i
             ] = bytes32(publicKeyRedcLimbs[i]);
         }
 

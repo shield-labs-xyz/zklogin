@@ -18,4 +18,4 @@ Scripts follow the same pattern in all `apps/` and `packages/`:
 - `pnpm build` - Build for production
 - `pnpm test:lint` - Type-check and lint code
 - `pnpm test` - Run tests and `pnpm test:lint`
-- `pnpm compile` - If available, compile Aztec contracts
+- `pnpm compile` - If available, compile contracts

@@ -16,6 +16,8 @@ fn main(
     account_id: pub Field,
     jwt_iat: pub u64,
     jwt_aud: pub [u8; jwt::JWT_AUD_MAX_LEN],
+    // temporary owner address
+    jwt_nonce: pub [u8; jwt::JWT_NONCE_LEN],
     public_key_limbs: pub [Field; 18],
     public_key_redc_limbs: pub [Field; 18],
 ) {
@@ -27,5 +29,5 @@ fn main(
         signature_limbs
     );
 
-    jwt::assert_verify_jwt_payload(payload_json, account_id, salt, jwt_iat, jwt_aud);
+    jwt::assert_verify_jwt_payload(payload_json, account_id, salt, jwt_iat, jwt_aud, jwt_nonce);
 }

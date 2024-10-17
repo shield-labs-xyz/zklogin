@@ -35,6 +35,8 @@
     console.log(decodeJwt(data.session.id_token));
   });
 
+  const temporaryOwnerAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+
   async function prove() {
     if (!data.session?.id_token) {
       Ui.toast.error("Not logged in");
@@ -51,6 +53,8 @@
     const JWT_SUB_MAX_LEN = 64;
     // Note: keep in sync with Noir
     const JWT_AUD_MAX_LEN = 256;
+    // Note: keep in sync with Noir
+    const JWT_NONCE_LEN = 40;
 
     const jwt = data.session.id_token;
     const [headerBase64Url, payloadBase64Url, signatureBase64Url] =
@@ -65,10 +69,15 @@
       JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN,
     );
     const payload_json = utils.arrayPadEnd(
-      // TODO: remove base64url dependency
       Array.from(ethers.decodeBase64(base64UrlToBase64(payloadBase64Url))),
       JWT_PAYLOAD_JSON_MAX_LEN,
       " ".charCodeAt(0),
+    );
+    console.log(
+      `
+      global header_base64url: [u8; ${headerBase64Url.length}] = ${JSON.stringify(headerBase64Url)}.as_bytes();
+      global payload_base64url: [u8; ${payloadBase64Url.length}] = ${JSON.stringify(payloadBase64Url)}.as_bytes();
+      global payload_json_padded = ${JSON.stringify(ethers.toUtf8String(Uint8Array.from(payload_json)))}.as_bytes();`,
     );
     const signature_limbs = bnToLimbStrArray(
       base64UrlToBigInt(signatureBase64Url),
@@ -95,6 +104,11 @@
       JWT_AUD_MAX_LEN,
       0,
     );
+    const jwt_nonce = utils.arrayPadEnd(
+      Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.nonce)),
+      JWT_NONCE_LEN,
+      0,
+    );
     const input = {
       header_and_payload,
       payload_json,
@@ -103,6 +117,7 @@
       salt,
       jwt_iat,
       jwt_aud,
+      jwt_nonce,
       public_key_limbs: publicKey.limbs.public_key_limbs,
       public_key_redc_limbs: publicKey.limbs.public_key_redc_limbs,
     };
@@ -115,6 +130,15 @@
     console.log("public key", publicKey);
     console.log("jwt", jwtDecoded);
     console.log("proof", ethers.hexlify(proof));
+  }
+
+  async function signIn() {
+    const nonce = ethers
+      .hexlify(ethers.getBytes(temporaryOwnerAddress))
+      .slice("0x".length);
+    await web2Auth.signIn("google", undefined, {
+      nonce,
+    });
   }
 
   function toBoundedVec(arr: number[], maxLen: number) {
@@ -147,13 +171,7 @@
 
   <Ui.Card>
     <Ui.Card.Content>
-      <Ui.LoadingButton
-        variant="default"
-        style="width: 100%;"
-        onclick={async () => {
-          await web2Auth.signIn();
-        }}
-      >
+      <Ui.LoadingButton variant="default" style="width: 100%;" onclick={signIn}>
         Login with Google
       </Ui.LoadingButton>
 

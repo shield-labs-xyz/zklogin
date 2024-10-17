@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  oauth4webapi@3.0.0:
+    hash: zsn2zwycmobvy6ss6tleap4mp4
+    path: patches/oauth4webapi@3.0.0.patch
+
 importers:
 
   .:
@@ -5211,7 +5216,7 @@ snapshots:
       '@types/cookie': 0.6.0
       cookie: 0.7.1
       jose: 5.9.4
-      oauth4webapi: 3.0.0
+      oauth4webapi: 3.0.0(patch_hash=zsn2zwycmobvy6ss6tleap4mp4)
       preact: 10.11.3
       preact-render-to-string: 5.2.3(preact@10.11.3)
 
@@ -9351,7 +9356,7 @@ snapshots:
       bn.js: 4.11.6
       strip-hex-prefix: 1.0.0
 
-  oauth4webapi@3.0.0: {}
+  oauth4webapi@3.0.0(patch_hash=zsn2zwycmobvy6ss6tleap4mp4): {}
 
   object-assign@4.1.1: {}
 
