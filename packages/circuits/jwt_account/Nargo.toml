@@ -2,7 +2,8 @@
 name = "jwt_account"
 type = "bin"
 authors = ["Oleh Misarosh <olehmisar@gmail.com>"]
-compiler_version = ">=0.34.0"
+compiler_version = ">=0.35.0"
 
 [dependencies]
 jwt = { path = "../jwt" }
+nodash = { git = "https://github.com/olehmisar/nodash/", tag = "v0.35.0" }

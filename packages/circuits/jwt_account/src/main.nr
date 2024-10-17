@@ -3,9 +3,9 @@
 global JWT_HEADER_MAX_LEN: u32 = 256;
 // TODO(security): if payload length is too long, account is lost
 // Note: keep in sync with JS
-global JWT_PAYLOAD_MAX_LEN: u32 = 1024;
+comptime global JWT_PAYLOAD_JSON_MAX_LEN: u32 = 768;
 // Note: keep in sync with JS
-global JWT_PAYLOAD_JSON_MAX_LEN: u32 = 768; // (x * 4 / 3) must match JWT_PAYLOAD_MAX_LEN rounded UP the nearest multiple of 4
+global JWT_PAYLOAD_MAX_LEN: u32 = comptime { nodash::div_ceil(JWT_PAYLOAD_JSON_MAX_LEN, 3) * 4 };
 
 fn main(
     header_and_payload: BoundedVec<u8, JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN>,
