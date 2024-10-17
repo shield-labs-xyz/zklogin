@@ -13,14 +13,14 @@ fn main(
     signature_limbs: [Field; 18],
     // TODO(security): use hash(jwt_sub, salt)
     jwt_sub: pub str<31>,
-    pubkey_limbs: pub [Field; 18],
-    pubkey_redc_limbs: pub [Field; 18],
+    public_key_limbs: pub [Field; 18],
+    public_key_redc_limbs: pub [Field; 18],
 ) {
     let verification = jwt::verify_jwt::<JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN, JWT_PAYLOAD_JSON_MAX_LEN, JWT_PAYLOAD_MAX_LEN>(
         header_and_payload,
         payload_json,
-        pubkey_limbs,
-        pubkey_redc_limbs,
+        public_key_limbs,
+        public_key_redc_limbs,
         signature_limbs
     );
     assert(verification, "jwt verification failed: signature");
