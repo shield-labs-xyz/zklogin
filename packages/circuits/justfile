@@ -9,8 +9,7 @@ prove name:
   nargo execute witness
   bb prove -b {{target}}/{{name}}.json
 
-vk name:
-  nargo compile
+vk name: compile
   bb write_vk -b {{target}}/{{name}}.json -o {{target}}/{{name}}_vk
 
 contract name: (vk name)

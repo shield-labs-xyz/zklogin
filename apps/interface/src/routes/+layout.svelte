@@ -4,14 +4,9 @@
   import { lib } from "$lib";
   import { Ui } from "$lib/ui";
   import { QueryClientProvider } from "@tanstack/svelte-query";
-  import { onMount } from "svelte";
   import Header from "./Header.svelte";
 
-  let { data, children } = $props();
-
-  onMount(async () => {
-    console.log("session", data);
-  });
+  let { children } = $props();
 </script>
 
 <QueryClientProvider client={lib.queries.queryClient}>

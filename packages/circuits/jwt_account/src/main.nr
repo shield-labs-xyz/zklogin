@@ -9,7 +9,7 @@ global JWT_PAYLOAD_MAX_LEN: u32 = comptime { nodash::div_ceil(JWT_PAYLOAD_JSON_M
 
 fn main(
     header_and_payload: BoundedVec<u8, JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN>,
-    payload_json: [u8; JWT_PAYLOAD_JSON_MAX_LEN],
+    payload_json: [u8; JWT_PAYLOAD_JSON_MAX_LEN], // TODO: get payload_json from header_and_payload
     signature_limbs: [Field; 18],
     salt: Field,
     // hash(jwt.sub, salt)

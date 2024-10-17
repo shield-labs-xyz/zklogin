@@ -7,7 +7,7 @@ use noir_rsa::rsa::RSA;
 mod noir_base64;
 
 // Note: keep in sync with JS
-global JWT_SUB_MAX_LEN: u32 = 64;
+global JWT_SUB_MAX_LEN: u32 = 64; // UUID is 36 chars but we add some buffer to be safe
 
 global PUBKEY_LIMBS_LEN: u32 = 18;
 global SIGNATURE_LIMBS_LEN: u32 = 18;
@@ -40,7 +40,9 @@ pub fn assert_verify_jwt<
 pub fn assert_verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], account_id: Field, salt: Field) {
     // TODO(security): haystack size should be based on N
     let haystack: string_search::StringBody1024 = string_search::StringBody::new(payload_json_padded, payload_json_padded.len());
+
     {
+        // verify "jwt.sub"
         let needle_text = "\"sub\":\"".as_bytes();
         let needle: string_search::SubString32 = string_search::SubString::new(needle_text, needle_text.len());
         let (result, match_position) = haystack.substring_match(needle);
