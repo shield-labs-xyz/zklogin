@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { describe } from "mocha";
 import { snapshottedBeforeEach } from "../shared/utils";
 import {
-  JwtAccount__factory,
+  TestJwtAccount__factory,
   UltraVerifier__factory,
 } from "../typechain-types";
 
@@ -62,14 +62,14 @@ describe("JwtAccount", () => {
     };
     const accountId =
       "0x295d04c5c1b26064172f268e6403c1fd1766274e7165ce21684f73b0f76f14b8";
-    const account = await new JwtAccount__factory(alice).deploy(
+    const account = await new TestJwtAccount__factory(alice).deploy(
       accountId,
       publicKey.public_key_limbs,
       publicKey.public_key_redc_limbs,
       verifier,
     );
 
-    const tx = await account.verify.send(proof, 1729186328);
+    const tx = await account.verify({ proof, jwtIat: 1729186328 });
     const receipt = await tx.wait();
     console.log("gas used", receipt?.gasUsed);
   });
