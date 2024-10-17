@@ -72,12 +72,13 @@ describe("JwtAccount", () => {
 
     const account = await new TestJwtAccount__factory(alice).deploy(
       accountId,
+      jwtAud,
       publicKey.public_key_limbs,
       publicKey.public_key_redc_limbs,
       verifier,
     );
 
-    const tx = await account.verify({ proof, jwtIat, jwtAud, jwtNonce });
+    const tx = await account.verify({ proof, jwtIat, jwtNonce });
     const receipt = await tx.wait();
     console.log("gas used", receipt?.gasUsed);
   });

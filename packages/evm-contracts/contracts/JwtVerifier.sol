@@ -11,6 +11,7 @@ contract JwtVerifier {
     UltraVerifier public immutable ultraVerifier;
 
     bytes32 public accountId;
+    bytes public jwtAud;
     uint256[18] public publicKeyLimbs;
     uint256[18] public publicKeyRedcLimbs;
 
@@ -20,10 +21,13 @@ contract JwtVerifier {
 
     function __JwtVerifier_initialize(
         bytes32 accountId_,
+        string memory jwtAud_,
         uint256[18] memory publicKeyLimbs_,
         uint256[18] memory publicKeyRedcLimbs_
     ) internal {
         accountId = accountId_;
+        jwtAud = bytes(jwtAud_);
+        require(jwtAud.length == JWT_AUD_MAX_LEN, "jwt.aud length mismatch");
         publicKeyLimbs = publicKeyLimbs_;
         publicKeyRedcLimbs = publicKeyRedcLimbs_;
     }
@@ -31,7 +35,6 @@ contract JwtVerifier {
     struct VerificationData {
         bytes proof;
         uint256 jwtIat;
-        string jwtAud;
         address jwtNonce;
     }
 
@@ -54,13 +57,8 @@ contract JwtVerifier {
         publicInputs[j++] = accountId;
         publicInputs[j++] = bytes32(verificationData.jwtIat);
 
-        bytes memory jwtAudBytes = bytes(verificationData.jwtAud);
-        require(
-            jwtAudBytes.length == JWT_AUD_MAX_LEN,
-            "jwt.aud length mismatch"
-        );
         for (uint256 i = 0; i < JWT_AUD_MAX_LEN; i++) {
-            publicInputs[j++] = bytes32(uint256(uint8(jwtAudBytes[i])));
+            publicInputs[j++] = bytes32(uint256(uint8(jwtAud[i])));
         }
 
         for (uint256 i = 0; i < jwtNonce.length; i++) {

@@ -7,12 +7,14 @@ import {UltraVerifier} from "@repo/circuits/target/jwt_account.sol";
 contract TestJwtAccount is JwtVerifier {
     constructor(
         bytes32 accountId_,
+        string memory jwtAud_,
         uint256[18] memory publicKeyLimbs_,
         uint256[18] memory publicKeyRedcLimbs_,
         UltraVerifier ultraVerifier_
     ) JwtVerifier(ultraVerifier_) {
         __JwtVerifier_initialize(
             accountId_,
+            jwtAud_,
             publicKeyLimbs_,
             publicKeyRedcLimbs_
         );
