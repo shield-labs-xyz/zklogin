@@ -2,8 +2,5 @@
   "name": "@repo/circuits",
   "type": "module",
   "version": "0.0.1",
-  "private": true,
-  "exports": {
-    "./*": "./target/"
-  }
+  "private": true
 }

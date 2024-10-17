@@ -16,7 +16,7 @@
   } from "@mach-34/noir-bignum-paramgen";
   import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
   import { Noir } from "@noir-lang/noir_js";
-  import circuit from "@repo/circuits/jwt_account";
+  import circuit from "@repo/circuits/target/jwt_account.json" with { type: "json" };
   import { utils } from "@repo/utils";
   import { ethers } from "ethers";
   import ky from "ky";
