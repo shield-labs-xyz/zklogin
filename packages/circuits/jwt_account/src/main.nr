@@ -11,19 +11,19 @@ fn main(
     header_and_payload: BoundedVec<u8, JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN>,
     payload_json: [u8; JWT_PAYLOAD_JSON_MAX_LEN],
     signature_limbs: [Field; 18],
-    // TODO(security): use hash(jwt_sub, salt)
-    jwt_sub: pub str<31>,
+    salt: Field,
+    // hash(jwt.sub, salt)
+    account_id: pub Field,
     public_key_limbs: pub [Field; 18],
     public_key_redc_limbs: pub [Field; 18],
 ) {
-    let verification = jwt::verify_jwt::<JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN, JWT_PAYLOAD_JSON_MAX_LEN, JWT_PAYLOAD_MAX_LEN>(
+    jwt::assert_verify_jwt::<JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN, JWT_PAYLOAD_JSON_MAX_LEN, JWT_PAYLOAD_MAX_LEN>(
         header_and_payload,
         payload_json,
         public_key_limbs,
         public_key_redc_limbs,
         signature_limbs
     );
-    assert(verification, "jwt verification failed: signature");
 
-    assert(jwt::verify_jwt_payload(payload_json, jwt_sub), "jwt payload verification failed");
+    jwt::assert_verify_jwt_payload(payload_json, account_id, salt);
 }
