@@ -37,7 +37,7 @@ pub fn assert_verify_jwt<
     assert(result, "jwt verification failed: signature");
 }
 
-pub fn assert_verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], account_id: Field, salt: Field) {
+pub fn assert_verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], account_id: Field, salt: Field, block_timestamp_seconds: u64, jwt_valid_for_seconds: u64) {
     // TODO(security): haystack size should be based on N
     let haystack: string_search::StringBody1024 = string_search::StringBody::new(payload_json_padded, payload_json_padded.len());
 
@@ -64,7 +64,27 @@ pub fn assert_verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], accou
         assert(hash == account_id, "jwt.sub mismatch");
     }
 
-    // TODO(security): verify `iat` or `exp`
+    {
+        // verify "jwt.iat"
+        let needle_text = "\"iat\":".as_bytes();
+        let needle: string_search::SubString32 = string_search::SubString::new(needle_text, needle_text.len());
+        let (result, match_position) = haystack.substring_match(needle);
+        assert(result, "jwt.iat not found");
+        let mut data = [0 as u8; 20];
+        let mut stop = false;
+        for i in 0..20 {
+            let chr = payload_json_padded[match_position + needle_text.len() + i];
+            if chr == ",".as_bytes()[0] {
+                stop = true;
+            }
+            if !stop {
+                data[i] = chr;
+            }
+        }
+        assert(stop, "jwt.iat is too long");
+        let iat = nodash::str_to_u64(data);
+        assert(iat + jwt_valid_for_seconds >= block_timestamp_seconds, "jwt.iat is too old");
+    }
 }
 
 fn assert_payloads_match<let N: u32, let M: u32, let M2: u32>(header_and_payload: BoundedVec<u8, N>, payload_json_padded: [u8; M]) {
@@ -129,7 +149,7 @@ mod tests {
     fn test_jwt_payload() {
         let salt = 123;
         let account_id = 0x161cf12a6f018200f9492d0fbbdf3b8f20665708b3f69ba1ab4dd2c71725dd5f;
-        assert_verify_jwt_payload(payload_json_padded, account_id, salt);
+        assert_verify_jwt_payload(payload_json_padded, account_id, salt, 1689968000, 99999999);
     }
 
 

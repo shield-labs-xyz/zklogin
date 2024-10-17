@@ -96,6 +96,7 @@ export function decodeJwt(jwt: string) {
     aud: z.string(),
     sub: z.string(),
     iss: z.string(),
+    iat: z.number(),
   });
   return {
     header: HeaderSchema.parse(header),

@@ -6,4 +6,4 @@ compiler_version = ">=0.34.0"
 
 [dependencies]
 jwt = { path = "../jwt" }
-nodash = { git = "https://github.com/olehmisar/nodash/", tag = "v0.35.0" }
+nodash = { git = "https://github.com/olehmisar/nodash/", tag = "v0.35.1" }

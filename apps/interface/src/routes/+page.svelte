@@ -87,6 +87,8 @@
       ),
       salt,
     ]).toString();
+    const block_timestamp_seconds = jwtDecoded.payload.iat + 10;
+    const jwt_valid_for_seconds = 11;
     const input = {
       header_and_payload,
       payload_json,
@@ -95,6 +97,8 @@
       salt,
       public_key_limbs: publicKey.limbs.public_key_limbs,
       public_key_redc_limbs: publicKey.limbs.public_key_redc_limbs,
+      block_timestamp_seconds,
+      jwt_valid_for_seconds,
     };
     console.log(input);
     const { witness } = await noir.execute(input);
