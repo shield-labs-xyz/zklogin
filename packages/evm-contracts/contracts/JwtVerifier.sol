@@ -50,8 +50,9 @@ contract JwtVerifier {
                 publicKeyLimbs.length +
                 publicKeyRedcLimbs.length
         );
-        publicInputs[0] = accountId;
-        publicInputs[1] = bytes32(verificationData.jwtIat);
+        uint256 j = 0;
+        publicInputs[j++] = accountId;
+        publicInputs[j++] = bytes32(verificationData.jwtIat);
 
         bytes memory jwtAudBytes = bytes(verificationData.jwtAud);
         require(
@@ -59,31 +60,19 @@ contract JwtVerifier {
             "jwt.aud length mismatch"
         );
         for (uint256 i = 0; i < JWT_AUD_MAX_LEN; i++) {
-            publicInputs[staticInputLength + i] = bytes32(
-                uint256(uint8(jwtAudBytes[i]))
-            );
+            publicInputs[j++] = bytes32(uint256(uint8(jwtAudBytes[i])));
         }
 
         for (uint256 i = 0; i < jwtNonce.length; i++) {
-            publicInputs[staticInputLength + JWT_AUD_MAX_LEN + i] = bytes32(
-                uint256(uint8(jwtNonce[i]))
-            );
+            publicInputs[j++] = bytes32(uint256(uint8(jwtNonce[i])));
         }
 
         for (uint256 i = 0; i < publicKeyLimbs.length; i++) {
-            publicInputs[
-                staticInputLength + JWT_AUD_MAX_LEN + jwtNonce.length + i
-            ] = bytes32(publicKeyLimbs[i]);
+            publicInputs[j++] = bytes32(publicKeyLimbs[i]);
         }
 
         for (uint256 i = 0; i < publicKeyRedcLimbs.length; i++) {
-            publicInputs[
-                staticInputLength +
-                    JWT_AUD_MAX_LEN +
-                    jwtNonce.length +
-                    publicKeyLimbs.length +
-                    i
-            ] = bytes32(publicKeyRedcLimbs[i]);
+            publicInputs[j++] = bytes32(publicKeyRedcLimbs[i]);
         }
 
         return ultraVerifier.verify(verificationData.proof, publicInputs);
