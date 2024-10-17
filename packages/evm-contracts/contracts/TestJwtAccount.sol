@@ -10,12 +10,11 @@ contract TestJwtAccount is JwtVerifier {
         uint256[18] memory publicKeyLimbs_,
         uint256[18] memory publicKeyRedcLimbs_,
         UltraVerifier ultraVerifier_
-    ) {
+    ) JwtVerifier(ultraVerifier_) {
         __JwtVerifier_initialize(
             accountId_,
             publicKeyLimbs_,
-            publicKeyRedcLimbs_,
-            ultraVerifier_
+            publicKeyRedcLimbs_
         );
     }
 

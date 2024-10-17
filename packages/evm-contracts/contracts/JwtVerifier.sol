@@ -7,27 +7,30 @@ import {UltraVerifier} from "@repo/circuits/target/jwt_account.sol";
 uint256 constant JWT_AUD_MAX_LEN = 256;
 
 contract JwtVerifier {
+    UltraVerifier public immutable ultraVerifier;
+
     bytes32 public accountId;
     uint256[18] public publicKeyLimbs;
     uint256[18] public publicKeyRedcLimbs;
-    UltraVerifier public ultraVerifier;
 
-    struct VerificationData {
-        bytes proof;
-        uint256 jwtIat;
-        string jwtAud;
+    constructor(UltraVerifier ultraVerifier_) {
+        ultraVerifier = ultraVerifier_;
     }
 
     function __JwtVerifier_initialize(
         bytes32 accountId_,
         uint256[18] memory publicKeyLimbs_,
-        uint256[18] memory publicKeyRedcLimbs_,
-        UltraVerifier ultraVerifier_
+        uint256[18] memory publicKeyRedcLimbs_
     ) internal {
         accountId = accountId_;
         publicKeyLimbs = publicKeyLimbs_;
         publicKeyRedcLimbs = publicKeyRedcLimbs_;
-        ultraVerifier = ultraVerifier_;
+    }
+
+    struct VerificationData {
+        bytes proof;
+        uint256 jwtIat;
+        string jwtAud;
     }
 
     function _verify(
