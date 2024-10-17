@@ -2,6 +2,8 @@ target := "./target"
 
 compile:
   nargo compile
+  # iterate over target/*.json and remove .file_map using jq
+  for f in target/*.json; do jq 'del(.file_map)' $f > $f.tmp; mv $f.tmp $f; done
 
 prove name:
   nargo execute witness

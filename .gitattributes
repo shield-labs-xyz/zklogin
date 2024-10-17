@@ -1,3 +1,5 @@
+**/target/** filter=lfs diff=lfs merge=lfs -text
+
 **/typechain-types/** linguist-generated=true
 **/target/** linguist-generated=true
 **/dist/** linguist-generated=true
