@@ -49,6 +49,8 @@
     const JWT_PAYLOAD_MAX_LEN = Math.ceil(JWT_PAYLOAD_JSON_MAX_LEN / 3) * 4;
     // Note: keep in sync with Noir
     const JWT_SUB_MAX_LEN = 64;
+    // Note: keep in sync with Noir
+    const JWT_AUD_MAX_LEN = 256;
 
     const jwt = data.session.id_token;
     const [headerBase64Url, payloadBase64Url, signatureBase64Url] =
@@ -88,15 +90,21 @@
       salt,
     ]).toString();
     const jwt_iat = jwtDecoded.payload.iat;
+    const jwt_aud = utils.arrayPadEnd(
+      Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.aud)),
+      JWT_AUD_MAX_LEN,
+      0,
+    );
     const input = {
       header_and_payload,
       payload_json,
       signature_limbs,
       account_id,
       salt,
+      jwt_iat,
+      jwt_aud,
       public_key_limbs: publicKey.limbs.public_key_limbs,
       public_key_redc_limbs: publicKey.limbs.public_key_redc_limbs,
-      jwt_iat,
     };
     console.log(input);
     const { witness } = await noir.execute(input);
