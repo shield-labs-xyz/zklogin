@@ -21,6 +21,7 @@ contract TestJwtAccount is JwtVerifier {
     }
 
     function verify(VerificationData calldata verificationData) external {
-        _verify(verificationData);
+        bool result = _verifyJwtProof(verificationData);
+        require(result, "JwtAccount: invalid proof");
     }
 }

@@ -38,7 +38,7 @@ contract JwtVerifier {
         address jwtNonce;
     }
 
-    function _verify(
+    function _verifyJwtProof(
         VerificationData memory verificationData
     ) internal view returns (bool) {
         bytes memory jwtNonce = bytes(
