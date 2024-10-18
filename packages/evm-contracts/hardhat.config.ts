@@ -10,7 +10,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 999999999,
+        runs: 100000000,
       },
     },
   },
@@ -21,7 +21,9 @@ const config: HardhatUserConfig = {
     },
   },
   etherscan: {
-    apiKey: {},
+    apiKey: {
+      baseSepolia: "XFIQMP77Q7JFTSAUI33EEQMUG9E1UBSB4X",
+    },
   },
   namedAccounts: {
     deployer: `privatekey://${envConfig.DEPLOYER_PRIVATE_KEY}`,

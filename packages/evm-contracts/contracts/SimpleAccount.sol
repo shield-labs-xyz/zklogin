@@ -130,32 +130,23 @@ contract SimpleAccount is
         _call(dest, value, func);
     }
 
+    /// @notice Represents a call to make.
+    struct Call {
+        /// @dev The address to call.
+        address target;
+        /// @dev The value to send when making the call.
+        uint256 value;
+        /// @dev The data of the call.
+        bytes data;
+    }
+
     /**
      * execute a sequence of transactions
-     * @dev to reduce gas consumption for trivial case (no value), use a zero-length array to mean zero value
-     * @param dest an array of destination addresses
-     * @param value an array of values to pass to each call. can be zero-length for no-value calls
-     * @param func an array of calldata to pass to each call
      */
-    function executeBatch(
-        address[] calldata dest,
-        uint256[] calldata value,
-        bytes[] calldata func
-    ) external {
+    function executeBatch(Call[] calldata calls) external {
         _requireFromEntryPointOrOwner();
-        require(
-            dest.length == func.length &&
-                (value.length == 0 || value.length == func.length),
-            "wrong array lengths"
-        );
-        if (value.length == 0) {
-            for (uint256 i = 0; i < dest.length; i++) {
-                _call(dest[i], 0, func[i]);
-            }
-        } else {
-            for (uint256 i = 0; i < dest.length; i++) {
-                _call(dest[i], value[i], func[i]);
-            }
+        for (uint256 i; i < calls.length; i++) {
+            _call(calls[i].target, calls[i].value, calls[i].data);
         }
     }
 
