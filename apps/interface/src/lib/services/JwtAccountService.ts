@@ -20,15 +20,12 @@ import ky from "ky";
 import { assert } from "ts-essentials";
 import {
   bytesToString,
-  createWalletClient,
   getContract,
-  http,
   keccak256,
   stringToBytes,
   toHex,
   type Address,
   type Hex,
-  type LocalAccount,
   type PublicClient,
   type SignableMessage,
 } from "viem";
@@ -37,7 +34,6 @@ import {
   entryPoint07Address,
   getUserOperationHash,
   toSmartAccount,
-  type BundlerClient,
 } from "viem/account-abstraction";
 import { isDeployed } from "./CoinbaseWalletService";
 
@@ -60,16 +56,13 @@ export class JwtAccountService {
     undefined,
   );
 
-  constructor(
-    private publicClient: PublicClient,
-    private bundlerClient: BundlerClient,
-  ) {}
+  constructor(private publicClient: PublicClient) {}
 
   get address() {
     return this.#address.value;
   }
 
-  async getAccount(jwt: string, owner: LocalAccount) {
+  async getAccount(jwt: string, owner: ethers.Signer) {
     const account = await toJwtSmartAccount(owner, jwt, this.publicClient);
     this.#address.value = account.address;
     return account;
@@ -77,40 +70,28 @@ export class JwtAccountService {
 
   async setOwner(
     jwt: string,
-    owner: LocalAccount,
+    owner: ethers.Signer,
     verificationData: VerificationData,
   ) {
-    assert(owner.address === verificationData.jwtNonce, "jwt.nonce mismatch");
+    assert(
+      utils.isAddressEqual(await owner.getAddress(), verificationData.jwtNonce),
+      "jwt.nonce mismatch",
+    );
     const account = await this.getAccount(jwt, owner);
-    const data = SimpleAccount__factory.createInterface().encodeFunctionData(
-      "setOwner",
-      [verificationData],
-    ) as Hex;
 
-    return await this.bundlerClient.sendUserOperation({
-      account,
-      calls: [
-        {
-          to: account.address,
-          data,
-        },
-      ],
-    });
+    const contract = SimpleAccount__factory.connect(account.address, owner);
+    return await contract.setOwner(verificationData);
   }
 
-  async currentOwner(jwt: string, owner: LocalAccount) {
+  async currentOwner(jwt: string, owner: ethers.Signer) {
     const account = await this.getAccount(jwt, owner);
     const deployed: boolean = await isDeployed(account, this.publicClient);
+    console.log("deployed", deployed);
     if (!deployed) {
-      return owner.address;
+      return await owner.getAddress();
     }
-    const contract = getContract({
-      address: account.address,
-      abi: SimpleAccount__factory.abi,
-      client: this.publicClient,
-    });
-    const ownerOnChain = await contract.read.currentOwner();
-    return ownerOnChain;
+    const contract = SimpleAccount__factory.connect(account.address, owner);
+    return (await contract.currentOwner()) as Address;
   }
 }
 
@@ -123,19 +104,12 @@ export interface VerificationData {
 }
 
 export async function toJwtSmartAccount(
-  owner: LocalAccount,
+  owner: ethers.Signer,
   jwt: string,
   client: PublicClient,
 ) {
   const chainId = client.chain!.id as unknown as keyof typeof deployments;
   assert(deployments[chainId], `deployments for ${chainId} not found`);
-
-  console.log("client", client);
-  const walletClient = createWalletClient({
-    transport: http(),
-    chain: client.chain,
-    account: owner,
-  });
 
   const factoryAddress = deployments[chainId].contracts
     .SimpleAccountFactory as `0x${string}`;
@@ -147,7 +121,12 @@ export async function toJwtSmartAccount(
   const factoryCalldata =
     SimpleAccountFactory__factory.createInterface().encodeFunctionData(
       "createAccount",
-      [await getJwtAccountInitParams(jwt, walletClient.account.address)],
+      [
+        await getJwtAccountInitParams(
+          jwt,
+          (await owner.getAddress()) as Address,
+        ),
+      ],
     ) as Hex;
 
   const entryPoint = {
@@ -157,7 +136,9 @@ export async function toJwtSmartAccount(
   } as const;
 
   async function signMessage({ message }: { message: SignableMessage }) {
-    return await walletClient.signMessage({ message });
+    const toSign =
+      typeof message === "string" ? message : ethers.getBytes(message.raw);
+    return (await owner.signMessage(toSign)) as Hex;
   }
   const account = await toSmartAccount({
     client,
@@ -165,7 +146,7 @@ export async function toJwtSmartAccount(
     async getFactoryArgs() {
       return {
         factory: factory.address,
-        factoryData: factoryCalldata as Hex,
+        factoryData: factoryCalldata,
       };
     },
     async getStubSignature() {
@@ -175,7 +156,11 @@ export async function toJwtSmartAccount(
       return await signMessage({ message });
     },
     async signTypedData(parameters) {
-      return await walletClient.signTypedData(parameters as any);
+      return (await owner.signTypedData(
+        parameters.domain as any,
+        parameters.types as any,
+        parameters.message as any,
+      )) as Hex;
     },
     async decodeCalls() {
       throw new Error("decodeCalls not implemented");
@@ -194,7 +179,7 @@ export async function toJwtSmartAccount(
 
       const sig = await signMessage({ message: { raw: hash } });
       console.log("sign userOp", {
-        owner: walletClient.account.address,
+        owner: await owner.getAddress(),
         hash,
         sig,
         address,
@@ -203,7 +188,10 @@ export async function toJwtSmartAccount(
     },
     async getAddress() {
       return factory.read.getAddress([
-        await getJwtAccountInitParams(jwt, walletClient.account.address),
+        await getJwtAccountInitParams(
+          jwt,
+          (await owner.getAddress()) as Address,
+        ),
       ]);
     },
     async encodeCalls(x) {
@@ -262,12 +250,15 @@ export async function prepareJwt(jwt: string) {
     JWT_PAYLOAD_JSON_MAX_LEN,
     " ".charCodeAt(0),
   );
-  console.log(
-    `
+  const showDebug = false;
+  if (showDebug) {
+    console.log(
+      `
       global header_base64url: [u8; ${headerBase64Url.length}] = ${JSON.stringify(headerBase64Url)}.as_bytes();
       global payload_base64url: [u8; ${payloadBase64Url.length}] = ${JSON.stringify(payloadBase64Url)}.as_bytes();
       global payload_json_padded = ${JSON.stringify(bytesToString(Uint8Array.from(payload_json)))}.as_bytes();`,
-  );
+    );
+  }
   const signature_limbs = bnToLimbStrArray(
     base64UrlToBigInt(signatureBase64Url),
   );
@@ -291,11 +282,7 @@ export async function prepareJwt(jwt: string) {
     JWT_AUD_MAX_LEN,
     0,
   );
-  const jwt_nonce = utils.arrayPadEnd(
-    Array.from(stringToBytes(jwtDecoded.payload.nonce)),
-    JWT_NONCE_LEN,
-    0,
-  );
+  const jwt_nonce = encodedAddressAsJwtNonce(jwtDecoded.payload.nonce);
   const input = {
     header_and_payload,
     payload_json,
@@ -308,10 +295,24 @@ export async function prepareJwt(jwt: string) {
     public_key_limbs: publicKey.limbs.public_key_limbs,
     public_key_redc_limbs: publicKey.limbs.public_key_redc_limbs,
   };
-  console.log(input);
-  console.log("public key", publicKey);
-  console.log("jwt", jwtDecoded);
+  if (showDebug) {
+    console.log(input);
+    console.log("public key", publicKey);
+    console.log("jwt", jwtDecoded);
+  }
   return input;
+}
+
+export function encodedAddressAsJwtNonce(address: string) {
+  assert(address === address.toLowerCase(), "address must be lowercase");
+  if (address.startsWith("0x")) {
+    address = address.slice(2);
+  }
+  return utils.arrayPadEnd(
+    Array.from(ethers.toUtf8Bytes(address)),
+    JWT_NONCE_LEN,
+    0,
+  );
 }
 
 function toBoundedVec(arr: number[], maxLen: number) {

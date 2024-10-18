@@ -95,6 +95,7 @@ export async function isDeployed(
   { address }: { address: Address },
   publicClient: PublicClient,
 ) {
-  const deployed = size((await publicClient.getCode({ address })) ?? "0x") > 0;
+  const code = await publicClient.getCode({ address });
+  const deployed = size(code ?? "0x") > 0;
   return deployed;
 }

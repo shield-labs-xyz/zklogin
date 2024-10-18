@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { lib, owner, recoveryOwner } from "$lib";
+  import { lib } from "$lib";
   import ConnectWalletOr from "$lib/ConnectWalletOr.svelte";
   import {
     authProviderId,
+    encodedAddressAsJwtNonce,
     prepareJwt,
   } from "$lib/services/JwtAccountService.js";
   import { chain } from "$lib/services/Web3ModalService.svelte.js";
@@ -17,9 +18,11 @@
   import { utils } from "@repo/utils";
   import { createQuery } from "@tanstack/svelte-query";
   import { ethers } from "ethers";
+  import { isEqual } from "lodash-es";
   import { onMount } from "svelte";
   import { assert } from "ts-essentials";
-  import { bytesToHex, hexToBytes, parseEther } from "viem";
+  import { bytesToHex, parseEther } from "viem";
+  import type { Address } from "viem/accounts";
   import { z } from "zod";
 
   let { data } = $props();
@@ -34,27 +37,30 @@
     console.log(decodeJwt(jwt));
   });
 
-  let ownersQuery = $derived(
-    createQuery(
-      {
-        queryKey: ["owners", lib.coinbase.address],
-        queryFn: async () => {
-          return await lib.coinbase.getOwners(owner);
-        },
-      },
-      lib.queries.queryClient,
-    ),
-  );
+  // let ownersQuery = $derived(
+  //   createQuery(
+  //     {
+  //       queryKey: ["owners", lib.coinbase.address],
+  //       queryFn: async () => {
+  //         return await lib.coinbase.getOwners(owner);
+  //       },
+  //     },
+  //     lib.queries.queryClient,
+  //   ),
+  // );
 
   let jwtCurrentOwnerQuery = $derived(
     createQuery(
       {
-        queryKey: ["jwtCurrentOwner", lib.jwtAccount.address],
+        queryKey: ["jwtCurrentOwner", jwt, lib.jwtAccount.address],
         queryFn: async () => {
-          if (!jwt) {
+          if (!jwt || !lib.web3modal.account) {
             return null;
           }
-          return await lib.jwtAccount.currentOwner(jwt, owner);
+          return await lib.jwtAccount.currentOwner(
+            jwt,
+            await lib.web3modal.account.getSigner(),
+          );
         },
       },
       lib.queries.queryClient,
@@ -63,11 +69,19 @@
 
   async function recover() {
     assert(jwt, "jwt not found");
+    utils.assertConnected(lib.web3modal.account);
 
+    const signer = await lib.web3modal.account.getSigner();
     const input = await prepareJwt(jwt);
+    const jwtNonceMatches = isEqual(
+      encodedAddressAsJwtNonce((await signer.getAddress()).toLowerCase()),
+      input.jwt_nonce,
+    );
+    if (!jwtNonceMatches) {
+      await signIn();
+    }
 
     {
-      utils.assertConnected(lib.web3modal.account);
       const chainId = chain.id as unknown as keyof typeof deployments;
       const publicKeyRegistry = PublicKeyRegistry__factory.connect(
         deployments[chainId].contracts.PublicKeyRegistry,
@@ -112,23 +126,24 @@
     console.timeEnd("generate proof");
     console.log("proof", bytesToHex(proof));
 
-    const tx = await lib.jwtAccount.setOwner(jwt, recoveryOwner, {
+    const tx = await lib.jwtAccount.setOwner(jwt, signer, {
       proof: bytesToHex(proof),
       jwtIat: input.jwt_iat,
-      jwtNonce: recoveryOwner.address,
+      jwtNonce: (await signer.getAddress()) as Address,
       publicKeyLimbs: input.public_key_limbs,
       publicKeyRedcLimbs: input.public_key_redc_limbs,
     });
     console.log("recovery tx", tx);
-    // const jwtAccount = await lib.jwtAccount.getAccount(jwt, recoveryOwner);
-    // const tx2 = await lib.coinbase.addOwner(jwtAccount, recoveryOwner);
+    // const jwtAccount = await lib.jwtAccount.getAccount(jwt, lib.web3modal.account.address);
+    // const tx2 = await lib.coinbase.addOwner(jwtAccount, lib.web3modal.account.address);
     // console.log("new owner tx", tx2);
   }
 
   async function signIn() {
-    const nonce = bytesToHex(hexToBytes(recoveryOwner.address)).slice(
-      "0x".length,
-    );
+    utils.assertConnected(lib.web3modal.account);
+    const nonce = ethers
+      .hexlify(ethers.getBytes(lib.web3modal.account.address))
+      .slice("0x".length);
     await web2Auth.signIn("google", undefined, {
       nonce,
     });
@@ -138,12 +153,16 @@
     await web2Auth.signOut();
   }
 
-  async function connectGoogle() {
-    assert(jwt, "jwt not found");
-    const account = await lib.jwtAccount.getAccount(jwt, owner);
-    const tx = await lib.coinbase.addOwner(owner, account);
-    console.log("tx", tx);
-  }
+  // async function connectGoogle() {
+  //   assert(jwt, "jwt not found");
+  //   utils.assertConnected(lib.web3modal.account);
+  //   const account = await lib.jwtAccount.getAccount(
+  //     jwt,
+  //     await lib.web3modal.account.getSigner(),
+  //   );
+  //   const tx = await lib.coinbase.addOwner(owner, account);
+  //   console.log("tx", tx);
+  // }
 </script>
 
 <Ui.GapContainer class="container">
@@ -153,6 +172,7 @@
     </div>
   </section>
 
+  <!--
   <Ui.Card>
     <Ui.Card.Header>
       <Ui.Card.Title>Coinbase Wallet</Ui.Card.Title>
@@ -182,21 +202,21 @@
       </Ui.Query>
     </Ui.Card.Content>
   </Ui.Card>
+  -->
 
   <Ui.Card>
+    <Ui.Card.Header>
+      <Ui.Card.Title>Google account: {lib.jwtAccount.address}</Ui.Card.Title>
+    </Ui.Card.Header>
     <Ui.Card.Content>
-      <h3>Google account: {lib.jwtAccount.address}</h3>
       <h3>
-        Google account current signer:
+        Current owner:
         <Ui.Query query={$jwtCurrentOwnerQuery}>
           {#snippet success(data)}
             {data}
           {/snippet}
         </Ui.Query>
       </h3>
-
-      <h3>Signer: {owner.address}</h3>
-      <h3>Recovery signer: {recoveryOwner.address}</h3>
 
       {#if !jwt}
         <Ui.LoadingButton
@@ -207,16 +227,16 @@
           Login with Google
         </Ui.LoadingButton>
       {:else}
-        {#if $ownersQuery.data && lib.jwtAccount.address}
+        <!-- {#if $ownersQuery.data && lib.jwtAccount.address}
           {#if $ownersQuery.data.find((o) => lib.jwtAccount.address && utils.isAddressEqual(o, lib.jwtAccount.address))}
-            Google recovery is set
-            <Ui.LoadingButton onclick={recover}>Recover</Ui.LoadingButton>
-          {:else}
+            Google recovery is set -->
+        <Ui.LoadingButton onclick={recover}>Recover</Ui.LoadingButton>
+        <!-- {:else}
             <Ui.LoadingButton onclick={connectGoogle} variant="default">
               Set Google as recovery method
             </Ui.LoadingButton>
           {/if}
-        {/if}
+        {/if} -->
 
         <Ui.LoadingButton onclick={signOut}>Logout</Ui.LoadingButton>
       {/if}
@@ -264,49 +284,6 @@
 
           <ConnectWalletOr class="w-full">
             <Ui.Form.SubmitButton variant="default">Send</Ui.Form.SubmitButton>
-          </ConnectWalletOr>
-        {/snippet}
-      </Ui.Form>
-    </Ui.Card.Content>
-  </Ui.Card>
-
-  <Ui.Card>
-    <Ui.Card.Header>
-      <Ui.Card.Title>Add owner</Ui.Card.Title>
-    </Ui.Card.Header>
-    <Ui.Card.Content>
-      <Ui.Form
-        schema={z.object({
-          owner: zAddress(),
-        })}
-        onsubmit={async (data) => {
-          utils.assertConnected(lib.web3modal.account);
-          const signer = await lib.web3modal.account.getSigner();
-          console.log(await signer.getAddress());
-          const abi = ["function addOwnerAddress(address owner)"];
-          const contract = new ethers.Contract(
-            await signer.getAddress(),
-            abi,
-            signer,
-          );
-          // unfortunately, this does not work. coinbase.com shows "something went wrong". Probably a guard against scammers
-          const tx = await contract.addOwnerAddress!(data.owner);
-        }}
-      >
-        {#snippet children(form, formData)}
-          <Ui.Form.Field {form} name="owner">
-            <Ui.Form.Control let:attrs>
-              <Ui.Form.Label>Address</Ui.Form.Label>
-              <Ui.Input {...attrs} bind:value={formData.owner} />
-            </Ui.Form.Control>
-            <Ui.Form.Description></Ui.Form.Description>
-            <Ui.Form.FieldErrors />
-          </Ui.Form.Field>
-
-          <ConnectWalletOr class="w-full">
-            <Ui.Form.SubmitButton variant="default">
-              Add owner
-            </Ui.Form.SubmitButton>
           </ConnectWalletOr>
         {/snippet}
       </Ui.Form>

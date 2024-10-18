@@ -2,15 +2,10 @@
   import Menu from "lucide-svelte/icons/menu";
 
   import { page } from "$app/stores";
-  import { lib } from "$lib";
   import { Button } from "$lib/components/ui/button/index.js";
-  import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
   import * as Sheet from "$lib/components/ui/sheet/index.js";
-  import ConnectWalletOr from "$lib/ConnectWalletOr.svelte";
   import { route } from "$lib/ROUTES";
-  import { Ui } from "$lib/ui";
   import { cn } from "$lib/utils";
-  import { utils } from "@repo/utils";
 
   function isActive(href: string) {
     if (href === "/") {
@@ -50,30 +45,7 @@
     class="flex w-full items-center gap-4 md:ml-auto md:w-auto md:gap-2 lg:gap-4"
   >
     <div class="grow"></div>
-    <ConnectWalletOr>
-      {#if lib.web3modal.account}
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild let:builder>
-            <Button builders={[builder]} variant="ghost" class="rounded-full">
-              <span class="mr-2">
-                {utils.shortAddress(lib.web3modal.account.address)}
-              </span>
-              <Ui.UserAvatar address={lib.web3modal.account.address} />
-              <span class="sr-only">Toggle user menu</span>
-            </Button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content align="end">
-            <DropdownMenu.Label class="flex items-center gap-2">
-              {utils.shortAddress(lib.web3modal.account.address)}
-              <Ui.CopyButton text={lib.web3modal.account.address} size="sm" />
-            </DropdownMenu.Label>
-            <!-- <DropdownMenu.Separator />
-            <DropdownMenu.Item>Settings</DropdownMenu.Item>
-            <DropdownMenu.Item>Support</DropdownMenu.Item> -->
-          </DropdownMenu.Content>
-        </DropdownMenu.Root>
-      {/if}
-    </ConnectWalletOr>
+    <w3m-button />
   </div>
 </header>
 
