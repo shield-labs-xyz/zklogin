@@ -6,6 +6,8 @@
     "test:no-typecheck": "hardhat test"
   },
   "dependencies": {
+    "@account-abstraction/contracts": "0.7.0",
+    "@openzeppelin/contracts": "5.1.0",
     "@repo/circuits": "workspace:*"
   },
   "devDependencies": {
