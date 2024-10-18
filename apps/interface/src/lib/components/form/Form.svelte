@@ -37,7 +37,7 @@
         await onsubmit(data);
         formElement?.reset();
       } catch (e) {
-        toast.error(utils.errorToString(e));
+        toast.error(e);
         throw e;
       } finally {
         lib.queries.invalidateAll();

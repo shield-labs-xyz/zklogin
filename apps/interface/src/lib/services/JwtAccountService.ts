@@ -1,4 +1,4 @@
-import { chain } from "$lib/services/Web3ModalService.svelte.js";
+import { LocalStore } from "$lib/localStorage.svelte";
 import {
   base64UrlToBase64,
   base64UrlToBigInt,
@@ -20,26 +20,26 @@ import ky from "ky";
 import { assert } from "ts-essentials";
 import {
   bytesToString,
-  encodeFunctionData,
+  createWalletClient,
   getContract,
+  http,
   keccak256,
   stringToBytes,
   toHex,
-  type Account,
   type Address,
-  type Chain,
   type Hex,
+  type LocalAccount,
   type PublicClient,
   type SignableMessage,
-  type Transport,
-  type WalletClient,
 } from "viem";
 import {
   entryPoint07Abi,
   entryPoint07Address,
   getUserOperationHash,
   toSmartAccount,
+  type BundlerClient,
 } from "viem/account-abstraction";
+import { isDeployed } from "./CoinbaseWalletService";
 
 // Note: keep in sync with Noir
 const JWT_HEADER_MAX_LEN = 256;
@@ -54,14 +54,89 @@ const JWT_AUD_MAX_LEN = 256;
 // Note: keep in sync with Noir
 const JWT_NONCE_LEN = 40;
 
+export class JwtAccountService {
+  #address = new LocalStore<Address | undefined>(
+    "jwt-account-address",
+    undefined,
+  );
+
+  constructor(
+    private publicClient: PublicClient,
+    private bundlerClient: BundlerClient,
+  ) {}
+
+  get address() {
+    return this.#address.value;
+  }
+
+  async getAccount(jwt: string, owner: LocalAccount) {
+    const account = await toJwtSmartAccount(owner, jwt, this.publicClient);
+    this.#address.value = account.address;
+    return account;
+  }
+
+  async setOwner(
+    jwt: string,
+    owner: LocalAccount,
+    verificationData: VerificationData,
+  ) {
+    assert(owner.address === verificationData.jwtNonce, "jwt.nonce mismatch");
+    const account = await this.getAccount(jwt, owner);
+    const data = SimpleAccount__factory.createInterface().encodeFunctionData(
+      "setOwner",
+      [verificationData],
+    ) as Hex;
+
+    return await this.bundlerClient.sendUserOperation({
+      account,
+      calls: [
+        {
+          to: account.address,
+          data,
+        },
+      ],
+    });
+  }
+
+  async currentOwner(jwt: string, owner: LocalAccount) {
+    const account = await this.getAccount(jwt, owner);
+    const deployed: boolean = await isDeployed(account, this.publicClient);
+    if (!deployed) {
+      return owner.address;
+    }
+    const contract = getContract({
+      address: account.address,
+      abi: SimpleAccount__factory.abi,
+      client: this.publicClient,
+    });
+    const ownerOnChain = await contract.read.currentOwner();
+    return ownerOnChain;
+  }
+}
+
+export interface VerificationData {
+  proof: Hex;
+  jwtIat: number;
+  jwtNonce: Address;
+  publicKeyLimbs: string[];
+  publicKeyRedcLimbs: string[];
+}
+
 export async function toJwtSmartAccount(
-  walletClient: WalletClient<Transport, Chain, Account>,
+  owner: LocalAccount,
   jwt: string,
   client: PublicClient,
 ) {
-  const chainId = chain.id as unknown as keyof typeof deployments;
+  const chainId = client.chain!.id as unknown as keyof typeof deployments;
   assert(deployments[chainId], `deployments for ${chainId} not found`);
-  const input = await prepareJwt(jwt);
+
+  console.log("client", client);
+  const walletClient = createWalletClient({
+    transport: http(),
+    chain: client.chain,
+    account: owner,
+  });
+
   const factoryAddress = deployments[chainId].contracts
     .SimpleAccountFactory as `0x${string}`;
   const factory = getContract({
@@ -69,24 +144,22 @@ export async function toJwtSmartAccount(
     address: factoryAddress,
     client,
   });
-  const factoryCalldata = encodeFunctionData({
-    abi: SimpleAccountFactory__factory.abi,
-    functionName: "createAccount",
-    args: [await getJwtAccountInitParams(jwt, walletClient.account.address)],
-  });
+  const factoryCalldata =
+    SimpleAccountFactory__factory.createInterface().encodeFunctionData(
+      "createAccount",
+      [await getJwtAccountInitParams(jwt, walletClient.account.address)],
+    ) as Hex;
 
-  const accountAbi = SimpleAccount__factory.abi;
   const entryPoint = {
     address: entryPoint07Address,
     abi: entryPoint07Abi,
     version: "0.7",
   } as const;
-  console.log("entryPoint", entryPoint.address);
 
   async function signMessage({ message }: { message: SignableMessage }) {
     return await walletClient.signMessage({ message });
   }
-  return await toSmartAccount({
+  const account = await toSmartAccount({
     client,
     entryPoint,
     async getFactoryArgs() {
@@ -134,17 +207,16 @@ export async function toJwtSmartAccount(
       ]);
     },
     async encodeCalls(x) {
-      return encodeFunctionData({
-        abi: accountAbi,
-        functionName: "executeBatch",
-        args: [
+      return SimpleAccount__factory.createInterface().encodeFunctionData(
+        "executeBatch",
+        [
           x.map((x) => ({
             target: x.to,
             value: x.value ?? 0n,
             data: x.data ?? "0x",
           })),
         ],
-      });
+      ) as Hex;
     },
 
     userOperation: {
@@ -163,6 +235,8 @@ export async function toJwtSmartAccount(
       },
     },
   });
+
+  return account;
 }
 
 async function getJwtAccountInitParams(jwt: string, owner: Address) {
