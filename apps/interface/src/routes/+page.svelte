@@ -8,7 +8,7 @@
   } from "$lib/services/JwtAccountService.js";
   import { chain } from "$lib/services/Web3ModalService.svelte.js";
   import { Ui } from "$lib/ui";
-  import { decodeJwt, zAddress } from "$lib/utils";
+  import { zAddress } from "$lib/utils";
   import * as web2Auth from "@auth/sveltekit/client";
   import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
   import { Noir } from "@noir-lang/noir_js";
@@ -19,23 +19,14 @@
   import { createQuery } from "@tanstack/svelte-query";
   import { ethers } from "ethers";
   import { isEqual } from "lodash-es";
-  import { onMount } from "svelte";
   import { assert } from "ts-essentials";
-  import { bytesToHex, parseEther } from "viem";
+  import { type Hex } from "viem";
   import type { Address } from "viem/accounts";
   import { z } from "zod";
 
   let { data } = $props();
 
   let jwt = $derived(data.session?.id_token);
-
-  onMount(async () => {
-    console.log("session", data.session);
-    if (!jwt) {
-      return;
-    }
-    console.log(decodeJwt(jwt));
-  });
 
   // let ownersQuery = $derived(
   //   createQuery(
@@ -79,6 +70,7 @@
     );
     if (!jwtNonceMatches) {
       await signIn();
+      return;
     }
 
     {
@@ -124,10 +116,10 @@
     console.time("generate proof");
     const { proof } = await barretenberg.generateProof(witness);
     console.timeEnd("generate proof");
-    console.log("proof", bytesToHex(proof));
+    console.log("proof", ethers.hexlify(proof));
 
     const tx = await lib.jwtAccount.setOwner(jwt, signer, {
-      proof: bytesToHex(proof),
+      proof: ethers.hexlify(proof) as Hex,
       jwtIat: input.jwt_iat,
       jwtNonce: (await signer.getAddress()) as Address,
       publicKeyLimbs: input.public_key_limbs,
@@ -259,7 +251,7 @@
           console.log(await signer.getAddress());
           await signer.sendTransaction({
             to: data.recipient,
-            value: parseEther(data.amount),
+            value: ethers.parseEther(data.amount),
           });
         }}
       >
