@@ -3,7 +3,8 @@
   "scripts": {
     "compile": "hardhat compile --typecheck",
     "test": "hardhat test --typecheck",
-    "test:no-typecheck": "hardhat test"
+    "test:no-typecheck": "hardhat test",
+    "deploy": "hardhat deploy-and-export --tags all"
   },
   "dependencies": {
     "@account-abstraction/contracts": "0.7.0",

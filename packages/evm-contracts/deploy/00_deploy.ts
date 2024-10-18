@@ -1,10 +1,11 @@
 import { DeployFunction } from "hardhat-deploy/types";
 
-// declare module "hardhat/types/runtime" {
-//   interface TypedHardhatDeployNames {
-//     USDC: "ERC20";
-//   }
-// }
+declare module "hardhat/types/runtime" {
+  interface TypedHardhatDeployNames {
+    SimpleAccountFactory: "SimpleAccountFactory";
+    UltraVerifier: "UltraVerifier";
+  }
+}
 
 const deploy: DeployFunction = async ({
   typedDeployments,
@@ -12,12 +13,19 @@ const deploy: DeployFunction = async ({
 }) => {
   const { deployer } = await safeGetNamedAccounts({ deployer: true });
 
-  // await typedDeployments.deploy("USDC", {
-  //   from: deployer,
-  //   log: true,
-  //   args: ["USD Coin", "USDC"],
-  //   contract: "ERC20",
-  // });
+  const ultraVerifier = await typedDeployments.deploy("UltraVerifier", {
+    from: deployer,
+    log: true,
+  });
+
+  const entryPoint = "0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789";
+  await typedDeployments.deploy("SimpleAccountFactory", {
+    from: deployer,
+    log: true,
+    args: [entryPoint, ultraVerifier.address],
+  });
 };
+
+deploy.tags = ["all"];
 
 export default deploy;

@@ -1,0 +1,10 @@
+{
+  "84532": {
+    "chainId": "84532",
+    "contracts": {
+      "SimpleAccountFactory": "0x15efC6b6CCc2Fa7598747e45aAf429d7463a7295",
+      "UltraVerifier": "0x3a6087B1242a6B4df1a5A1082D4193BE3bA76F20"
+    },
+    "name": "baseSepolia"
+  }
+}

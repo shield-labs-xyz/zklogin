@@ -20,13 +20,7 @@ task("deploy-and-export")
     types.string,
     true,
   )
-  .addParam(
-    "gasprice",
-    "Price in wei per unit of gas",
-    undefined,
-    types.string,
-    false,
-  )
+  .addParam("gasprice", "Price per unit of gas", undefined, types.string, false)
   .setAction(async (args, hre) => {
     const unit = "gwei";
     assert(args.gasprice.endsWith(unit), `gasprice must end with ${unit}`);

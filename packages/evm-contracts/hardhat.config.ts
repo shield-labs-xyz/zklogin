@@ -15,7 +15,7 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    basesepolia: {
+    baseSepolia: {
       url: "https://sepolia.base.org",
       chainId: 84532,
     },
