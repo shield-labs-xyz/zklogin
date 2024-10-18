@@ -8,8 +8,6 @@ export class QueriesService {
     readonly queryClient: QueryClient,
   ) {}
 
-
-
   async invalidateAll() {
     await this.queryClient.invalidateQueries();
   }

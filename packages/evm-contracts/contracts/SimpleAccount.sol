@@ -14,6 +14,7 @@ import "@account-abstraction/contracts/core/Helpers.sol";
 import "@account-abstraction/contracts/samples/callback/TokenCallbackHandler.sol";
 
 import {UltraVerifier} from "@repo/circuits/target/jwt_account.sol";
+import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 import {JwtVerifier} from "./JwtVerifier.sol";
 
 uint256 constant OWNER_EXPIRATION_TIME = 1 hours;
@@ -41,34 +42,36 @@ contract SimpleAccount is
 
     constructor(
         IEntryPoint anEntryPoint,
-        UltraVerifier ultraVerifier_
-    ) JwtVerifier(ultraVerifier_) {
+        UltraVerifier ultraVerifier_,
+        PublicKeyRegistry publicKeyRegistry_
+    ) JwtVerifier(ultraVerifier_, publicKeyRegistry_) {
         _entryPoint = anEntryPoint;
         _disableInitializers();
+    }
+
+    struct InitializeParams {
+        address owner;
+        bytes32 accountId;
+        string jwtAud;
+        bytes32 authProviderId;
     }
 
     /**
      * @dev The _entryPoint member is immutable, to reduce gas consumption.  To upgrade EntryPoint,
      * a new implementation of SimpleAccount must be deployed with the new EntryPoint address, then upgrading
      * the implementation by calling `upgradeTo()`
-     * @param anOwner the owner (signer) of this account
      */
     function initialize(
-        address anOwner,
-        bytes32 accountId_,
-        string memory jwtAud_,
-        uint256[18] memory publicKeyLimbs_,
-        uint256[18] memory publicKeyRedcLimbs_
+        InitializeParams calldata params
     ) public virtual initializer {
         ownerInfo = Owner({
-            owner: anOwner,
+            owner: params.owner,
             expirationTimestamp: block.timestamp + OWNER_EXPIRATION_TIME
         });
         __JwtVerifier_initialize(
-            accountId_,
-            jwtAud_,
-            publicKeyLimbs_,
-            publicKeyRedcLimbs_
+            params.accountId,
+            params.jwtAud,
+            params.authProviderId
         );
     }
 

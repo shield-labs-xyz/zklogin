@@ -2,6 +2,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 declare module "hardhat/types/runtime" {
   interface TypedHardhatDeployNames {
+    PublicKeyRegistry: "PublicKeyRegistry";
     SimpleAccountFactory: "SimpleAccountFactory";
     UltraVerifier: "UltraVerifier";
   }
@@ -13,16 +14,21 @@ const deploy: DeployFunction = async ({
 }) => {
   const { deployer } = await safeGetNamedAccounts({ deployer: true });
 
+  const publicKeyRegistry = await typedDeployments.deploy("PublicKeyRegistry", {
+    from: deployer,
+    log: true,
+  });
+
   const ultraVerifier = await typedDeployments.deploy("UltraVerifier", {
     from: deployer,
     log: true,
   });
 
-  const entryPoint = "0x0000000071727De22E5E9d8BAf0edAc6f37da032";
+  const entryPoint = "0x0000000071727De22E5E9d8BAf0edAc6f37da032"; // 0.7.0
   await typedDeployments.deploy("SimpleAccountFactory", {
     from: deployer,
     log: true,
-    args: [entryPoint, ultraVerifier.address],
+    args: [entryPoint, ultraVerifier.address, publicKeyRegistry.address],
   });
 };
 

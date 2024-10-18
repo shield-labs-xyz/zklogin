@@ -4,7 +4,9 @@ pragma solidity ^0.8.23;
 import "@openzeppelin/contracts/utils/Create2.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import "./SimpleAccount.sol";
+import {SimpleAccount, IEntryPoint} from "./SimpleAccount.sol";
+import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
+import {UltraVerifier} from "@repo/circuits/target/jwt_account.sol";
 
 /**
  * A sample factory contract for SimpleAccount
@@ -15,8 +17,16 @@ import "./SimpleAccount.sol";
 contract SimpleAccountFactory {
     SimpleAccount public immutable accountImplementation;
 
-    constructor(IEntryPoint _entryPoint, UltraVerifier _ultraVerifier) {
-        accountImplementation = new SimpleAccount(_entryPoint, _ultraVerifier);
+    constructor(
+        IEntryPoint _entryPoint,
+        UltraVerifier _ultraVerifier,
+        PublicKeyRegistry _publicKeyRegistry
+    ) {
+        accountImplementation = new SimpleAccount(
+            _entryPoint,
+            _ultraVerifier,
+            _publicKeyRegistry
+        );
     }
 
     /**
@@ -26,27 +36,14 @@ contract SimpleAccountFactory {
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
     function createAccount(
-        address owner,
-        bytes32 accountId,
-        string calldata jwtAud,
-        uint256[18] calldata publicKeyLimbs,
-        uint256[18] calldata publicKeyRedcLimbs
+        SimpleAccount.InitializeParams calldata params
     ) public returns (SimpleAccount ret) {
         // TODO: create2 address should depend only on accountId and jwt.aud (and maybe "jwt.iss"?)
         ret = SimpleAccount(
             payable(
                 new ERC1967Proxy{salt: bytes32(0)}(
                     address(accountImplementation),
-                    abi.encodeCall(
-                        SimpleAccount.initialize,
-                        (
-                            owner,
-                            accountId,
-                            jwtAud,
-                            publicKeyLimbs,
-                            publicKeyRedcLimbs
-                        )
-                    )
+                    abi.encodeCall(SimpleAccount.initialize, params)
                 )
             )
         );
@@ -56,11 +53,7 @@ contract SimpleAccountFactory {
      * calculate the counterfactual address of this account as it would be returned by createAccount()
      */
     function getAddress(
-        address owner,
-        bytes32 accountId,
-        string calldata jwtAud,
-        uint256[18] calldata publicKeyLimbs,
-        uint256[18] calldata publicKeyRedcLimbs
+        SimpleAccount.InitializeParams calldata params
     ) public view returns (address) {
         return
             Create2.computeAddress(
@@ -70,16 +63,7 @@ contract SimpleAccountFactory {
                         type(ERC1967Proxy).creationCode,
                         abi.encode(
                             address(accountImplementation),
-                            abi.encodeCall(
-                                SimpleAccount.initialize,
-                                (
-                                    owner,
-                                    accountId,
-                                    jwtAud,
-                                    publicKeyLimbs,
-                                    publicKeyRedcLimbs
-                                )
-                            )
+                            abi.encodeCall(SimpleAccount.initialize, (params))
                         )
                     )
                 )

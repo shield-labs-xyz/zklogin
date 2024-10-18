@@ -19,9 +19,13 @@ import { ethers } from "ethers";
 import ky from "ky";
 import { assert } from "ts-essentials";
 import {
+  bytesToString,
   encodeFunctionData,
   getContract,
+  keccak256,
+  toHex,
   type Account,
+  type Address,
   type Chain,
   type Hex,
   type PublicClient,
@@ -67,13 +71,7 @@ export async function toJwtSmartAccount(
   const factoryCalldata = encodeFunctionData({
     abi: SimpleAccountFactory__factory.abi,
     functionName: "createAccount",
-    args: [
-      walletClient.account.address,
-      input.account_id,
-      ethers.toUtf8String(Uint8Array.from(input.jwt_aud)),
-      input.public_key_limbs.map((x) => BigInt(x)) as any,
-      input.public_key_redc_limbs.map((x) => BigInt(x)) as any,
-    ],
+    args: [await getJwtAccountInitParams(jwt, walletClient.account.address)],
   });
 
   const accountAbi = SimpleAccount__factory.abi;
@@ -131,11 +129,7 @@ export async function toJwtSmartAccount(
     },
     async getAddress() {
       return factory.read.getAddress([
-        walletClient.account.address,
-        input.account_id,
-        ethers.toUtf8String(Uint8Array.from(input.jwt_aud)),
-        input.public_key_limbs.map((x) => BigInt(x)) as any,
-        input.public_key_redc_limbs.map((x) => BigInt(x)) as any,
+        await getJwtAccountInitParams(jwt, walletClient.account.address),
       ]);
     },
     async encodeCalls(x) {
@@ -168,6 +162,17 @@ export async function toJwtSmartAccount(
       },
     },
   });
+}
+
+async function getJwtAccountInitParams(jwt: string, owner: Address) {
+  const input = await prepareJwt(jwt);
+  const authProviderId = keccak256(toHex("accounts.google.com"));
+  return {
+    owner,
+    accountId: input.account_id,
+    jwtAud: bytesToString(Uint8Array.from(input.jwt_aud)),
+    authProviderId,
+  };
 }
 
 export async function prepareJwt(jwt: string) {

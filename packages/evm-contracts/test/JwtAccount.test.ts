@@ -3,6 +3,8 @@ import { ethers, safeGetNamedAccounts, typedDeployments } from "hardhat";
 import { describe } from "mocha";
 import { snapshottedBeforeEach } from "../shared/utils";
 import {
+  PublicKeyRegistry,
+  PublicKeyRegistry__factory,
   SimpleAccountFactory__factory,
   TestJwtAccount__factory,
   UltraVerifier__factory,
@@ -10,14 +12,26 @@ import {
 
 describe("JwtAccount", () => {
   let alice: SignerWithAddress;
+  let deployer: SignerWithAddress;
+  let publicKeyRegistry: PublicKeyRegistry;
+  const authProviderId = ethers.id("accounts.google.com"); // TODO: think about the structure
 
   snapshottedBeforeEach(async () => {
-    await ethers.provider.send("hardhat_setBalance", [
+    deployer = await ethers.getSigner(
       (await safeGetNamedAccounts({ deployer: true })).deployer,
+    );
+    await ethers.provider.send("hardhat_setBalance", [
+      deployer.address,
       ethers.toQuantity(ethers.parseEther("100")),
     ]);
     await typedDeployments.fixture();
+
     [alice] = await ethers.getSigners();
+
+    publicKeyRegistry = PublicKeyRegistry__factory.connect(
+      (await typedDeployments.get("PublicKeyRegistry")).address,
+      deployer,
+    );
   });
 
   it("works", async () => {
@@ -76,15 +90,30 @@ describe("JwtAccount", () => {
       );
     const jwtNonce = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".toLowerCase();
 
+    await publicKeyRegistry.setPublicKeyValid(
+      authProviderId,
+      await publicKeyRegistry.getPublicKeyHash(
+        publicKey.public_key_limbs,
+        publicKey.public_key_redc_limbs,
+      ),
+      true,
+    );
+
     const account = await new TestJwtAccount__factory(alice).deploy(
       accountId,
       jwtAud,
-      publicKey.public_key_limbs,
-      publicKey.public_key_redc_limbs,
+      authProviderId,
       verifier,
+      publicKeyRegistry,
     );
 
-    const tx = await account.verify({ proof, jwtIat, jwtNonce });
+    const tx = await account.verify({
+      proof,
+      jwtIat,
+      jwtNonce,
+      publicKeyLimbs: publicKey.public_key_limbs,
+      publicKeyRedcLimbs: publicKey.public_key_redc_limbs,
+    });
     const receipt = await tx.wait();
     console.log("gas used", receipt?.gasUsed);
   });
@@ -95,10 +124,11 @@ describe("JwtAccount", () => {
       alice,
     );
 
-    const account = await factory.createAccount(
-      alice.address,
-      "0x0ec327b01716a7ccc9339270ef9d1eed3c618b1a5b4720a2a3e0bd785ab45911",
-      ethers.toUtf8String(
+    const account = await factory.createAccount({
+      owner: alice.address,
+      accountId:
+        "0x0ec327b01716a7ccc9339270ef9d1eed3c618b1a5b4720a2a3e0bd785ab45911",
+      jwtAud: ethers.toUtf8String(
         Uint8Array.from([
           54, 57, 56, 49, 48, 57, 52, 55, 52, 56, 48, 53, 45, 110, 118, 102,
           103, 57, 104, 104, 51, 49, 107, 106, 109, 98, 54, 109, 109, 110, 53,
@@ -115,47 +145,8 @@ describe("JwtAccount", () => {
           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         ]),
       ),
-      [
-        "0x9d9b7ab520532396758488b2100155",
-        "0x87ff0f733247ea1ae377d26bdd60aa",
-        "0x55e1805ec2babe74ebadb5de3c29a7",
-        "0x4131e289b5519e562dff8935a669e2",
-        "0xe974f2f0179abc0cc837efb26a9d5d",
-        "0x72f158dfb2a2ba0fd881d8742426ec",
-        "0x7e56e9182ef83caea0a45cfdaba45a",
-        "0xc2b9b23f6684f0442257dbb8a37291",
-        "0xfc0ecae4fe9f8be5c52a91edd59db2",
-        "0x3ba9bd0376ade89881c7bafa2b36de",
-        "0x3548bec7032b97739300f7fd72769b",
-        "0x6a5b4b975ccf938c5e63ee41d57c7c",
-        "0x4fabc9dbb6a9157f91a87adaff6e66",
-        "0x303d705edf9cae022cd91f57f332b6",
-        "0x1834cc2b65d9d2cab6dd210ba58cad",
-        "0x43b9c3ca0df606d243d4c442794829",
-        "0x5239e9f174adc5871d580714b1eb98",
-        "0xe1",
-      ],
-      [
-        "0x1e7578875458139006e47aac5c17fb",
-        "0x249a5affa65fe288cb0df8ab6548be",
-        "0xc29ec9b115f3132ff5fb71e744fba3",
-        "0xbde4d1e1b2e894dd482277dc14aba5",
-        "0x675f382edc2e53fabb2c785f0dd7e8",
-        "0x8af86434e50f50ddfc9b46ce2c8990",
-        "0xbaf8f36a4caec8a61d14be456599d3",
-        "0x4ac14c9865afb8da5ab36b76e6d651",
-        "0x2be72e03504024bbc777e0a1e9d16d",
-        "0x249a0c4d673705ab5ad1757a225fea",
-        "0x0300712f5005899fffeb1289f9ef4b",
-        "0x73eb759f585e597acb40bfbf59efed",
-        "0xe070a169f35358c7ead1df56d02d4b",
-        "0x5657e0c005b6bca107abd9024b4dd1",
-        "0xe6da2103c7938911ca44a5e641c541",
-        "0xc98e9e1235394e0eb2b87143fd42c3",
-        "0xdb1c76abaf095069edf0ea5248ef95",
-        "0x0122",
-      ],
-    );
+      authProviderId,
+    });
 
     const receipt = await account.wait();
     console.log("account", receipt?.gasUsed);
