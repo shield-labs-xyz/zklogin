@@ -14,22 +14,13 @@ import deployments from "@repo/contracts/deployments.json";
 import {
   SimpleAccount__factory,
   SimpleAccountFactory__factory,
+  type SimpleAccount,
 } from "@repo/contracts/typechain-types";
 import { utils } from "@repo/utils";
 import { ethers } from "ethers";
 import ky from "ky";
 import { assert } from "ts-essentials";
-import {
-  bytesToString,
-  getContract,
-  keccak256,
-  stringToBytes,
-  toHex,
-  type Address,
-  type Hex,
-  type PublicClient,
-  type SignableMessage,
-} from "viem";
+import type { Address, Hex, PublicClient, SignableMessage } from "viem";
 import {
   entryPoint07Abi,
   entryPoint07Address,
@@ -127,21 +118,11 @@ export async function toJwtSmartAccount(
 
   const factoryAddress = deployments[chainId].contracts
     .SimpleAccountFactory as `0x${string}`;
-  const factory = getContract({
-    abi: SimpleAccountFactory__factory.abi,
-    address: factoryAddress,
-    client,
-  });
-  const factoryCalldata =
-    SimpleAccountFactory__factory.createInterface().encodeFunctionData(
-      "createAccount",
-      [
-        await getJwtAccountInitParams(
-          jwt,
-          (await owner.getAddress()) as Address,
-        ),
-      ],
-    ) as Hex;
+  const factory = SimpleAccountFactory__factory.connect(factoryAddress, owner);
+  const factoryCalldata = factory.interface.encodeFunctionData(
+    "createAccount",
+    [await getJwtAccountInitParams(jwt)],
+  ) as Hex;
 
   const entryPoint = {
     address: entryPoint07Address,
@@ -159,7 +140,7 @@ export async function toJwtSmartAccount(
     entryPoint,
     async getFactoryArgs() {
       return {
-        factory: factory.address,
+        factory: (await factory.getAddress()) as Address,
         factoryData: factoryCalldata,
       };
     },
@@ -192,21 +173,12 @@ export async function toJwtSmartAccount(
       });
 
       const sig = await signMessage({ message: { raw: hash } });
-      console.log("sign userOp", {
-        owner: await owner.getAddress(),
-        hash,
-        sig,
-        address,
-      });
       return sig;
     },
     async getAddress() {
-      return factory.read.getAddress([
-        await getJwtAccountInitParams(
-          jwt,
-          (await owner.getAddress()) as Address,
-        ),
-      ]);
+      return (await factory.getAccountAddress(
+        await getJwtAccountInitParams(jwt),
+      )) as Address;
     },
     async encodeCalls(calls) {
       const iface = SimpleAccount__factory.createInterface();
@@ -253,13 +225,14 @@ export async function toJwtSmartAccount(
   return account;
 }
 
-export const authProviderId = keccak256(toHex("accounts.google.com"));
-async function getJwtAccountInitParams(jwt: string, owner: Address) {
+export const authProviderId = ethers.id("accounts.google.com");
+async function getJwtAccountInitParams(
+  jwt: string,
+): Promise<SimpleAccount.InitializeParamsStruct> {
   const input = await prepareJwt(jwt);
   return {
-    owner,
     accountId: input.account_id,
-    jwtAud: bytesToString(Uint8Array.from(input.jwt_aud)),
+    jwtAud: ethers.toUtf8String(Uint8Array.from(input.jwt_aud)),
     authProviderId,
   };
 }
@@ -268,7 +241,7 @@ export async function prepareJwt(jwt: string) {
   const [headerBase64Url, payloadBase64Url, signatureBase64Url] = splitJwt(jwt);
 
   const header_and_payload = toBoundedVec(
-    Array.from(stringToBytes(`${headerBase64Url}.${payloadBase64Url}`)),
+    Array.from(ethers.toUtf8Bytes(`${headerBase64Url}.${payloadBase64Url}`)),
     JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN,
   );
   const payload_json = utils.arrayPadEnd(
@@ -282,7 +255,7 @@ export async function prepareJwt(jwt: string) {
       `
       global header_base64url: [u8; ${headerBase64Url.length}] = ${JSON.stringify(headerBase64Url)}.as_bytes();
       global payload_base64url: [u8; ${payloadBase64Url.length}] = ${JSON.stringify(payloadBase64Url)}.as_bytes();
-      global payload_json_padded = ${JSON.stringify(bytesToString(Uint8Array.from(payload_json)))}.as_bytes();`,
+      global payload_json_padded = ${JSON.stringify(ethers.toUtf8String(Uint8Array.from(payload_json)))}.as_bytes();`,
     );
   }
   const signature_limbs = bnToLimbStrArray(
@@ -296,7 +269,7 @@ export async function prepareJwt(jwt: string) {
   const { pedersenHash } = await import("@aztec/foundation/crypto");
   const account_id = pedersenHash([
     ...utils.arrayPadEnd(
-      Array.from(stringToBytes(jwtDecoded.payload.sub)),
+      Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.sub)),
       JWT_SUB_MAX_LEN,
       0,
     ),
@@ -304,7 +277,7 @@ export async function prepareJwt(jwt: string) {
   ]).toString();
   const jwt_iat = jwtDecoded.payload.iat;
   const jwt_aud = utils.arrayPadEnd(
-    Array.from(stringToBytes(jwtDecoded.payload.aud)),
+    Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.aud)),
     JWT_AUD_MAX_LEN,
     0,
   );

@@ -52,7 +52,7 @@ contract SimpleAccountFactory {
     /**
      * calculate the counterfactual address of this account as it would be returned by createAccount()
      */
-    function getAddress(
+    function getAccountAddress(
         SimpleAccount.InitializeParams calldata params
     ) public view returns (address) {
         return
