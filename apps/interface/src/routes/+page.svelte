@@ -1,134 +1,63 @@
 <script lang="ts">
   import { lib } from "$lib";
   import ConnectWalletOr from "$lib/ConnectWalletOr.svelte";
+  import {
+    prepareJwt,
+    toJwtSmartAccount,
+  } from "$lib/services/JwtAccountService.js";
+  import { chain } from "$lib/services/Web3ModalService.svelte.js";
   import { Ui } from "$lib/ui";
-  import {
-    base64UrlToBase64,
-    base64UrlToBigInt,
-    decodeJwt,
-    splitJwt,
-    zAddress,
-  } from "$lib/utils";
+  import { decodeJwt, zAddress } from "$lib/utils";
   import * as web2Auth from "@auth/sveltekit/client";
-  import {
-    bnToLimbStrArray,
-    bnToRedcLimbStrArray,
-  } from "@mach-34/noir-bignum-paramgen";
   import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
   import { Noir } from "@noir-lang/noir_js";
   import circuit from "@repo/circuits/target/jwt_account.json" with { type: "json" };
   import { utils } from "@repo/utils";
   import { ethers } from "ethers";
-  import ky from "ky";
   import { onMount } from "svelte";
   import { assert } from "ts-essentials";
+  import {
+    createPublicClient,
+    createWalletClient,
+    http,
+    type PublicClient,
+  } from "viem";
+  import {
+    createBundlerClient,
+    createPaymasterClient,
+  } from "viem/account-abstraction";
+  import { privateKeyToAccount } from "viem/accounts";
   import { z } from "zod";
 
   let { data } = $props();
 
+  let jwt = $derived(data.session?.id_token);
+
   onMount(async () => {
     console.log("session", data.session);
-
-    if (!data.session?.id_token) {
+    if (!jwt) {
       return;
     }
-    console.log(decodeJwt(data.session.id_token));
+    console.log(decodeJwt(jwt));
   });
 
   const temporaryOwnerAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
 
   async function prove() {
-    if (!data.session?.id_token) {
+    if (!jwt) {
       Ui.toast.error("Not logged in");
       return;
     }
-
-    // Note: keep in sync with Noir
-    const JWT_HEADER_MAX_LEN = 256;
-    // Note: keep in sync with Noir
-    const JWT_PAYLOAD_JSON_MAX_LEN = 768;
-    // Note: keep in sync with Noir
-    const JWT_PAYLOAD_MAX_LEN = Math.ceil(JWT_PAYLOAD_JSON_MAX_LEN / 3) * 4;
-    // Note: keep in sync with Noir
-    const JWT_SUB_MAX_LEN = 64;
-    // Note: keep in sync with Noir
-    const JWT_AUD_MAX_LEN = 256;
-    // Note: keep in sync with Noir
-    const JWT_NONCE_LEN = 40;
-
-    const jwt = data.session.id_token;
-    const [headerBase64Url, payloadBase64Url, signatureBase64Url] =
-      splitJwt(jwt);
+    const input = await prepareJwt(jwt);
 
     const noir = new Noir(circuit as any);
     const barretenberg = new BarretenbergBackend(circuit as any);
     console.time("generate witness");
-
-    const header_and_payload = toBoundedVec(
-      Array.from(ethers.toUtf8Bytes(`${headerBase64Url}.${payloadBase64Url}`)),
-      JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN,
-    );
-    const payload_json = utils.arrayPadEnd(
-      Array.from(ethers.decodeBase64(base64UrlToBase64(payloadBase64Url))),
-      JWT_PAYLOAD_JSON_MAX_LEN,
-      " ".charCodeAt(0),
-    );
-    console.log(
-      `
-      global header_base64url: [u8; ${headerBase64Url.length}] = ${JSON.stringify(headerBase64Url)}.as_bytes();
-      global payload_base64url: [u8; ${payloadBase64Url.length}] = ${JSON.stringify(payloadBase64Url)}.as_bytes();
-      global payload_json_padded = ${JSON.stringify(ethers.toUtf8String(Uint8Array.from(payload_json)))}.as_bytes();`,
-    );
-    const signature_limbs = bnToLimbStrArray(
-      base64UrlToBigInt(signatureBase64Url),
-    );
-    const jwtDecoded = decodeJwt(jwt);
-    const publicKeys = await getGooglePublicKeys();
-    const publicKey = publicKeys.find(
-      (key) => key.kid === jwtDecoded.header.kid,
-    );
-    assert(publicKey, "publicKey not found");
-    const salt = 0;
-    const { pedersenHash } = await import("@aztec/foundation/crypto");
-    const account_id = pedersenHash([
-      ...utils.arrayPadEnd(
-        Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.sub)),
-        JWT_SUB_MAX_LEN,
-        0,
-      ),
-      salt,
-    ]).toString();
-    const jwt_iat = jwtDecoded.payload.iat;
-    const jwt_aud = utils.arrayPadEnd(
-      Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.aud)),
-      JWT_AUD_MAX_LEN,
-      0,
-    );
-    const jwt_nonce = utils.arrayPadEnd(
-      Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.nonce)),
-      JWT_NONCE_LEN,
-      0,
-    );
-    const input = {
-      header_and_payload,
-      payload_json,
-      signature_limbs,
-      account_id,
-      salt,
-      jwt_iat,
-      jwt_aud,
-      jwt_nonce,
-      public_key_limbs: publicKey.limbs.public_key_limbs,
-      public_key_redc_limbs: publicKey.limbs.public_key_redc_limbs,
-    };
-    console.log(input);
     const { witness } = await noir.execute(input);
     console.timeEnd("generate witness");
     console.time("generate proof");
     const { proof } = await barretenberg.generateProof(witness);
     console.timeEnd("generate proof");
-    console.log("public key", publicKey);
-    console.log("jwt", jwtDecoded);
     console.log("proof", ethers.hexlify(proof));
   }
 
@@ -141,24 +70,54 @@
     });
   }
 
-  function toBoundedVec(arr: number[], maxLen: number) {
-    const storage = utils.arrayPadEnd(arr, maxLen, 0);
-    return { storage, len: arr.length };
-  }
+  async function createSmartAccount() {
+    assert(jwt, "jwt not found");
 
-  async function getGooglePublicKeys() {
-    const res = await ky
-      .get("https://www.googleapis.com/oauth2/v3/certs")
-      .json<{ keys: { n: string; kid: string }[] }>();
-    const keys = res.keys.map((key) => {
-      const publicKey = base64UrlToBigInt(key.n);
-      const limbs = {
-        public_key_limbs: bnToLimbStrArray(publicKey),
-        public_key_redc_limbs: bnToRedcLimbStrArray(publicKey),
-      };
-      return { kid: key.kid, limbs };
+    const publicClient = createPublicClient({
+      chain,
+      transport: http(),
     });
-    return keys;
+
+    const owner = privateKeyToAccount(
+      "0x28a30f5bbd37a5da63f5429133c06f43358d54b0b22eff921b98f92d93a98737",
+    );
+    const walletClient = createWalletClient({
+      account: owner,
+      chain,
+      transport: http(),
+    });
+
+    const paymasterClient = createPaymasterClient({
+      transport: http(
+        "https://api.pimlico.io/v2/84532/rpc?apikey=pim_NN7RHTfDreHNUP6RTrkg7p",
+      ),
+    });
+
+    const bundlerClient = createBundlerClient({
+      client: publicClient,
+      paymaster: paymasterClient,
+      transport: http(
+        "https://api.pimlico.io/v2/84532/rpc?apikey=pim_NN7RHTfDreHNUP6RTrkg7p",
+      ),
+    });
+
+    const account = await toJwtSmartAccount(
+      walletClient,
+      jwt,
+      publicClient as PublicClient,
+    );
+    console.log("viem account", account);
+
+    const tx = await bundlerClient.sendUserOperation({
+      account,
+      calls: [
+        {
+          to: owner.address,
+          value: 0n,
+        },
+      ],
+    });
+    console.log("tx", tx);
   }
 </script>
 
@@ -176,6 +135,10 @@
       </Ui.LoadingButton>
 
       <Ui.LoadingButton onclick={prove}>Prove</Ui.LoadingButton>
+
+      <Ui.LoadingButton onclick={createSmartAccount}>
+        Create my smart account
+      </Ui.LoadingButton>
     </Ui.Card.Content>
   </Ui.Card>
 

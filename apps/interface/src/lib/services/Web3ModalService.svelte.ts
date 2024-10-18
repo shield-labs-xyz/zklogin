@@ -10,6 +10,9 @@ export interface Account {
   chainId: number;
   getSigner: () => Promise<ethers.Signer>;
 }
+
+export const chain = baseSepolia;
+
 export class Web3ModalService {
   #modal: ReturnType<typeof createWeb3Modal>;
   #account: Account | undefined = $state();
@@ -19,7 +22,7 @@ export class Web3ModalService {
         provider: ethers.BrowserProvider;
       }
     | undefined = $state();
-  readonly #chains = [baseSepolia].map(viemChainToEthersChain);
+  readonly #chains = [chain].map(viemChainToEthersChain);
 
   static getSingleton = utils.lazyValue(() => new Web3ModalService());
   private constructor() {

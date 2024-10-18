@@ -52,6 +52,9 @@ importers:
       '@repo/circuits':
         specifier: workspace:*
         version: link:../../packages/circuits
+      '@repo/contracts':
+        specifier: workspace:*
+        version: link:../../packages/evm-contracts
       '@repo/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -186,17 +189,10 @@ importers:
   packages/circuits: {}
 
   packages/evm-contracts:
-    dependencies:
+    devDependencies:
       '@account-abstraction/contracts':
         specifier: 0.7.0
         version: 0.7.0
-      '@openzeppelin/contracts':
-        specifier: 5.1.0
-        version: 5.1.0
-      '@repo/circuits':
-        specifier: workspace:*
-        version: link:../circuits
-    devDependencies:
       '@nomicfoundation/hardhat-chai-matchers':
         specifier: ^2.0.2
         version: 2.0.8(@nomicfoundation/hardhat-ethers@3.0.8(ethers@6.13.3)(hardhat@2.22.13(ts-node@10.9.2(@types/node@20.16.11)(typescript@5.6.3))(typescript@5.6.3)))(chai@4.5.0)(ethers@6.13.3)(hardhat@2.22.13(ts-node@10.9.2(@types/node@20.16.11)(typescript@5.6.3))(typescript@5.6.3))
@@ -212,6 +208,12 @@ importers:
       '@nomicfoundation/hardhat-verify':
         specifier: ^2.0.4
         version: 2.0.11(hardhat@2.22.13(ts-node@10.9.2(@types/node@20.16.11)(typescript@5.6.3))(typescript@5.6.3))
+      '@openzeppelin/contracts':
+        specifier: 5.1.0
+        version: 5.1.0
+      '@repo/circuits':
+        specifier: workspace:*
+        version: link:../circuits
       '@typechain/ethers-v6':
         specifier: ^0.5.1
         version: 0.5.1(ethers@6.13.3)(typechain@8.3.2(typescript@5.6.3))(typescript@5.6.3)
