@@ -107,7 +107,8 @@ contract SimpleAccount is
     }
 
     function setOwner(VerificationData calldata verificationData) public {
-        uint256 expirationTimestamp = block.timestamp + OWNER_EXPIRATION_TIME;
+        uint256 expirationTimestamp = verificationData.jwtIat +
+            OWNER_EXPIRATION_TIME;
         require(
             expirationTimestamp > block.timestamp,
             "JwtAccount: expired proof"
