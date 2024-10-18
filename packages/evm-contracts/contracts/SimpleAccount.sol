@@ -81,6 +81,23 @@ contract SimpleAccount is
         return SIG_VALIDATION_SUCCESS;
     }
 
+    function validateUserOp(
+        PackedUserOperation calldata userOp,
+        bytes32 userOpHash,
+        uint256 missingAccountFunds
+    ) external virtual override returns (uint256 validationData) {
+        if (bytes4(userOp.callData) == this.setOwner.selector) {
+            // because it is a non-restricted function
+            return SIG_VALIDATION_SUCCESS;
+        }
+
+        // copy-pasted from BaseAccount
+        _requireFromEntryPoint();
+        validationData = _validateSignature(userOp, userOpHash);
+        _validateNonce(userOp.nonce);
+        _payPrefund(missingAccountFunds);
+    }
+
     function currentOwner() public view returns (address) {
         Owner memory ownerInfo_ = ownerInfo;
         if (block.timestamp > ownerInfo_.expirationTimestamp) {

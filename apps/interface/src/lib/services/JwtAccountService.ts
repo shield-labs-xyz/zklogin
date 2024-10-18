@@ -1,3 +1,4 @@
+import { ethersSignerToWalletClient, getBundlerClient } from "$lib";
 import { LocalStore } from "$lib/localStorage.svelte";
 import {
   base64UrlToBase64,
@@ -79,8 +80,21 @@ export class JwtAccountService {
     );
     const account = await this.getAccount(jwt, owner);
 
-    const contract = SimpleAccount__factory.connect(account.address, owner);
-    return await contract.setOwner(verificationData);
+    const bundlerClient = getBundlerClient(
+      await ethersSignerToWalletClient(owner),
+    );
+    return await bundlerClient.sendUserOperation({
+      account,
+      calls: [
+        {
+          to: account.address,
+          data: SimpleAccount__factory.createInterface().encodeFunctionData(
+            "setOwner",
+            [verificationData],
+          ) as Hex,
+        },
+      ],
+    });
   }
 
   async currentOwner(jwt: string, owner: ethers.Signer) {
@@ -194,17 +208,29 @@ export async function toJwtSmartAccount(
         ),
       ]);
     },
-    async encodeCalls(x) {
-      return SimpleAccount__factory.createInterface().encodeFunctionData(
-        "executeBatch",
-        [
-          x.map((x) => ({
-            target: x.to,
-            value: x.value ?? 0n,
-            data: x.data ?? "0x",
-          })),
-        ],
-      ) as Hex;
+    async encodeCalls(calls) {
+      const iface = SimpleAccount__factory.createInterface();
+      if (calls.length === 1) {
+        const call = calls[0]!;
+        const unrestrictedSelectors = [iface.getFunction("setOwner")].map(
+          (x) => x.selector,
+        );
+        if (
+          utils.isAddressEqual(call.to, account.address) &&
+          (call.value ?? 0n) === 0n &&
+          call.data &&
+          unrestrictedSelectors.some((sel) => call.data?.startsWith(sel))
+        ) {
+          return call.data;
+        }
+      }
+      return iface.encodeFunctionData("executeBatch", [
+        calls.map((x) => ({
+          target: x.to,
+          value: x.value ?? 0n,
+          data: x.data ?? "0x",
+        })),
+      ]) as Hex;
     },
 
     userOperation: {
