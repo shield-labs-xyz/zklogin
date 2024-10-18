@@ -125,7 +125,6 @@ describe("JwtAccount", () => {
     );
 
     const account = await factory.createAccount({
-      owner: alice.address,
       accountId:
         "0x0ec327b01716a7ccc9339270ef9d1eed3c618b1a5b4720a2a3e0bd785ab45911",
       jwtAud: ethers.toUtf8String(

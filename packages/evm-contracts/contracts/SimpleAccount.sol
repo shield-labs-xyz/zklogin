@@ -50,7 +50,6 @@ contract SimpleAccount is
     }
 
     struct InitializeParams {
-        address owner;
         bytes32 accountId;
         string jwtAud;
         bytes32 authProviderId;
@@ -64,10 +63,6 @@ contract SimpleAccount is
     function initialize(
         InitializeParams calldata params
     ) public virtual initializer {
-        ownerInfo = Owner({
-            owner: params.owner,
-            expirationTimestamp: block.timestamp + OWNER_EXPIRATION_TIME
-        });
         __JwtVerifier_initialize(
             params.accountId,
             params.jwtAud,
