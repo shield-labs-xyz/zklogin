@@ -1,13 +1,19 @@
 <script lang="ts">
   import { lib, owner, recoveryOwner } from "$lib";
   import ConnectWalletOr from "$lib/ConnectWalletOr.svelte";
-  import { prepareJwt } from "$lib/services/JwtAccountService.js";
+  import {
+    authProviderId,
+    prepareJwt,
+  } from "$lib/services/JwtAccountService.js";
+  import { chain } from "$lib/services/Web3ModalService.svelte.js";
   import { Ui } from "$lib/ui";
   import { decodeJwt, zAddress } from "$lib/utils";
   import * as web2Auth from "@auth/sveltekit/client";
   import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
   import { Noir } from "@noir-lang/noir_js";
   import circuit from "@repo/circuits/target/jwt_account.json";
+  import deployments from "@repo/contracts/deployments.json";
+  import { PublicKeyRegistry__factory } from "@repo/contracts/typechain-types/index.js";
   import { utils } from "@repo/utils";
   import { createQuery } from "@tanstack/svelte-query";
   import { ethers } from "ethers";
@@ -60,6 +66,41 @@
 
     const input = await prepareJwt(jwt);
 
+    {
+      utils.assertConnected(lib.web3modal.account);
+      const chainId = chain.id as unknown as keyof typeof deployments;
+      const publicKeyRegistry = PublicKeyRegistry__factory.connect(
+        deployments[chainId].contracts.PublicKeyRegistry,
+        await lib.web3modal.account.getSigner(),
+      );
+      const publicKeyHash = await publicKeyRegistry.getPublicKeyHash(
+        input.public_key_limbs,
+        input.public_key_redc_limbs,
+      );
+      const valid = await publicKeyRegistry.isPublicKeyHashValid(
+        authProviderId,
+        publicKeyHash,
+      );
+      if (!valid) {
+        assert(
+          utils.isAddressEqual(
+            await publicKeyRegistry.owner(),
+            lib.web3modal.account.address,
+          ),
+          "Public key hash is not registered",
+        );
+        const result: boolean = await Ui.toast.confirm({
+          confirmText: "Public key is not registered. Register it?",
+        });
+        assert(result, "rejected to register public key");
+        await publicKeyRegistry.setPublicKeyValid(
+          authProviderId,
+          publicKeyHash,
+          true,
+        );
+      }
+    }
+
     console.log("generating proof...");
     const noir = new Noir(circuit as any);
     const barretenberg = new BarretenbergBackend(circuit as any);
@@ -85,7 +126,9 @@
   }
 
   async function signIn() {
-    const nonce = bytesToHex(hexToBytes(owner.address)).slice("0x".length);
+    const nonce = bytesToHex(hexToBytes(recoveryOwner.address)).slice(
+      "0x".length,
+    );
     await web2Auth.signIn("google", undefined, {
       nonce,
     });

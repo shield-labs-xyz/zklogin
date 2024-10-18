@@ -30,10 +30,10 @@ export const publicClient = createPublicClient({
 }) as PublicClient;
 
 export const owner = privateKeyToAccount(
-  "0x78a30f5bbd37a5da63f5429133c06f43358d54b0b22eff921b98f92d93a98737",
+  "0x18a30f5bbd37a5da63f5429133c06f43358d54b0b22eff921b98f92d93a98737",
 );
 export const recoveryOwner = privateKeyToAccount(
-  "0xd8a30f5bbd37a5da63f5429133c06f43358d54b0b22eff921b98f92d93a98737",
+  "0x28a30f5bbd37a5da63f5429133c06f43358d54b0b22eff921b98f92d93a98737",
 );
 export const walletClient = createWalletClient({
   account: owner,

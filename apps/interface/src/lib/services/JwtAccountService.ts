@@ -239,9 +239,9 @@ export async function toJwtSmartAccount(
   return account;
 }
 
+export const authProviderId = keccak256(toHex("accounts.google.com"));
 async function getJwtAccountInitParams(jwt: string, owner: Address) {
   const input = await prepareJwt(jwt);
-  const authProviderId = keccak256(toHex("accounts.google.com"));
   return {
     owner,
     accountId: input.account_id,
