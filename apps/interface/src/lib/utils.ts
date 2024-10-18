@@ -4,6 +4,7 @@ import { cubicOut } from "svelte/easing";
 import type { TransitionConfig } from "svelte/transition";
 import { twMerge } from "tailwind-merge";
 import { assert } from "ts-essentials";
+import { bytesToBigInt, bytesToString } from "viem";
 import { z } from "zod";
 
 export * from "./utils.svelte.js";
@@ -80,14 +81,10 @@ export function zAddress() {
 export function decodeJwt(jwt: string) {
   const [headerBase64Url, payloadBase64Url] = splitJwt(jwt);
   const header = JSON.parse(
-    ethers.toUtf8String(
-      ethers.decodeBase64(base64UrlToBase64(headerBase64Url)),
-    ),
+    bytesToString(ethers.decodeBase64(base64UrlToBase64(headerBase64Url))),
   );
   const payload = JSON.parse(
-    ethers.toUtf8String(
-      ethers.decodeBase64(base64UrlToBase64(payloadBase64Url)),
-    ),
+    bytesToString(ethers.decodeBase64(base64UrlToBase64(payloadBase64Url))),
   );
   const HeaderSchema = z.object({
     kid: z.string(),
@@ -128,5 +125,5 @@ export function base64UrlToBase64(base64url: string) {
 }
 
 export function base64UrlToBigInt(base64url: string) {
-  return ethers.toBigInt(ethers.decodeBase64(base64UrlToBase64(base64url)));
+  return bytesToBigInt(ethers.decodeBase64(base64UrlToBase64(base64url)));
 }

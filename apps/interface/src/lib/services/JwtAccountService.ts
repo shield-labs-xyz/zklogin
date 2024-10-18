@@ -23,6 +23,7 @@ import {
   encodeFunctionData,
   getContract,
   keccak256,
+  stringToBytes,
   toHex,
   type Account,
   type Address,
@@ -179,7 +180,7 @@ export async function prepareJwt(jwt: string) {
   const [headerBase64Url, payloadBase64Url, signatureBase64Url] = splitJwt(jwt);
 
   const header_and_payload = toBoundedVec(
-    Array.from(ethers.toUtf8Bytes(`${headerBase64Url}.${payloadBase64Url}`)),
+    Array.from(stringToBytes(`${headerBase64Url}.${payloadBase64Url}`)),
     JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN,
   );
   const payload_json = utils.arrayPadEnd(
@@ -191,7 +192,7 @@ export async function prepareJwt(jwt: string) {
     `
       global header_base64url: [u8; ${headerBase64Url.length}] = ${JSON.stringify(headerBase64Url)}.as_bytes();
       global payload_base64url: [u8; ${payloadBase64Url.length}] = ${JSON.stringify(payloadBase64Url)}.as_bytes();
-      global payload_json_padded = ${JSON.stringify(ethers.toUtf8String(Uint8Array.from(payload_json)))}.as_bytes();`,
+      global payload_json_padded = ${JSON.stringify(bytesToString(Uint8Array.from(payload_json)))}.as_bytes();`,
   );
   const signature_limbs = bnToLimbStrArray(
     base64UrlToBigInt(signatureBase64Url),
@@ -204,7 +205,7 @@ export async function prepareJwt(jwt: string) {
   const { pedersenHash } = await import("@aztec/foundation/crypto");
   const account_id = pedersenHash([
     ...utils.arrayPadEnd(
-      Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.sub)),
+      Array.from(stringToBytes(jwtDecoded.payload.sub)),
       JWT_SUB_MAX_LEN,
       0,
     ),
@@ -212,12 +213,12 @@ export async function prepareJwt(jwt: string) {
   ]).toString();
   const jwt_iat = jwtDecoded.payload.iat;
   const jwt_aud = utils.arrayPadEnd(
-    Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.aud)),
+    Array.from(stringToBytes(jwtDecoded.payload.aud)),
     JWT_AUD_MAX_LEN,
     0,
   );
   const jwt_nonce = utils.arrayPadEnd(
-    Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.nonce)),
+    Array.from(stringToBytes(jwtDecoded.payload.nonce)),
     JWT_NONCE_LEN,
     0,
   );

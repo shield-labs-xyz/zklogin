@@ -17,9 +17,12 @@
   import { onMount } from "svelte";
   import { assert } from "ts-essentials";
   import {
+    bytesToHex,
     createPublicClient,
     createWalletClient,
+    hexToBytes,
     http,
+    parseEther,
     type PublicClient,
   } from "viem";
   import {
@@ -58,13 +61,13 @@
     console.time("generate proof");
     const { proof } = await barretenberg.generateProof(witness);
     console.timeEnd("generate proof");
-    console.log("proof", ethers.hexlify(proof));
+    console.log("proof", bytesToHex(proof));
   }
 
   async function signIn() {
-    const nonce = ethers
-      .hexlify(ethers.getBytes(temporaryOwnerAddress))
-      .slice("0x".length);
+    const nonce = bytesToHex(hexToBytes(temporaryOwnerAddress)).slice(
+      "0x".length,
+    );
     await web2Auth.signIn("google", undefined, {
       nonce,
     });
@@ -158,7 +161,7 @@
           console.log(await signer.getAddress());
           await signer.sendTransaction({
             to: data.recipient,
-            value: ethers.parseEther(data.amount),
+            value: parseEther(data.amount),
           });
         }}
       >
