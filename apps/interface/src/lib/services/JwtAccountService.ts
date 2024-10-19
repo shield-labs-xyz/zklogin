@@ -315,16 +315,16 @@ export async function prepareJwt(jwt: string) {
 
 const getNoir = utils.lazyValue(() => {
   const noir = new Noir(circuit as any);
-  const barretenberg = new BarretenbergBackend(circuit as any);
-  return { noir, barretenberg };
+  const backend = new BarretenbergBackend(circuit as any);
+  return { noir, backend };
 });
 export async function proveJwt(input: Awaited<ReturnType<typeof prepareJwt>>) {
-  const { noir, barretenberg } = getNoir();
+  const { noir, backend } = getNoir();
   console.time("generate witness");
   const { witness } = await noir.execute(input);
   console.timeEnd("generate witness");
   console.time("generate proof");
-  const { proof } = await barretenberg.generateProof(witness);
+  const { proof } = await backend.generateProof(witness);
   console.timeEnd("generate proof");
 
   return ethers.hexlify(proof);
