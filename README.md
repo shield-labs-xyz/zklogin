@@ -1,4 +1,4 @@
-# Monorepo
+# evm-zkLogin monorepo
 
 ## Requirements
 
