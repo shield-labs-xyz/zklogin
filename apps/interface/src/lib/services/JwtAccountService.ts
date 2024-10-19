@@ -101,10 +101,10 @@ export class JwtAccountService {
     const account = await this.getAccount(jwt, owner);
     const deployed: boolean = await isDeployed(account, this.publicClient);
     if (!deployed) {
+      const jwtDecoded = decodeJwt(jwt);
       return {
         owner: await owner.getAddress(),
-        expirationTimestamp:
-          Math.floor(Date.now() / 1000) + OWNER_EXPIRATION_TIME,
+        expirationTimestamp: jwtDecoded.payload.iat + OWNER_EXPIRATION_TIME,
       };
     }
     const contract = SimpleAccount__factory.connect(account.address, owner);
