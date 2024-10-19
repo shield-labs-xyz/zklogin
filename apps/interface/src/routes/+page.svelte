@@ -147,6 +147,7 @@
       publicKeyRedcLimbs: input.public_key_redc_limbs,
     });
     console.log("recovery tx", tx);
+    Ui.toast.success("Session extended successfully");
     // const jwtAccount = await lib.jwtAccount.getAccount(jwt, signer.address);
     // const tx2 = await lib.coinbase.addOwner(jwtAccount, signer.address);
     // console.log("new owner tx", tx2);
@@ -290,6 +291,7 @@
             ],
           });
           console.log("tx", tx);
+          Ui.toast.success("Transaction sent successfully");
         }}
       >
         {#snippet children(form, formData)}
