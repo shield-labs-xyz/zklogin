@@ -226,7 +226,15 @@
         Current owner:
         <Ui.Query query={$jwtCurrentOwnerQuery}>
           {#snippet success(data)}
-            {data}
+            {#if !data}
+              Unknown
+            {:else}
+              {data.owner}
+              <br />
+              Expires in {Math.floor(
+                (data.expirationTimestamp - Math.floor(Date.now() / 1000)) / 60,
+              )} minutes
+            {/if}
           {/snippet}
         </Ui.Query>
       </h3>

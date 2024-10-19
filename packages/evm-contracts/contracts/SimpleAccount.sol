@@ -17,6 +17,7 @@ import {UltraVerifier} from "@repo/circuits/target/jwt_account.sol";
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 import {JwtVerifier} from "./JwtVerifier.sol";
 
+// Note: keep in sync with JS
 uint256 constant OWNER_EXPIRATION_TIME = 1 hours;
 
 /**

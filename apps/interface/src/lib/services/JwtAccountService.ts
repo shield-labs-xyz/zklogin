@@ -19,6 +19,7 @@ import {
 import { utils } from "@repo/utils";
 import { ethers } from "ethers";
 import ky from "ky";
+import ms from "ms";
 import { assert } from "ts-essentials";
 import type { Address, Hex, PublicClient, SignableMessage } from "viem";
 import {
@@ -41,6 +42,8 @@ const JWT_SUB_MAX_LEN = 64;
 const JWT_AUD_MAX_LEN = 256;
 // Note: keep in sync with Noir
 const JWT_NONCE_LEN = 40;
+
+const OWNER_EXPIRATION_TIME = Math.floor(ms("1 hour") / 1000);
 
 export class JwtAccountService {
   #address = new LocalStore<Address | undefined>(
@@ -92,10 +95,19 @@ export class JwtAccountService {
     const account = await this.getAccount(jwt, owner);
     const deployed: boolean = await isDeployed(account, this.publicClient);
     if (!deployed) {
-      return await owner.getAddress();
+      return {
+        owner: await owner.getAddress(),
+        expirationTimestamp:
+          Math.floor(Date.now() / 1000) + OWNER_EXPIRATION_TIME,
+      };
     }
     const contract = SimpleAccount__factory.connect(account.address, owner);
-    return (await contract.currentOwner()) as Address;
+    const ownerInfo = await contract.ownerInfo();
+    const ownerAddress = await contract.currentOwner();
+    return {
+      owner: ownerAddress,
+      expirationTimestamp: ethers.toNumber(ownerInfo.expirationTimestamp),
+    };
   }
 }
 
