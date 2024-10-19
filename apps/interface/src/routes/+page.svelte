@@ -80,6 +80,7 @@
                 : undefined,
           };
         },
+        refetchInterval: ms("10 sec"),
       },
       lib.queries.queryClient,
     ),
