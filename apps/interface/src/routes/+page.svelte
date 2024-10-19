@@ -55,22 +55,7 @@
   //   ),
   // );
 
-  let balanceQuery = $derived(
-    createQuery(
-      {
-        queryKey: ["balance", provider, lib.jwtAccount.address],
-        queryFn: async () => {
-          const raw = lib.jwtAccount.address
-            ? await provider.provider.getBalance(lib.jwtAccount.address)
-            : 0n;
-          return `${ethers.formatEther(raw)} ETH`;
-        },
-      },
-      lib.queries.queryClient,
-    ),
-  );
-
-  let jwtCurrentOwnerQuery = $derived(
+  let jwtAccountInfo = $derived(
     createQuery(
       {
         queryKey: ["jwtCurrentOwner", jwt, signer.address],
@@ -78,7 +63,26 @@
           if (!jwt) {
             return null;
           }
-          return await lib.jwtAccount.currentOwner(jwt, signer);
+          const { account, ownerInfo } = await ethers.resolveProperties({
+            account: lib.jwtAccount.getAccount(jwt, signer),
+            ownerInfo: lib.jwtAccount.currentOwner(jwt, signer),
+          });
+          return { address: account.address, ownerInfo };
+        },
+      },
+      lib.queries.queryClient,
+    ),
+  );
+
+  let balanceQuery = $derived(
+    createQuery(
+      {
+        queryKey: ["balance", provider, $jwtAccountInfo.data?.address],
+        queryFn: async () => {
+          const raw = $jwtAccountInfo.data?.address
+            ? await provider.provider.getBalance($jwtAccountInfo.data.address)
+            : 0n;
+          return `${ethers.formatEther(raw)} ETH`;
         },
       },
       lib.queries.queryClient,
@@ -213,25 +217,10 @@
 
   <Ui.Card>
     <Ui.Card.Header>
-      <Ui.Card.Title>Google account: {lib.jwtAccount.address}</Ui.Card.Title>
+      <Ui.Card.Title>Google account</Ui.Card.Title>
     </Ui.Card.Header>
     <Ui.Card.Content>
-      <h3>
-        Current owner:
-        <Ui.Query query={$jwtCurrentOwnerQuery}>
-          {#snippet success(data)}
-            {#if !data}
-              Unknown
-            {:else}
-              {data.owner}
-              <br />
-              Expires in {Math.floor(
-                (data.expirationTimestamp - Math.floor(Date.now() / 1000)) / 60,
-              )} minutes
-            {/if}
-          {/snippet}
-        </Ui.Query>
-      </h3>
+      <div></div>
 
       {#if !jwt}
         <Ui.LoadingButton
@@ -242,17 +231,26 @@
           Sign in with Google
         </Ui.LoadingButton>
       {:else}
-        <!-- {#if $ownersQuery.data && lib.jwtAccount.address}
-          {#if $ownersQuery.data.find((o) => lib.jwtAccount.address && utils.isAddressEqual(o, lib.jwtAccount.address))}
-            Google recovery is set -->
-        <Ui.LoadingButton onclick={recover}>Recover</Ui.LoadingButton>
-        <!-- {:else}
-            <Ui.LoadingButton onclick={connectGoogle} variant="default">
-              Set Google as recovery method
-            </Ui.LoadingButton>
-          {/if}
-        {/if} -->
-
+        <Ui.Query query={$jwtAccountInfo}>
+          {#snippet pending()}
+            <div>Loading...</div>
+          {/snippet}
+          {#snippet success(data)}
+            {#if data}
+              <div>Address: {data.address}</div>
+              <div>
+                Session expiration: in {Math.floor(
+                  (data.ownerInfo.expirationTimestamp -
+                    Math.floor(Date.now() / 1000)) /
+                    60,
+                )} minutes
+              </div>
+              <Ui.LoadingButton variant="default" onclick={recover}>
+                Extend session
+              </Ui.LoadingButton>
+            {/if}
+          {/snippet}
+        </Ui.Query>
         <Ui.LoadingButton onclick={signOut}>Logout</Ui.LoadingButton>
       {/if}
     </Ui.Card.Content>

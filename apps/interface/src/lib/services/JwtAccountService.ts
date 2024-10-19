@@ -52,20 +52,10 @@ const JWT_NONCE_LEN = 40;
 const OWNER_EXPIRATION_TIME = Math.floor(ms("1 hour") / 1000);
 
 export class JwtAccountService {
-  #address = new LocalStore<Address | undefined>(
-    "jwt-account-address",
-    undefined,
-  );
-
   constructor(private publicClient: PublicClient) {}
-
-  get address() {
-    return this.#address.value;
-  }
 
   async getAccount(jwt: string, owner: ethers.Signer) {
     const account = await toJwtSmartAccount(owner, jwt, this.publicClient);
-    this.#address.value = account.address;
     return account;
   }
 
