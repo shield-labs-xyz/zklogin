@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ethersSignerToWalletClient, getBundlerClient, lib } from "$lib";
   import ConnectWalletOr from "$lib/ConnectWalletOr.svelte";
+  import { LocalStore } from "$lib/localStorage.svelte.js";
   import {
     authProviderId,
     encodedAddressAsJwtNonce,
@@ -26,6 +27,23 @@
 
   let jwt = $derived(data.session?.id_token);
 
+  const provider = {
+    chainId: chain.id,
+    provider: new ethers.JsonRpcProvider(chain.rpcUrls.default.http[0]),
+  };
+
+  const signerPrivateKey = new LocalStore<string | undefined>(
+    "signer-private-key",
+    undefined,
+  );
+  if (!signerPrivateKey.value) {
+    signerPrivateKey.value = ethers.Wallet.createRandom().privateKey;
+  }
+
+  let signer = $derived(
+    new ethers.Wallet(signerPrivateKey.value, provider.provider),
+  );
+
   // let ownersQuery = $derived(
   //   createQuery(
   //     {
@@ -41,12 +59,10 @@
   let balanceQuery = $derived(
     createQuery(
       {
-        queryKey: ["balance", lib.web3modal.provider, lib.jwtAccount.address],
+        queryKey: ["balance", provider, lib.jwtAccount.address],
         queryFn: async () => {
           const raw = lib.jwtAccount.address
-            ? ((await lib.web3modal.provider?.provider.getBalance(
-                lib.jwtAccount.address,
-              )) ?? 0n)
+            ? await provider.provider.getBalance(lib.jwtAccount.address)
             : 0n;
           return `${ethers.formatEther(raw)} ETH`;
         },
@@ -58,15 +74,12 @@
   let jwtCurrentOwnerQuery = $derived(
     createQuery(
       {
-        queryKey: ["jwtCurrentOwner", jwt, lib.web3modal.account],
+        queryKey: ["jwtCurrentOwner", jwt, signer.address],
         queryFn: async () => {
-          if (!jwt || !lib.web3modal.account) {
+          if (!jwt) {
             return null;
           }
-          return await lib.jwtAccount.currentOwner(
-            jwt,
-            await lib.web3modal.account.getSigner(),
-          );
+          return await lib.jwtAccount.currentOwner(jwt, signer);
         },
       },
       lib.queries.queryClient,
@@ -75,9 +88,6 @@
 
   async function recover() {
     assert(jwt, "jwt not found");
-    utils.assertConnected(lib.web3modal.account);
-
-    const signer = await lib.web3modal.account.getSigner();
     const input = await prepareJwt(jwt);
     const jwtNonceMatches = isEqual(
       encodedAddressAsJwtNonce((await signer.getAddress()).toLowerCase()),
@@ -96,7 +106,7 @@
       const chainId = chain.id as unknown as keyof typeof deployments;
       const publicKeyRegistry = PublicKeyRegistry__factory.connect(
         deployments[chainId].contracts.PublicKeyRegistry,
-        await lib.web3modal.account.getSigner(),
+        signer,
       );
       const publicKeyHash = await publicKeyRegistry.getPublicKeyHash(
         input.public_key_limbs,
@@ -108,10 +118,7 @@
       );
       if (!valid) {
         assert(
-          utils.isAddressEqual(
-            await publicKeyRegistry.owner(),
-            lib.web3modal.account.address,
-          ),
+          utils.isAddressEqual(await publicKeyRegistry.owner(), signer.address),
           "Public key hash is not registered",
         );
         const result: boolean = await Ui.toast.confirm({
@@ -137,15 +144,14 @@
       publicKeyRedcLimbs: input.public_key_redc_limbs,
     });
     console.log("recovery tx", tx);
-    // const jwtAccount = await lib.jwtAccount.getAccount(jwt, lib.web3modal.account.address);
-    // const tx2 = await lib.coinbase.addOwner(jwtAccount, lib.web3modal.account.address);
+    // const jwtAccount = await lib.jwtAccount.getAccount(jwt, signer.address);
+    // const tx2 = await lib.coinbase.addOwner(jwtAccount, signer.address);
     // console.log("new owner tx", tx2);
   }
 
   async function signIn() {
-    utils.assertConnected(lib.web3modal.account);
     const nonce = ethers
-      .hexlify(ethers.getBytes(lib.web3modal.account.address))
+      .hexlify(ethers.getBytes(await signer.getAddress()))
       .slice("0x".length);
     await web2Auth.signIn("google", undefined, {
       nonce,
@@ -158,10 +164,9 @@
 
   // async function connectGoogle() {
   //   assert(jwt, "jwt not found");
-  //   utils.assertConnected(lib.web3modal.account);
   //   const account = await lib.jwtAccount.getAccount(
   //     jwt,
-  //     await lib.web3modal.account.getSigner(),
+  //     signer,
   //   );
   //   const tx = await lib.coinbase.addOwner(owner, account);
   //   console.log("tx", tx);
@@ -274,8 +279,6 @@
         })}
         onsubmit={async (data) => {
           assert(jwt, "jwt not found");
-          utils.assertConnected(lib.web3modal.account);
-          const signer = await lib.web3modal.account.getSigner();
           const bundlerClient = getBundlerClient(
             await ethersSignerToWalletClient(signer),
           );
