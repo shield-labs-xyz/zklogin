@@ -113,6 +113,10 @@ export async function toJwtSmartAccount(
   jwt: string,
   client: PublicClient,
 ) {
+  const accountIface = SimpleAccount__factory.createInterface();
+  const unrestrictedSelectors = [accountIface.getFunction("setOwner")].map(
+    (x) => x.selector,
+  );
   const chainId = client.chain!.id as unknown as keyof typeof deployments;
   assert(deployments[chainId], `deployments for ${chainId} not found`);
 
@@ -161,6 +165,14 @@ export async function toJwtSmartAccount(
       throw new Error("decodeCalls not implemented");
     },
     async signUserOperation({ chainId = client.chain!.id, ...userOperation }) {
+      if (
+        unrestrictedSelectors.some((sel) =>
+          userOperation.callData.startsWith(sel),
+        )
+      ) {
+        return await this.getStubSignature();
+      }
+
       const address = await this.getAddress();
       const hash = getUserOperationHash({
         chainId,
@@ -181,12 +193,8 @@ export async function toJwtSmartAccount(
       )) as Address;
     },
     async encodeCalls(calls) {
-      const iface = SimpleAccount__factory.createInterface();
       if (calls.length === 1) {
         const call = calls[0]!;
-        const unrestrictedSelectors = [iface.getFunction("setOwner")].map(
-          (x) => x.selector,
-        );
         if (
           utils.isAddressEqual(call.to, account.address) &&
           (call.value ?? 0n) === 0n &&
@@ -196,7 +204,7 @@ export async function toJwtSmartAccount(
           return call.data;
         }
       }
-      return iface.encodeFunctionData("executeBatch", [
+      return accountIface.encodeFunctionData("executeBatch", [
         calls.map((x) => ({
           target: x.to,
           value: x.value ?? 0n,
@@ -206,6 +214,7 @@ export async function toJwtSmartAccount(
     },
 
     userOperation: {
+      // TODO: is this needed?
       async estimateGas(userOperation) {
         return {
           preVerificationGas: BigInt(
