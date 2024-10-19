@@ -43,7 +43,7 @@
   let jwtCurrentOwnerQuery = $derived(
     createQuery(
       {
-        queryKey: ["jwtCurrentOwner", jwt, lib.jwtAccount.address],
+        queryKey: ["jwtCurrentOwner", jwt, lib.web3modal.account],
         queryFn: async () => {
           if (!jwt || !lib.web3modal.account) {
             return null;
