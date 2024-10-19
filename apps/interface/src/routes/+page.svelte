@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { ethersSignerToWalletClient, getBundlerClient, lib } from "$lib";
+  import { lib } from "$lib";
   import { chain } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
+  import SendEthCard from "$lib/SendEthCard.svelte";
   import {
     authProviderId,
     encodedAddressAsJwtNonce,
@@ -9,7 +10,6 @@
     proveJwt,
   } from "$lib/services/JwtAccountService.js";
   import { Ui } from "$lib/ui";
-  import { zAddress } from "$lib/utils";
   import * as web2Auth from "@auth/sveltekit/client";
   import deployments from "@repo/contracts/deployments.json";
   import { PublicKeyRegistry__factory } from "@repo/contracts/typechain-types/index.js";
@@ -20,7 +20,6 @@
   import { assert } from "ts-essentials";
   import { type Hex } from "viem";
   import type { Address } from "viem/accounts";
-  import { z } from "zod";
 
   let { data } = $props();
 
@@ -257,65 +256,7 @@
     </Ui.Card.Content>
   </Ui.Card>
 
-  <Ui.Card>
-    <Ui.Card.Header>
-      <Ui.Card.Title>Send ETH</Ui.Card.Title>
-    </Ui.Card.Header>
-    <Ui.Card.Content>
-      <div>
-        Balance: <Ui.Query query={$balanceQuery}>
-          {#snippet success(data)}
-            {data}
-          {/snippet}
-        </Ui.Query>
-      </div>
-
-      <Ui.Form
-        schema={z.object({
-          recipient: zAddress(),
-          amount: z.string(),
-        })}
-        onsubmit={async (data) => {
-          assert(jwt, "jwt not found");
-          const bundlerClient = getBundlerClient(
-            await ethersSignerToWalletClient(signer),
-          );
-          const account = await lib.jwtAccount.getAccount(jwt, signer);
-          const tx = await bundlerClient.sendUserOperation({
-            account,
-            calls: [
-              {
-                to: data.recipient as Address,
-                value: ethers.parseEther(data.amount),
-              },
-            ],
-          });
-          console.log("tx", tx);
-          Ui.toast.success("Transaction sent successfully");
-        }}
-      >
-        {#snippet children(form, formData)}
-          <Ui.Form.Field {form} name="recipient">
-            <Ui.Form.Control let:attrs>
-              <Ui.Form.Label>Address</Ui.Form.Label>
-              <Ui.Input {...attrs} bind:value={formData.recipient} />
-            </Ui.Form.Control>
-            <Ui.Form.Description></Ui.Form.Description>
-            <Ui.Form.FieldErrors />
-          </Ui.Form.Field>
-
-          <Ui.Form.Field {form} name="amount">
-            <Ui.Form.Control let:attrs>
-              <Ui.Form.Label>Amount</Ui.Form.Label>
-              <Ui.Input {...attrs} bind:value={formData.amount} />
-            </Ui.Form.Control>
-            <Ui.Form.Description></Ui.Form.Description>
-            <Ui.Form.FieldErrors />
-          </Ui.Form.Field>
-
-          <Ui.Form.SubmitButton variant="default">Send</Ui.Form.SubmitButton>
-        {/snippet}
-      </Ui.Form>
-    </Ui.Card.Content>
-  </Ui.Card>
+  {#if jwt}
+    <SendEthCard {jwt} {signer} />
+  {/if}
 </Ui.GapContainer>
