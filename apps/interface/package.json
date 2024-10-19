@@ -69,6 +69,7 @@
     "vite": "^5.2.11",
     "vite-plugin-kit-routes": "^0.6.5",
     "vite-plugin-node-polyfills": "0.17.0",
-    "vite-plugin-resolve": "^2.5.2"
+    "vite-plugin-resolve": "^2.5.2",
+    "vitest": "^2.1.3"
   }
 }

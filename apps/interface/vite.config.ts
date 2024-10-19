@@ -35,6 +35,11 @@ export default defineConfig({
       target: "esnext",
     },
   },
+  test: {
+    hookTimeout: 99999999,
+    testTimeout: 99999999,
+    teardownTimeout: 99999999,
+  },
 } satisfies UserConfig);
 
 function wasmContentTypePlugin(): Plugin {

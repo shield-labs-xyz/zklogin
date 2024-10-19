@@ -1,4 +1,3 @@
-import { ethersSignerToWalletClient, getBundlerClient } from "$lib";
 import { LocalStore } from "$lib/localStorage.svelte";
 import {
   base64UrlToBase64,
@@ -10,6 +9,9 @@ import {
   bnToLimbStrArray,
   bnToRedcLimbStrArray,
 } from "@mach-34/noir-bignum-paramgen";
+import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
+import { Noir } from "@noir-lang/noir_js";
+import circuit from "@repo/circuits/target/jwt_account.json";
 import deployments from "@repo/contracts/deployments.json";
 import {
   SimpleAccount__factory,
@@ -28,6 +30,10 @@ import {
   getUserOperationHash,
   toSmartAccount,
 } from "viem/account-abstraction";
+import {
+  ethersSignerToWalletClient,
+  getBundlerClient,
+} from "../viemClients.js";
 import { isDeployed } from "./CoinbaseWalletService";
 
 // Note: keep in sync with Noir
@@ -317,9 +323,22 @@ export async function prepareJwt(jwt: string) {
   if (showDebug) {
     console.log(input);
     console.log("public key", publicKey);
-    console.log("jwt", jwtDecoded);
+    console.log("jwt", jwtDecoded, jwt);
   }
   return input;
+}
+
+export async function proveJwt(input: Awaited<ReturnType<typeof prepareJwt>>) {
+  const noir = new Noir(circuit as any);
+  const barretenberg = new BarretenbergBackend(circuit as any);
+  console.time("generate witness");
+  const { witness } = await noir.execute(input);
+  console.timeEnd("generate witness");
+  console.time("generate proof");
+  const { proof } = await barretenberg.generateProof(witness);
+  console.timeEnd("generate proof");
+
+  return ethers.hexlify(proof);
 }
 
 export function encodedAddressAsJwtNonce(address: string) {

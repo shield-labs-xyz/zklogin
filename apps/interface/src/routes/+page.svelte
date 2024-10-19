@@ -5,14 +5,12 @@
     authProviderId,
     encodedAddressAsJwtNonce,
     prepareJwt,
+    proveJwt,
   } from "$lib/services/JwtAccountService.js";
   import { chain } from "$lib/services/Web3ModalService.svelte.js";
   import { Ui } from "$lib/ui";
   import { zAddress } from "$lib/utils";
   import * as web2Auth from "@auth/sveltekit/client";
-  import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
-  import { Noir } from "@noir-lang/noir_js";
-  import circuit from "@repo/circuits/target/jwt_account.json";
   import deployments from "@repo/contracts/deployments.json";
   import { PublicKeyRegistry__factory } from "@repo/contracts/typechain-types/index.js";
   import { utils } from "@repo/utils";
@@ -128,16 +126,8 @@
       }
     }
 
-    console.log("generating proof...");
-    const noir = new Noir(circuit as any);
-    const barretenberg = new BarretenbergBackend(circuit as any);
-    console.time("generate witness");
-    const { witness } = await noir.execute(input);
-    console.timeEnd("generate witness");
-    console.time("generate proof");
-    const { proof } = await barretenberg.generateProof(witness);
-    console.timeEnd("generate proof");
-    console.log("proof", ethers.hexlify(proof));
+    const proof = await proveJwt(input);
+    console.log("proof", proof);
 
     const tx = await lib.jwtAccount.setOwner(jwt, signer, {
       proof: ethers.hexlify(proof) as Hex,
