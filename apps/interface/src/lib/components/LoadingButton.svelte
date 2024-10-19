@@ -17,7 +17,7 @@
 
 <Button
   {...props}
-  {loading}
+  loading={props.loading || loading}
   onclick={async () => {
     loading = true;
     try {

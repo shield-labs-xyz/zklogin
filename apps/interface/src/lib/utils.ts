@@ -127,3 +127,8 @@ export function base64UrlToBase64(base64url: string) {
 export function base64UrlToBigInt(base64url: string) {
   return bytesToBigInt(ethers.decodeBase64(base64UrlToBase64(base64url)));
 }
+
+export const EXTEND_SESSION_SEARCH_PARAM = {
+  key: "extend-session",
+  value: "true",
+};

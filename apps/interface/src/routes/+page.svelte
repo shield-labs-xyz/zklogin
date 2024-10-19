@@ -11,6 +11,7 @@
     proveJwt,
   } from "$lib/services/JwtAccountService.js";
   import { Ui } from "$lib/ui";
+  import { EXTEND_SESSION_SEARCH_PARAM } from "$lib/utils.js";
   import * as web2Auth from "@auth/sveltekit/client";
   import deployments from "@repo/contracts/deployments.json";
   import { PublicKeyRegistry__factory } from "@repo/contracts/typechain-types/index.js";
@@ -19,6 +20,7 @@
   import { ethers } from "ethers";
   import { isEqual } from "lodash-es";
   import ms from "ms";
+  import { onMount } from "svelte";
   import { assert } from "ts-essentials";
   import { type Hex } from "viem";
   import type { Address } from "viem/accounts";
@@ -82,22 +84,16 @@
     ),
   );
 
-  let balanceQuery = $derived(
-    createQuery(
-      {
-        queryKey: ["balance", provider, $jwtAccountInfo.data?.address],
-        queryFn: async () => {
-          const raw = $jwtAccountInfo.data?.address
-            ? await provider.provider.getBalance($jwtAccountInfo.data.address)
-            : 0n;
-          return `${ethers.formatEther(raw)} ETH`;
-        },
-      },
-      lib.queries.queryClient,
-    ),
-  );
-
-  async function recover() {
+  let isExtendingSession = $state(false);
+  async function extendSession() {
+    try {
+      isExtendingSession = true;
+      await extendSessionInner();
+    } finally {
+      isExtendingSession = false;
+    }
+  }
+  async function extendSessionInner() {
     assert(jwt, "jwt not found");
     const input = await prepareJwt(jwt);
     const jwtNonceMatches = isEqual(
@@ -113,7 +109,7 @@
         "Sign in again please to link your wallet to your Google account",
       );
       await utils.sleep("2 sec");
-      await signIn();
+      await signIn(signer, { extendSessionAfterLogin: true });
       return;
     }
 
@@ -165,18 +161,45 @@
     // console.log("new owner tx", tx2);
   }
 
-  async function signIn() {
+  async function signIn(
+    signer: ethers.Signer,
+    { extendSessionAfterLogin = false } = {},
+  ) {
     const nonce = ethers
       .hexlify(ethers.getBytes(await signer.getAddress()))
       .slice("0x".length);
-    await web2Auth.signIn("google", undefined, {
-      nonce,
-    });
+    const callbackUrl = new URL(location.href);
+    if (extendSessionAfterLogin) {
+      callbackUrl.searchParams.set(
+        EXTEND_SESSION_SEARCH_PARAM.key,
+        EXTEND_SESSION_SEARCH_PARAM.value,
+      );
+    }
+    await web2Auth.signIn(
+      "google",
+      { callbackUrl: callbackUrl.href },
+      {
+        nonce,
+      },
+    );
   }
 
   async function signOut() {
     await web2Auth.signOut();
   }
+
+  onMount(async () => {
+    const url = new URL(location.href);
+    if (
+      url.searchParams.get(EXTEND_SESSION_SEARCH_PARAM.key) !==
+      EXTEND_SESSION_SEARCH_PARAM.value
+    ) {
+      return;
+    }
+    url.searchParams.delete(EXTEND_SESSION_SEARCH_PARAM.key);
+    history.replaceState(null, "", url.href);
+    await extendSession();
+  });
 
   // async function connectGoogle() {
   //   assert(jwt, "jwt not found");
@@ -239,7 +262,7 @@
         <Ui.LoadingButton
           variant="default"
           style="width: 100%;"
-          onclick={signIn}
+          onclick={() => signIn(signer)}
         >
           Sign in with Google
         </Ui.LoadingButton>
@@ -262,7 +285,11 @@
                   Session expired
                 {/if}
               </div>
-              <Ui.LoadingButton variant="default" onclick={recover}>
+              <Ui.LoadingButton
+                variant="default"
+                onclick={extendSession}
+                loading={isExtendingSession}
+              >
                 Extend session
               </Ui.LoadingButton>
             {/if}
