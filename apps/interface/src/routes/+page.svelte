@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { lib } from "$lib";
+  import { ethersSignerToWalletClient, getBundlerClient, lib } from "$lib";
   import ConnectWalletOr from "$lib/ConnectWalletOr.svelte";
   import {
     authProviderId,
@@ -39,6 +39,23 @@
   //     lib.queries.queryClient,
   //   ),
   // );
+
+  let balanceQuery = $derived(
+    createQuery(
+      {
+        queryKey: ["balance", lib.web3modal.provider, lib.jwtAccount.address],
+        queryFn: async () => {
+          const raw = lib.jwtAccount.address
+            ? ((await lib.web3modal.provider?.provider.getBalance(
+                lib.jwtAccount.address,
+              )) ?? 0n)
+            : 0n;
+          return `${ethers.formatEther(raw)} ETH`;
+        },
+      },
+      lib.queries.queryClient,
+    ),
+  );
 
   let jwtCurrentOwnerQuery = $derived(
     createQuery(
@@ -244,19 +261,37 @@
       <Ui.Card.Title>Send ETH</Ui.Card.Title>
     </Ui.Card.Header>
     <Ui.Card.Content>
+      <div>
+        Balance: <Ui.Query query={$balanceQuery}>
+          {#snippet success(data)}
+            {data}
+          {/snippet}
+        </Ui.Query>
+      </div>
+
       <Ui.Form
         schema={z.object({
           recipient: zAddress(),
           amount: z.string(),
         })}
         onsubmit={async (data) => {
+          assert(jwt, "jwt not found");
           utils.assertConnected(lib.web3modal.account);
           const signer = await lib.web3modal.account.getSigner();
-          console.log(await signer.getAddress());
-          await signer.sendTransaction({
-            to: data.recipient,
-            value: ethers.parseEther(data.amount),
+          const bundlerClient = getBundlerClient(
+            await ethersSignerToWalletClient(signer),
+          );
+          const account = await lib.jwtAccount.getAccount(jwt, signer);
+          const tx = await bundlerClient.sendUserOperation({
+            account,
+            calls: [
+              {
+                to: data.recipient as Address,
+                value: ethers.parseEther(data.amount),
+              },
+            ],
           });
+          console.log("tx", tx);
         }}
       >
         {#snippet children(form, formData)}
@@ -271,7 +306,7 @@
 
           <Ui.Form.Field {form} name="amount">
             <Ui.Form.Control let:attrs>
-              <Ui.Form.Label>Address</Ui.Form.Label>
+              <Ui.Form.Label>Amount</Ui.Form.Label>
               <Ui.Input {...attrs} bind:value={formData.amount} />
             </Ui.Form.Control>
             <Ui.Form.Description></Ui.Form.Description>

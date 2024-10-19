@@ -1,7 +1,6 @@
 <script lang="ts" generics="T extends z.AnyZodObject">
   import { lib } from "$lib";
   import { toRuneObject } from "$lib/utils.svelte";
-  import { utils } from "@repo/utils";
   import { setContext } from "svelte-typed-context";
   import { defaults, superForm, superValidate } from "sveltekit-superforms";
   import { zod, zodClient } from "sveltekit-superforms/adapters";
