@@ -6,6 +6,7 @@
   import * as Sheet from "$lib/components/ui/sheet/index.js";
   import { route } from "$lib/ROUTES";
   import { cn } from "$lib/utils";
+  import { signOut } from "@auth/sveltekit/client";
 
   function isActive(href: string) {
     if (href === "/") {
@@ -45,6 +46,9 @@
     class="flex w-full items-center gap-4 md:ml-auto md:w-auto md:gap-2 lg:gap-4"
   >
     <div class="grow"></div>
+    {#if $page.data.session}
+      <Button onclick={() => signOut()}>Sign out</Button>
+    {/if}
   </div>
 </header>
 

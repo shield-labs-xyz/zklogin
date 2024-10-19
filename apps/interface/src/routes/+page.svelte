@@ -184,10 +184,6 @@
     );
   }
 
-  async function signOut() {
-    await web2Auth.signOut();
-  }
-
   onMount(async () => {
     const url = new URL(location.href);
     if (
@@ -256,8 +252,6 @@
       <Ui.Card.Title>Google account</Ui.Card.Title>
     </Ui.Card.Header>
     <Ui.Card.Content>
-      <div></div>
-
       {#if !jwt}
         <Ui.LoadingButton
           variant="default"
@@ -295,7 +289,6 @@
             {/if}
           {/snippet}
         </Ui.Query>
-        <Ui.LoadingButton onclick={signOut}>Logout</Ui.LoadingButton>
       {/if}
     </Ui.Card.Content>
   </Ui.Card>
