@@ -1,7 +1,6 @@
 <script lang="ts">
   import { ethersSignerToWalletClient, getBundlerClient, lib } from "$lib";
   import { chain } from "$lib/chain.js";
-  import ConnectWalletOr from "$lib/ConnectWalletOr.svelte";
   import { LocalStore } from "$lib/localStorage.svelte.js";
   import {
     authProviderId,
@@ -314,9 +313,7 @@
             <Ui.Form.FieldErrors />
           </Ui.Form.Field>
 
-          <ConnectWalletOr class="w-full">
-            <Ui.Form.SubmitButton variant="default">Send</Ui.Form.SubmitButton>
-          </ConnectWalletOr>
+          <Ui.Form.SubmitButton variant="default">Send</Ui.Form.SubmitButton>
         {/snippet}
       </Ui.Form>
     </Ui.Card.Content>

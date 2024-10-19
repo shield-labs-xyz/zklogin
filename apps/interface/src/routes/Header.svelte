@@ -45,7 +45,6 @@
     class="flex w-full items-center gap-4 md:ml-auto md:w-auto md:gap-2 lg:gap-4"
   >
     <div class="grow"></div>
-    <w3m-button />
   </div>
 </header>
 
