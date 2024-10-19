@@ -3,15 +3,14 @@ import { type EVMEthersClient } from "@web3modal/base/adapters/evm/ethers";
 import { createWeb3Modal } from "@web3modal/ethers";
 import { ethers } from "ethers";
 import { assert } from "ts-essentials";
-import { baseSepolia, type Chain } from "viem/chains";
+import { type Chain } from "viem/chains";
+import { chain } from "../chain.js";
 
 export interface Account {
   address: string;
   chainId: number;
   getSigner: () => Promise<ethers.Signer>;
 }
-
-export const chain = baseSepolia;
 
 export class Web3ModalService {
   #modal: ReturnType<typeof createWeb3Modal>;

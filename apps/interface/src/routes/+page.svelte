@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ethersSignerToWalletClient, getBundlerClient, lib } from "$lib";
+  import { chain } from "$lib/chain.js";
   import ConnectWalletOr from "$lib/ConnectWalletOr.svelte";
   import { LocalStore } from "$lib/localStorage.svelte.js";
   import {
@@ -8,7 +9,6 @@
     prepareJwt,
     proveJwt,
   } from "$lib/services/JwtAccountService.js";
-  import { chain } from "$lib/services/Web3ModalService.svelte.js";
   import { Ui } from "$lib/ui";
   import { zAddress } from "$lib/utils";
   import * as web2Auth from "@auth/sveltekit/client";

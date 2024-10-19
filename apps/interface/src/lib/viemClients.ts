@@ -12,7 +12,7 @@ import {
   createBundlerClient,
   createPaymasterClient,
 } from "viem/account-abstraction";
-import { chain } from "./services/Web3ModalService.svelte";
+import { chain } from "./chain.js";
 
 export const publicClient = createPublicClient({
   chain,
