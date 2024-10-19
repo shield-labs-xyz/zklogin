@@ -126,11 +126,11 @@ export interface SimpleAccountInterface extends Interface {
       | "onERC1155Received"
       | "onERC721Received"
       | "ownerInfo"
+      | "proofVerifier"
       | "proxiableUUID"
       | "publicKeyRegistry"
       | "setOwner"
       | "supportsInterface"
-      | "ultraVerifier"
       | "upgradeToAndCall"
       | "validateUserOp"
       | "withdrawDepositTo"
@@ -197,6 +197,10 @@ export interface SimpleAccountInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "ownerInfo", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "proofVerifier",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "proxiableUUID",
     values?: undefined
   ): string;
@@ -211,10 +215,6 @@ export interface SimpleAccountInterface extends Interface {
   encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "ultraVerifier",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "upgradeToAndCall",
@@ -267,6 +267,10 @@ export interface SimpleAccountInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "ownerInfo", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "proofVerifier",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "proxiableUUID",
     data: BytesLike
   ): Result;
@@ -277,10 +281,6 @@ export interface SimpleAccountInterface extends Interface {
   decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "ultraVerifier",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -436,6 +436,8 @@ export interface SimpleAccount extends BaseContract {
     "view"
   >;
 
+  proofVerifier: TypedContractMethod<[], [string], "view">;
+
   proxiableUUID: TypedContractMethod<[], [string], "view">;
 
   publicKeyRegistry: TypedContractMethod<[], [string], "view">;
@@ -451,8 +453,6 @@ export interface SimpleAccount extends BaseContract {
     [boolean],
     "view"
   >;
-
-  ultraVerifier: TypedContractMethod<[], [string], "view">;
 
   upgradeToAndCall: TypedContractMethod<
     [newImplementation: AddressLike, data: BytesLike],
@@ -569,6 +569,9 @@ export interface SimpleAccount extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "proofVerifier"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "proxiableUUID"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
@@ -584,9 +587,6 @@ export interface SimpleAccount extends BaseContract {
   getFunction(
     nameOrSignature: "supportsInterface"
   ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "ultraVerifier"
-  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "upgradeToAndCall"
   ): TypedContractMethod<

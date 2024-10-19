@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {SimpleAccount, IEntryPoint} from "./SimpleAccount.sol";
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
-import {UltraVerifier} from "@repo/circuits/target/jwt_account.sol";
 
 /**
  * A sample factory contract for SimpleAccount
@@ -19,12 +18,12 @@ contract SimpleAccountFactory {
 
     constructor(
         IEntryPoint _entryPoint,
-        UltraVerifier _ultraVerifier,
+        address _proofVerifier,
         PublicKeyRegistry _publicKeyRegistry
     ) {
         accountImplementation = new SimpleAccount(
             _entryPoint,
-            _ultraVerifier,
+            _proofVerifier,
             _publicKeyRegistry
         );
     }

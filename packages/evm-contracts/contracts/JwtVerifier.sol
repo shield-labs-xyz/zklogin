@@ -9,18 +9,15 @@ import {PublicKeyRegistry, calcPublicKeyHash} from "./PublicKeyRegistry.sol";
 uint256 constant JWT_AUD_MAX_LEN = 256;
 
 contract JwtVerifier {
-    UltraVerifier public immutable ultraVerifier;
+    UltraVerifier public immutable proofVerifier;
     PublicKeyRegistry public immutable publicKeyRegistry;
 
     bytes32 public accountId;
     bytes public jwtAud;
     bytes32 public authProviderId;
 
-    constructor(
-        UltraVerifier ultraVerifier_,
-        PublicKeyRegistry publicKeyRegistry_
-    ) {
-        ultraVerifier = ultraVerifier_;
+    constructor(address proofVerifier_, PublicKeyRegistry publicKeyRegistry_) {
+        proofVerifier = UltraVerifier(proofVerifier_);
         publicKeyRegistry = publicKeyRegistry_;
     }
 
@@ -93,6 +90,6 @@ contract JwtVerifier {
             publicInputs[j++] = bytes32(verificationData.publicKeyRedcLimbs[i]);
         }
 
-        return ultraVerifier.verify(verificationData.proof, publicInputs);
+        return proofVerifier.verify(verificationData.proof, publicInputs);
     }
 }

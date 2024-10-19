@@ -13,7 +13,6 @@ import "@account-abstraction/contracts/core/BaseAccount.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";
 import "@account-abstraction/contracts/samples/callback/TokenCallbackHandler.sol";
 
-import {UltraVerifier} from "@repo/circuits/target/jwt_account.sol";
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 import {JwtVerifier} from "./JwtVerifier.sol";
 
@@ -43,9 +42,9 @@ contract SimpleAccount is
 
     constructor(
         IEntryPoint anEntryPoint,
-        UltraVerifier ultraVerifier_,
+        address proofVerifier_,
         PublicKeyRegistry publicKeyRegistry_
-    ) JwtVerifier(ultraVerifier_, publicKeyRegistry_) {
+    ) JwtVerifier(proofVerifier_, publicKeyRegistry_) {
         _entryPoint = anEntryPoint;
         _disableInitializers();
     }

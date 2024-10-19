@@ -51,8 +51,8 @@ export interface TestJwtAccountInterface extends Interface {
       | "accountId"
       | "authProviderId"
       | "jwtAud"
+      | "proofVerifier"
       | "publicKeyRegistry"
-      | "ultraVerifier"
       | "verify"
   ): FunctionFragment;
 
@@ -63,11 +63,11 @@ export interface TestJwtAccountInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "jwtAud", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "publicKeyRegistry",
+    functionFragment: "proofVerifier",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "ultraVerifier",
+    functionFragment: "publicKeyRegistry",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -82,11 +82,11 @@ export interface TestJwtAccountInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "jwtAud", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "publicKeyRegistry",
+    functionFragment: "proofVerifier",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "ultraVerifier",
+    functionFragment: "publicKeyRegistry",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "verify", data: BytesLike): Result;
@@ -141,9 +141,9 @@ export interface TestJwtAccount extends BaseContract {
 
   jwtAud: TypedContractMethod<[], [string], "view">;
 
-  publicKeyRegistry: TypedContractMethod<[], [string], "view">;
+  proofVerifier: TypedContractMethod<[], [string], "view">;
 
-  ultraVerifier: TypedContractMethod<[], [string], "view">;
+  publicKeyRegistry: TypedContractMethod<[], [string], "view">;
 
   verify: TypedContractMethod<
     [verificationData: JwtVerifier.VerificationDataStruct],
@@ -165,10 +165,10 @@ export interface TestJwtAccount extends BaseContract {
     nameOrSignature: "jwtAud"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "publicKeyRegistry"
+    nameOrSignature: "proofVerifier"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "ultraVerifier"
+    nameOrSignature: "publicKeyRegistry"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "verify"

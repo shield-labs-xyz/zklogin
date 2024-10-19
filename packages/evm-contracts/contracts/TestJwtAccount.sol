@@ -3,16 +3,15 @@ pragma solidity ^0.8.27;
 
 import {JwtVerifier} from "./JwtVerifier.sol";
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
-import {UltraVerifier} from "@repo/circuits/target/jwt_account.sol";
 
 contract TestJwtAccount is JwtVerifier {
     constructor(
         bytes32 accountId_,
         string memory jwtAud_,
         bytes32 authProviderId_,
-        UltraVerifier ultraVerifier_,
+        address proofVerifier,
         PublicKeyRegistry publicKeyRegistry_
-    ) JwtVerifier(ultraVerifier_, publicKeyRegistry_) {
+    ) JwtVerifier(proofVerifier, publicKeyRegistry_) {
         __JwtVerifier_initialize(accountId_, jwtAud_, authProviderId_);
     }
 

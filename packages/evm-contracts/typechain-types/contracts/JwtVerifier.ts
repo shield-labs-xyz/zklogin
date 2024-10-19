@@ -25,8 +25,8 @@ export interface JwtVerifierInterface extends Interface {
       | "accountId"
       | "authProviderId"
       | "jwtAud"
+      | "proofVerifier"
       | "publicKeyRegistry"
-      | "ultraVerifier"
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "accountId", values?: undefined): string;
@@ -36,11 +36,11 @@ export interface JwtVerifierInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "jwtAud", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "publicKeyRegistry",
+    functionFragment: "proofVerifier",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "ultraVerifier",
+    functionFragment: "publicKeyRegistry",
     values?: undefined
   ): string;
 
@@ -51,11 +51,11 @@ export interface JwtVerifierInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "jwtAud", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "publicKeyRegistry",
+    functionFragment: "proofVerifier",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "ultraVerifier",
+    functionFragment: "publicKeyRegistry",
     data: BytesLike
   ): Result;
 }
@@ -109,9 +109,9 @@ export interface JwtVerifier extends BaseContract {
 
   jwtAud: TypedContractMethod<[], [string], "view">;
 
-  publicKeyRegistry: TypedContractMethod<[], [string], "view">;
+  proofVerifier: TypedContractMethod<[], [string], "view">;
 
-  ultraVerifier: TypedContractMethod<[], [string], "view">;
+  publicKeyRegistry: TypedContractMethod<[], [string], "view">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -127,10 +127,10 @@ export interface JwtVerifier extends BaseContract {
     nameOrSignature: "jwtAud"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "publicKeyRegistry"
+    nameOrSignature: "proofVerifier"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "ultraVerifier"
+    nameOrSignature: "publicKeyRegistry"
   ): TypedContractMethod<[], [string], "view">;
 
   filters: {};

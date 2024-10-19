@@ -19,7 +19,7 @@ const deploy: DeployFunction = async ({
     log: true,
   });
 
-  const ultraVerifier = await typedDeployments.deploy("UltraVerifier", {
+  const proofVerifier = await typedDeployments.deploy("UltraVerifier", {
     from: deployer,
     log: true,
   });
@@ -28,7 +28,7 @@ const deploy: DeployFunction = async ({
   await typedDeployments.deploy("SimpleAccountFactory", {
     from: deployer,
     log: true,
-    args: [entryPoint, ultraVerifier.address, publicKeyRegistry.address],
+    args: [entryPoint, proofVerifier.address, publicKeyRegistry.address],
   });
 };
 
