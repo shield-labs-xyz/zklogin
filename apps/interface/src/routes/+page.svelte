@@ -73,9 +73,10 @@
           return {
             address: account.address,
             ownerInfo:
-              utils.isAddressEqual(ownerInfo.owner, signer.address) &&
-              ownerInfo.expirationTimestamp > Math.floor(Date.now() / 1000)
-                ? ownerInfo
+              ownerInfo && utils.isAddressEqual(ownerInfo.owner, signer.address)
+                ? ownerInfo.expirationTimestamp > Math.floor(Date.now() / 1000)
+                  ? ownerInfo
+                  : ("expired" as const)
                 : undefined,
           };
         },
@@ -269,14 +270,16 @@
             {#if data}
               <div>Address: {data.address}</div>
               <div>
-                {#if data.ownerInfo}
+                {#if data.ownerInfo == null}
+                  No session
+                {:else if data.ownerInfo === "expired"}
+                  Session expired
+                {:else}
                   Session expiration: in {Math.floor(
                     (data.ownerInfo.expirationTimestamp -
                       Math.floor(Date.now() / 1000)) /
                       60,
                   )} minutes
-                {:else}
-                  Session expired
                 {/if}
               </div>
               <Ui.LoadingButton
@@ -284,7 +287,7 @@
                 onclick={extendSession}
                 loading={isExtendingSession}
               >
-                Extend session
+                {data.ownerInfo == null ? "Create" : "Extend"} session
               </Ui.LoadingButton>
             {/if}
           {/snippet}
@@ -293,7 +296,7 @@
     </Ui.Card.Content>
   </Ui.Card>
 
-  {#if jwt}
+  {#if jwt && $jwtAccountInfo.data?.ownerInfo && $jwtAccountInfo.data.ownerInfo !== "expired"}
     <SendEthCard {jwt} {signer} />
   {/if}
 </Ui.GapContainer>
