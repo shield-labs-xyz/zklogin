@@ -91,7 +91,6 @@ export class JwtAccountService {
   async currentOwner(jwt: string, owner: ethers.Signer) {
     const account = await this.getAccount(jwt, owner);
     const deployed: boolean = await isDeployed(account, this.publicClient);
-    console.log("deployed", deployed);
     if (!deployed) {
       return await owner.getAddress();
     }

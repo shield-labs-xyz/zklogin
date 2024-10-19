@@ -69,6 +69,10 @@
       input.jwt_nonce,
     );
     if (!jwtNonceMatches) {
+      Ui.toast.log(
+        "Sign in again please to link your wallet to your Google account",
+      );
+      await utils.sleep("2 sec");
       await signIn();
       return;
     }
@@ -216,7 +220,7 @@
           style="width: 100%;"
           onclick={signIn}
         >
-          Login with Google
+          Sign in with Google
         </Ui.LoadingButton>
       {:else}
         <!-- {#if $ownersQuery.data && lib.jwtAccount.address}
