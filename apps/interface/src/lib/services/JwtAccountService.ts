@@ -49,7 +49,7 @@ const JWT_AUD_MAX_LEN = 256;
 // Note: keep in sync with Noir
 const JWT_NONCE_LEN = 40;
 
-const OWNER_EXPIRATION_TIME = Math.floor(ms("1 hour") / 1000);
+export  const OWNER_EXPIRATION_TIME = Math.floor(ms("1 hour") / 1000);
 
 export class JwtAccountService {
   constructor(private publicClient: PublicClient) {}

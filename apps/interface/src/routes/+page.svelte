@@ -6,6 +6,7 @@
   import {
     authProviderId,
     encodedAddressAsJwtNonce,
+    OWNER_EXPIRATION_TIME,
     prepareJwt,
     proveJwt,
   } from "$lib/services/JwtAccountService.js";
@@ -17,6 +18,7 @@
   import { createQuery } from "@tanstack/svelte-query";
   import { ethers } from "ethers";
   import { isEqual } from "lodash-es";
+  import ms from "ms";
   import { assert } from "ts-essentials";
   import { type Hex } from "viem";
   import type { Address } from "viem/accounts";
@@ -66,7 +68,14 @@
             account: lib.jwtAccount.getAccount(jwt, signer),
             ownerInfo: lib.jwtAccount.currentOwner(jwt, signer),
           });
-          return { address: account.address, ownerInfo };
+          return {
+            address: account.address,
+            ownerInfo:
+              utils.isAddressEqual(ownerInfo.owner, signer.address) &&
+              ownerInfo.expirationTimestamp > Math.floor(Date.now() / 1000)
+                ? ownerInfo
+                : undefined,
+          };
         },
       },
       lib.queries.queryClient,
@@ -95,7 +104,11 @@
       encodedAddressAsJwtNonce((await signer.getAddress()).toLowerCase()),
       input.jwt_nonce,
     );
-    if (!jwtNonceMatches) {
+    const expirationMargin = Math.min(ms("20 min"), OWNER_EXPIRATION_TIME / 2);
+    const jwtExpired =
+      input.jwt_iat + OWNER_EXPIRATION_TIME <
+      Math.floor((Date.now() - expirationMargin) / 1000);
+    if (!jwtNonceMatches || jwtExpired) {
       Ui.toast.log(
         "Sign in again please to link your wallet to your Google account",
       );
@@ -239,11 +252,15 @@
             {#if data}
               <div>Address: {data.address}</div>
               <div>
-                Session expiration: in {Math.floor(
-                  (data.ownerInfo.expirationTimestamp -
-                    Math.floor(Date.now() / 1000)) /
-                    60,
-                )} minutes
+                {#if data.ownerInfo}
+                  Session expiration: in {Math.floor(
+                    (data.ownerInfo.expirationTimestamp -
+                      Math.floor(Date.now() / 1000)) /
+                      60,
+                  )} minutes
+                {:else}
+                  Session expired
+                {/if}
               </div>
               <Ui.LoadingButton variant="default" onclick={recover}>
                 Extend session
