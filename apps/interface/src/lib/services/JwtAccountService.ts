@@ -1,4 +1,3 @@
-import { LocalStore } from "$lib/localStorage.svelte";
 import {
   base64UrlToBase64,
   base64UrlToBigInt,
@@ -49,7 +48,7 @@ const JWT_AUD_MAX_LEN = 256;
 // Note: keep in sync with Noir
 const JWT_NONCE_LEN = 40;
 
-export  const OWNER_EXPIRATION_TIME = Math.floor(ms("1 hour") / 1000);
+export const OWNER_EXPIRATION_TIME = Math.floor(ms("1 hour") / 1000);
 
 export class JwtAccountService {
   constructor(private publicClient: PublicClient) {}
@@ -318,9 +317,13 @@ export async function prepareJwt(jwt: string) {
   return input;
 }
 
-export async function proveJwt(input: Awaited<ReturnType<typeof prepareJwt>>) {
+const getNoir = utils.lazyValue(() => {
   const noir = new Noir(circuit as any);
   const barretenberg = new BarretenbergBackend(circuit as any);
+  return { noir, barretenberg };
+});
+export async function proveJwt(input: Awaited<ReturnType<typeof prepareJwt>>) {
+  const { noir, barretenberg } = getNoir();
   console.time("generate witness");
   const { witness } = await noir.execute(input);
   console.timeEnd("generate witness");
