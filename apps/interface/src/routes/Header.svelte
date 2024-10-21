@@ -1,12 +1,9 @@
 <script lang="ts">
   import Menu from "lucide-svelte/icons/menu";
-
   import { page } from "$app/stores";
-  import { Button } from "$lib/components/ui/button/index.js";
-  import * as Sheet from "$lib/components/ui/sheet/index.js";
   import { route } from "$lib/ROUTES";
-  import { cn } from "$lib/utils";
   import { signOut } from "@auth/sveltekit/client";
+  import { Ui } from "@repo/ui";
 
   function isActive(href: string) {
     if (href === "/") {
@@ -24,9 +21,9 @@
   >
     {@render navbar()}
   </nav>
-  <Sheet.Root>
-    <Sheet.Trigger asChild let:builder>
-      <Button
+  <Ui.Sheet.Root>
+    <Ui.Sheet.Trigger asChild let:builder>
+      <Ui.Button
         variant="outline"
         size="icon"
         class="shrink-0 md:hidden"
@@ -34,20 +31,20 @@
       >
         <Menu class="h-5 w-5" />
         <span class="sr-only">Toggle navigation menu</span>
-      </Button>
-    </Sheet.Trigger>
-    <Sheet.Content side="left">
+      </Ui.Button>
+    </Ui.Sheet.Trigger>
+    <Ui.Sheet.Content side="left">
       <nav class="grid gap-6 text-lg font-medium">
         {@render navbar()}
       </nav>
-    </Sheet.Content>
-  </Sheet.Root>
+    </Ui.Sheet.Content>
+  </Ui.Sheet.Root>
   <div
     class="flex w-full items-center gap-4 md:ml-auto md:w-auto md:gap-2 lg:gap-4"
   >
     <div class="grow"></div>
     {#if $page.data.session}
-      <Button onclick={() => signOut()}>Sign out</Button>
+      <Ui.Button onclick={() => signOut()}>Sign out</Ui.Button>
     {/if}
   </div>
 </header>
@@ -65,7 +62,7 @@
 {#snippet link({ text, href }: { text: string; href: string })}
   <a
     {href}
-    class={cn(
+    class={Ui.cn(
       "transition-colors hover:text-foreground",
       isActive(href) ? "text-foreground" : "text-muted-foreground",
     )}

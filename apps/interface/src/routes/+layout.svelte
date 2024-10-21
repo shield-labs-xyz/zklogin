@@ -2,7 +2,7 @@
   import "../app.css";
 
   import { lib } from "$lib";
-  import { Ui } from "$lib/ui";
+  import { Ui } from "@repo/ui";
   import { QueryClientProvider } from "@tanstack/svelte-query";
   import Header from "./Header.svelte";
 

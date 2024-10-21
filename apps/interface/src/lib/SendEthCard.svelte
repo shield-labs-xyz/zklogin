@@ -1,11 +1,11 @@
 <script lang="ts">
   import { lib } from "$lib";
+  import { Ui } from "@repo/ui";
   import { createQuery } from "@tanstack/svelte-query";
   import { ethers } from "ethers";
   import { assert } from "ts-essentials";
   import type { Address } from "viem";
   import { z } from "zod";
-  import { Ui } from "./ui";
   import { zAddress } from "./utils";
   import { ethersSignerToWalletClient, getBundlerClient } from "./viemClients";
 
@@ -31,7 +31,7 @@
   );
 </script>
 
-<Ui.Card>
+<Ui.Card.Root>
   <Ui.Card.Header>
     <Ui.Card.Title>Send ETH</Ui.Card.Title>
   </Ui.Card.Header>
@@ -91,4 +91,4 @@
       {/snippet}
     </Ui.Form>
   </Ui.Card.Content>
-</Ui.Card>
+</Ui.Card.Root>

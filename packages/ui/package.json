@@ -1,0 +1,55 @@
+{
+  "name": "@repo/ui",
+  "type": "module",
+  "private": true,
+  "main": "src/lib/index.ts",
+  "module": "src/lib/index.ts",
+  "types": "src/lib/index.ts",
+  "scripts": {
+    "dev": "pnpm _chore && vite dev",
+    "build": "pnpm _chore && pnpm test:lint && vite build",
+    "preview": "vite preview",
+    "test": "pnpm test:lint && pnpm test:unit",
+    "test:unit": "pnpm _chore && vitest run",
+    "test:lint": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && prettier --check .",
+    "test:lint:fix": "prettier --write .",
+    "_chore": "pnpm i"
+  },
+  "imports": {
+    "#lib/*": "./src/lib/*"
+  },
+  "peerDependencies": {
+    "@sveltejs/kit": "^2.7.2",
+    "svelte": "^5.0.0"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-vercel": "^4.0.0",
+    "@sveltejs/kit": "^2.7.2",
+    "@sveltejs/vite-plugin-svelte": "^3.0.0",
+    "@tailwindcss/typography": "^0.5.14",
+    "@types/lodash-es": "^4.17.12",
+    "autoprefixer": "^10.4.20",
+    "clsx": "^2.1.1",
+    "prettier": "^3.1.1",
+    "prettier-plugin-svelte": "^3.1.2",
+    "svelte-check": "^4.0.5",
+    "tailwind-merge": "^2.5.2",
+    "tailwind-variants": "^0.2.1",
+    "tailwindcss": "^3.4.9",
+    "tslib": "^2.4.1",
+    "typescript": "^5.0.0",
+    "vite": "^5.2.11"
+  },
+  "dependencies": {
+    "@metamask/jazzicon": "^2.0.0",
+    "bits-ui": "^0.21.15",
+    "formsnap": "^1.0.1",
+    "lodash-es": "^4.17.21",
+    "lucide-svelte": "^0.441.0",
+    "svelte-french-toast": "^1.2.0",
+    "svelte-typed-context": "^1.0.1",
+    "sveltekit-superforms": "^2.19.1",
+    "ts-essentials": "^10.0.2",
+    "zod": "^3.23.8"
+  }
+}

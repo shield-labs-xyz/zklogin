@@ -10,11 +10,11 @@
     prepareJwt,
     proveJwt,
   } from "$lib/services/JwtAccountService.js";
-  import { Ui } from "$lib/ui";
   import { EXTEND_SESSION_SEARCH_PARAM } from "$lib/utils.js";
   import * as web2Auth from "@auth/sveltekit/client";
   import deployments from "@repo/contracts/deployments.json";
   import { PublicKeyRegistry__factory } from "@repo/contracts/typechain-types/index.js";
+  import { Ui } from "@repo/ui";
   import { utils } from "@repo/utils";
   import { createQuery } from "@tanstack/svelte-query";
   import { ethers } from "ethers";
@@ -218,7 +218,7 @@
   </section>
 
   <!--
-  <Ui.Card>
+  <Ui.Card.Root>
     <Ui.Card.Header>
       <Ui.Card.Title>Coinbase Wallet</Ui.Card.Title>
       {#if lib.coinbase.address}
@@ -246,10 +246,10 @@
         {/snippet}
       </Ui.Query>
     </Ui.Card.Content>
-  </Ui.Card>
+  </Ui.Card.Root>
   -->
 
-  <Ui.Card>
+  <Ui.Card.Root>
     <Ui.Card.Header>
       <Ui.Card.Title>Google account</Ui.Card.Title>
     </Ui.Card.Header>
@@ -295,7 +295,7 @@
         </Ui.Query>
       {/if}
     </Ui.Card.Content>
-  </Ui.Card>
+  </Ui.Card.Root>
 
   {#if jwt && $jwtAccountInfo.data?.ownerInfo && $jwtAccountInfo.data.ownerInfo !== "expired"}
     <SendEthCard {jwt} {signer} />
