@@ -58,7 +58,7 @@
         amount: z.string(),
       })}
       onsubmit={async (data) => {
-        assert(jwt, "jwt not found");
+        assert(jwt, "no session");
         const bundlerClient = getBundlerClient(
           await ethersSignerToWalletClient(signer),
         );
@@ -95,7 +95,7 @@
           <Ui.Form.FieldErrors />
         </Ui.Form.Field>
 
-        <Ui.Form.SubmitButton variant="default" {disabled}>
+        <Ui.Form.SubmitButton variant="default">
           {disabled ? "Create a session first" : "Send"}
         </Ui.Form.SubmitButton>
       {/snippet}

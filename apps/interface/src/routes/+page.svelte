@@ -96,7 +96,7 @@
     }
   }
   async function extendSessionInner() {
-    assert(jwt, "jwt not found");
+    assert(jwt, "no session");
     const input = await prepareJwt(jwt);
     const jwtNonceMatches = isEqual(
       encodedAddressAsJwtNonce((await signer.getAddress()).toLowerCase()),
@@ -200,7 +200,7 @@
   });
 
   // async function connectGoogle() {
-  //   assert(jwt, "jwt not found");
+  //   assert(jwt, "no session");
   //   const account = await lib.jwtAccount.getAccount(
   //     jwt,
   //     signer,
