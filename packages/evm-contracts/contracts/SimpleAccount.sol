@@ -17,7 +17,12 @@ import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 import {JwtVerifier} from "./JwtVerifier.sol";
 
 // Note: keep in sync with JS
-uint256 constant OWNER_EXPIRATION_TIME = 1 hours;
+// How long owner session is valid for
+uint256 constant OWNER_EXPIRATION_TIME = 24 hours;
+
+// Note: keep in sync with JS
+// How long a jwt is valid for
+uint256 constant JWT_EXPIRATION_TIME = 1 hours;
 
 /**
  * minimal account.
@@ -107,10 +112,8 @@ contract SimpleAccount is
     }
 
     function setOwner(VerificationData calldata verificationData) public {
-        uint256 expirationTimestamp = verificationData.jwtIat +
-            OWNER_EXPIRATION_TIME;
         require(
-            expirationTimestamp > block.timestamp,
+            verificationData.jwtIat + JWT_EXPIRATION_TIME >= block.timestamp,
             "JwtAccount: expired proof"
         );
         bool result = _verifyJwtProof(verificationData);
@@ -118,7 +121,7 @@ contract SimpleAccount is
 
         ownerInfo = Owner({
             owner: verificationData.jwtNonce,
-            expirationTimestamp: expirationTimestamp
+            expirationTimestamp: block.timestamp + OWNER_EXPIRATION_TIME
         });
     }
 

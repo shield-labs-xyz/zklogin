@@ -6,7 +6,7 @@
   import {
     authProviderId,
     encodedAddressAsJwtNonce,
-    OWNER_EXPIRATION_TIME,
+    JWT_EXPIRATION_TIME,
     prepareJwt,
     proveJwt,
   } from "$lib/services/JwtAccountService.js";
@@ -102,9 +102,9 @@
       encodedAddressAsJwtNonce((await signer.getAddress()).toLowerCase()),
       input.jwt_nonce,
     );
-    const expirationMargin = Math.min(ms("20 min"), OWNER_EXPIRATION_TIME / 2);
+    const expirationMargin = Math.min(ms("20 min"), JWT_EXPIRATION_TIME / 2);
     const jwtExpired =
-      input.jwt_iat + OWNER_EXPIRATION_TIME <
+      input.jwt_iat + JWT_EXPIRATION_TIME <
       Math.floor((Date.now() - expirationMargin) / 1000);
     if (!jwtNonceMatches || jwtExpired) {
       Ui.toast.log(
