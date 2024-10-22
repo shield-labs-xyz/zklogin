@@ -18,7 +18,7 @@ import {JwtVerifier} from "./JwtVerifier.sol";
 
 // Note: keep in sync with JS
 // How long owner session is valid for
-uint256 constant OWNER_EXPIRATION_TIME = 24 hours;
+uint96 constant OWNER_EXPIRATION_TIME = 24 hours;
 
 // Note: keep in sync with JS
 // How long a jwt is valid for
@@ -41,7 +41,7 @@ contract SimpleAccount is
 
     struct Owner {
         address owner;
-        uint256 expirationTimestamp;
+        uint96 expirationTimestamp;
     }
     Owner public ownerInfo;
 
@@ -121,7 +121,7 @@ contract SimpleAccount is
 
         ownerInfo = Owner({
             owner: verificationData.jwtNonce,
-            expirationTimestamp: block.timestamp + OWNER_EXPIRATION_TIME
+            expirationTimestamp: uint96(block.timestamp) + OWNER_EXPIRATION_TIME
         });
     }
 
