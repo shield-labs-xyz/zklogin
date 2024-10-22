@@ -12,17 +12,25 @@
   let {
     jwt,
     signer,
+    disabled,
   }: {
-    jwt: string;
+    jwt: string | undefined;
     signer: ethers.Wallet;
+    disabled: boolean;
   } = $props();
 
   let balanceQuery = $derived(
     createQuery(
       {
-        queryKey: ["balance", signer.address],
+        queryKey: ["balance", jwt && ethers.id(jwt)],
         queryFn: async () => {
-          const raw = await signer.provider!.getBalance(signer.address);
+          let raw: bigint;
+          if (!jwt) {
+            raw = 0n;
+          } else {
+            const account = await lib.jwtAccount.getAccount(jwt, signer);
+            raw = await signer.provider!.getBalance(account.address);
+          }
           return `${ethers.formatEther(raw)} ETH`;
         },
       },
@@ -87,7 +95,9 @@
           <Ui.Form.FieldErrors />
         </Ui.Form.Field>
 
-        <Ui.Form.SubmitButton variant="default">Send</Ui.Form.SubmitButton>
+        <Ui.Form.SubmitButton variant="default" {disabled}>
+          {disabled ? "Create a session first" : "Send"}
+        </Ui.Form.SubmitButton>
       {/snippet}
     </Ui.Form>
   </Ui.Card.Content>

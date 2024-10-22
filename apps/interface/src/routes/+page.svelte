@@ -270,6 +270,7 @@
           {#snippet success(data)}
             {#if data}
               <div>Address: {data.address}</div>
+              <div>Network: {chain.name}</div>
               <div>
                 {#if data.ownerInfo == null}
                   No session
@@ -297,7 +298,11 @@
     </Ui.Card.Content>
   </Ui.Card.Root>
 
-  {#if jwt && $jwtAccountInfo.data?.ownerInfo && $jwtAccountInfo.data.ownerInfo !== "expired"}
-    <SendEthCard {jwt} {signer} />
-  {/if}
+  <SendEthCard
+    {jwt}
+    {signer}
+    disabled={!jwt ||
+      !$jwtAccountInfo.data?.ownerInfo ||
+      $jwtAccountInfo.data.ownerInfo === "expired"}
+  />
 </Ui.GapContainer>
