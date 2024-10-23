@@ -16,12 +16,15 @@ export default defineConfig({
       hook: "buildStart",
     }),
     wasmContentTypePlugin(),
-    process.env.NODE_ENV === "production"
-      ? resolve({
-          // `unreachable` error in wasm is caused by incorrect version of bb.js. Consult pnpm-lock.yaml
-          "@aztec/bb.js": `export * from "https://unpkg.com/@aztec/bb.js@0.55.0/dest/browser/index.js"`,
-        })
-      : undefined,
+    resolve({
+      util: `export const inspect = {}`,
+      ...(process.env.NODE_ENV === "production"
+        ? {
+            // `unreachable` error in wasm is caused by incorrect version of bb.js. Consult pnpm-lock.yaml
+            "@aztec/bb.js": `export * from "https://unpkg.com/@aztec/bb.js@0.55.0/dest/browser/index.js"`,
+          }
+        : {}),
+    }),
   ],
   build: {
     target: "esnext",
