@@ -316,7 +316,8 @@ export async function prepareJwt(jwt: string) {
 
 const getNoir = utils.lazyValue(() => {
   const noir = new Noir(circuit as any);
-  const threads = navigator.hardwareConcurrency;
+  const threads =
+    typeof navigator !== "undefined" ? navigator.hardwareConcurrency : 1;
   console.log(`Using ${threads} threads`);
   const backend = new BarretenbergBackend(circuit as any, { threads });
   return { noir, backend };
