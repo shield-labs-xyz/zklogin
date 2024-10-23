@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { lib } from "$lib";
+  import { getBundlerClient, lib, publicClient } from "$lib";
   import { chain, provider, publicKeyRegistry } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
   import SendEthCard from "$lib/SendEthCard.svelte";
@@ -144,7 +144,11 @@
       publicKeyHash: input.public_key_hash,
     });
     console.log("recovery tx", tx);
+    await getBundlerClient(publicClient).waitForUserOperationReceipt({
+      hash: tx,
+    });
     Ui.toast.success("Session extended successfully");
+    lib.queries.invalidateAll();
     // const jwtAccount = await lib.jwtAccount.getAccount(jwt, signer.address);
     // const tx2 = await lib.coinbase.addOwner(jwtAccount, signer.address);
     // console.log("new owner tx", tx2);
