@@ -7,8 +7,10 @@ use noir_rsa::rsa::RSA;
 mod noir_base64;
 
 // Note: keep in sync with JS
+// TODO(security): if sub is too long, account is lost
 global JWT_SUB_MAX_LEN: u32 = 64; // UUID is 36 chars but we add some buffer to be safe
 // Note: keep in sync with JS
+// TODO(security): if aud is too long, account is lost
 global JWT_AUD_MAX_LEN: u32 = 256;
 // Note: keep in sync with JS
 global JWT_NONCE_LEN: u32 = 40; // eth address is 40 chars
@@ -41,32 +43,24 @@ pub fn assert_verify_jwt<
     assert(result, "jwt verification failed: signature");
 }
 
-pub fn assert_verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], account_id: Field, salt: Field, expected_jwt_iat: u64, expected_jwt_aud: [u8; JWT_AUD_MAX_LEN], expected_jwt_nonce: [u8; JWT_NONCE_LEN]) {
+pub fn assert_verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], account_id: Field, salt: Field, expected_jwt_iat: u64, expected_jwt_nonce: [u8; JWT_NONCE_LEN]) {
     // TODO(security): haystack size should be based on N
+    assert(N <= 1024, "payload_json length must be less than 1024");
     let haystack: string_search::StringBody1024 = string_search::StringBody::new(payload_json_padded, payload_json_padded.len());
 
     {
-        // verify "jwt.sub"
+        // verify "account_id"
         let jwt_sub: [u8; JWT_SUB_MAX_LEN] = extract_jwt_payload_field_str(haystack, "sub");
-        let mut data = [0 as Field; JWT_SUB_MAX_LEN + 1];
-        for i in 0..JWT_SUB_MAX_LEN {
-            data[i] = jwt_sub[i] as Field;
-        }
-        data[data.len() - 1] = salt;
-        let hash = std::hash::pedersen_hash(data);
-        assert(hash == account_id, "jwt.sub mismatch");
-    }
-
-    {
-        // verify "jwt.aud"
         let jwt_aud: [u8; JWT_AUD_MAX_LEN] = extract_jwt_payload_field_str(haystack, "aud");
-        assert(jwt_aud == expected_jwt_aud, "jwt.aud mismatch");
+        let data = nodash::pack_bytes(jwt_sub).concat(nodash::pack_bytes(jwt_aud)).concat([salt]);
+        let hash = std::hash::pedersen_hash(data);
+        assert(hash == account_id, f"account_id mismatch: expected {account_id}, got {hash}");
     }
 
     {
         // verify "jwt.nonce"
         let jwt_nonce: [u8; 40] = extract_jwt_payload_field_str(haystack, "nonce");
-        assert(jwt_nonce == expected_jwt_nonce, "jwt.nonce mismatch");
+        assert(jwt_nonce == expected_jwt_nonce, f"jwt.nonce mismatch: expected {expected_jwt_nonce}, got {jwt_nonce}");
     }
 
     {
@@ -94,8 +88,7 @@ pub fn assert_verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], accou
 
 fn extract_jwt_payload_field_str<let N: u32, let H: u32>(haystack: string_search::StringBody1024, needle_text: str<H>) -> [u8; N] {
     // `needle` -> `"needle": "`
-    let needle_text = nodash::array_concat("\"".as_bytes(), needle_text.as_bytes());
-    let needle_text = nodash::array_concat(needle_text, "\":\"".as_bytes());
+    let needle_text = "\"".as_bytes().concat(needle_text.as_bytes()).concat("\":\"".as_bytes());
 
     let needle: string_search::SubString32 = string_search::SubString::new(needle_text, needle_text.len());
     let (result, match_position) = haystack.substring_match(needle);
@@ -149,10 +142,8 @@ unconstrained fn find_dot<let N: u32>(input: [u8; N]) -> u32 {
     result
 }
 
-
 mod tests {
     use crate::{assert_verify_jwt, assert_verify_jwt_payload};
-    use crate::PadEnd;
 
     global pubkey_limbs = [0x9d9b7ab520532396758488b2100155, 0x87ff0f733247ea1ae377d26bdd60aa, 0x55e1805ec2babe74ebadb5de3c29a7, 0x4131e289b5519e562dff8935a669e2, 0xe974f2f0179abc0cc837efb26a9d5d, 0x72f158dfb2a2ba0fd881d8742426ec, 0x7e56e9182ef83caea0a45cfdaba45a, 0xc2b9b23f6684f0442257dbb8a37291, 0xfc0ecae4fe9f8be5c52a91edd59db2, 0x3ba9bd0376ade89881c7bafa2b36de, 0x3548bec7032b97739300f7fd72769b, 0x6a5b4b975ccf938c5e63ee41d57c7c, 0x4fabc9dbb6a9157f91a87adaff6e66, 0x303d705edf9cae022cd91f57f332b6, 0x1834cc2b65d9d2cab6dd210ba58cad, 0x43b9c3ca0df606d243d4c442794829, 0x5239e9f174adc5871d580714b1eb98, 0xe1];
     global pubkey_redc_limbs = [0x1e7578875458139006e47aac5c17fb, 0x249a5affa65fe288cb0df8ab6548be, 0xc29ec9b115f3132ff5fb71e744fba3, 0xbde4d1e1b2e894dd482277dc14aba5, 0x675f382edc2e53fabb2c785f0dd7e8, 0x8af86434e50f50ddfc9b46ce2c8990, 0xbaf8f36a4caec8a61d14be456599d3, 0x4ac14c9865afb8da5ab36b76e6d651, 0x2be72e03504024bbc777e0a1e9d16d, 0x249a0c4d673705ab5ad1757a225fea, 0x0300712f5005899fffeb1289f9ef4b, 0x73eb759f585e597acb40bfbf59efed, 0xe070a169f35358c7ead1df56d02d4b, 0x5657e0c005b6bca107abd9024b4dd1, 0xe6da2103c7938911ca44a5e641c541, 0xc98e9e1235394e0eb2b87143fd42c3, 0xdb1c76abaf095069edf0ea5248ef95, 0x0122];
@@ -178,10 +169,11 @@ mod tests {
     #[test]
     fn test_jwt_payload() {
         let salt = 123;
-        let account_id = 0x161cf12a6f018200f9492d0fbbdf3b8f20665708b3f69ba1ab4dd2c71725dd5f;
         let iat = 1729204366;
+        let sub = "116322252320755218222".as_bytes().pad_end::<crate::JWT_SUB_MAX_LEN>(0);
         let aud = "698109474805-nvfg9hh31kjmb6mmn51d4oiombgr3s3v.apps.googleusercontent.com".as_bytes().pad_end::<crate::JWT_AUD_MAX_LEN>(0);
-        assert_verify_jwt_payload(payload_json_padded, account_id, salt, iat, aud, "d8dA6BF26964aF9D7eEd9e03E53415D37aA96045".as_bytes());
+        let account_id = std::hash::pedersen_hash(nodash::pack_bytes(sub).concat(nodash::pack_bytes(aud)).concat([salt]));
+        assert_verify_jwt_payload(payload_json_padded, account_id, salt, iat, "d8dA6BF26964aF9D7eEd9e03E53415D37aA96045".as_bytes());
     }
 
 
@@ -202,20 +194,5 @@ mod tests {
             }
         }
         concated
-    }
-}
-
-trait PadEnd<T, let N: u32> {
-    fn pad_end<let M: u32>(self, pad_value: T) -> [T; M];
-}
-
-impl<T, let N: u32> PadEnd<T, N> for [T; N] {
-    fn pad_end<let M: u32>(self, pad_value: T) -> [T; M] {
-        assert(M >= N, "pad_end: array too long");
-        let mut res = [pad_value; M];
-        for i in 0..N {
-            res[i] = self[i];
-        }
-        res
     }
 }

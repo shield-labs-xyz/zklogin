@@ -240,7 +240,6 @@ async function getJwtAccountInitParams(
   const input = await prepareJwt(jwt);
   return {
     accountId: input.account_id,
-    jwtAud: ethers.toUtf8String(Uint8Array.from(input.jwt_aud)),
     authProviderId,
   };
 }
@@ -276,19 +275,23 @@ export async function prepareJwt(jwt: string) {
   const salt = 0;
   const { pedersenHash } = await import("@aztec/foundation/crypto");
   const account_id = pedersenHash([
-    ...utils.arrayPadEnd(
-      Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.sub)),
-      JWT_SUB_MAX_LEN,
-      0,
+    ...noirPackBytes(
+      utils.arrayPadEnd(
+        Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.sub)),
+        JWT_SUB_MAX_LEN,
+        0,
+      ),
+    ),
+    ...noirPackBytes(
+      utils.arrayPadEnd(
+        Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.aud)),
+        JWT_AUD_MAX_LEN,
+        0,
+      ),
     ),
     salt,
   ]).toString();
   const jwt_iat = jwtDecoded.payload.iat;
-  const jwt_aud = utils.arrayPadEnd(
-    Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.aud)),
-    JWT_AUD_MAX_LEN,
-    0,
-  );
   console.log("jwt_aud", jwtDecoded.payload.aud);
   console.log("jwt_nonce", jwtDecoded.payload.nonce);
   const jwt_nonce = encodedAddressAsJwtNonce(jwtDecoded.payload.nonce);
@@ -303,7 +306,6 @@ export async function prepareJwt(jwt: string) {
     account_id,
     salt,
     jwt_iat,
-    jwt_aud,
     jwt_nonce,
     public_key_limbs: publicKey.limbs.public_key_limbs,
     public_key_redc_limbs: publicKey.limbs.public_key_redc_limbs,
@@ -377,4 +379,33 @@ async function getGooglePublicKeys() {
     return { kid: key.kid, limbs };
   });
   return keys;
+}
+
+function noirPackBytes(arr: number[]) {
+  // keep in sync with Noir
+  const arrPadded = utils.arrayPadEnd(
+    arr,
+    (Math.floor(arr.length / 31) + 1) * 31,
+    0,
+  );
+  const res = [];
+  for (let i = 0; i < arrPadded.length / 31; i++) {
+    const chunk = arrPadded.slice(i * 31, i * 31 + 31);
+    res.push(fieldFromBytes(chunk));
+  }
+  return res;
+
+  function fieldFromBytes(bytes: number[]) {
+    assert(
+      bytes.length < 32,
+      `fieldFromBytes: N must be less than 32. Got: ${bytes.length}`,
+    );
+    let asField = 0n;
+    let offset = 1n;
+    for (let i = 0; i < bytes.length; i++) {
+      asField += BigInt(bytes[i]!) * offset;
+      offset *= 256n;
+    }
+    return asField;
+  }
 }

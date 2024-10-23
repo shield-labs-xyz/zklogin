@@ -56,7 +56,6 @@ contract SimpleAccount is
 
     struct InitializeParams {
         bytes32 accountId;
-        string jwtAud;
         bytes32 authProviderId;
     }
 
@@ -68,11 +67,7 @@ contract SimpleAccount is
     function initialize(
         InitializeParams calldata params
     ) public virtual initializer {
-        __JwtVerifier_initialize(
-            params.accountId,
-            params.jwtAud,
-            params.authProviderId
-        );
+        __JwtVerifier_initialize(params.accountId, params.authProviderId);
     }
 
     /// implement template method of BaseAccount

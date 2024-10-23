@@ -7,12 +7,11 @@ import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 contract TestJwtAccount is JwtVerifier {
     constructor(
         bytes32 accountId_,
-        string memory jwtAud_,
         bytes32 authProviderId_,
         address proofVerifier,
         PublicKeyRegistry publicKeyRegistry_
     ) JwtVerifier(proofVerifier, publicKeyRegistry_) {
-        __JwtVerifier_initialize(accountId_, jwtAud_, authProviderId_);
+        __JwtVerifier_initialize(accountId_, authProviderId_);
     }
 
     function verify(VerificationData calldata verificationData) external {

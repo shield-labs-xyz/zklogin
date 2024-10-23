@@ -72,15 +72,13 @@ export declare namespace SimpleAccount {
 
   export type InitializeParamsStruct = {
     accountId: BytesLike;
-    jwtAud: string;
     authProviderId: BytesLike;
   };
 
   export type InitializeParamsStructOutput = [
     accountId: string,
-    jwtAud: string,
     authProviderId: string
-  ] & { accountId: string; jwtAud: string; authProviderId: string };
+  ] & { accountId: string; authProviderId: string };
 }
 
 export declare namespace JwtVerifier {
@@ -118,7 +116,6 @@ export interface SimpleAccountInterface extends Interface {
       | "getDeposit"
       | "getNonce"
       | "initialize"
-      | "jwtAud"
       | "onERC1155BatchReceived"
       | "onERC1155Received"
       | "onERC721Received"
@@ -173,7 +170,6 @@ export interface SimpleAccountInterface extends Interface {
     functionFragment: "initialize",
     values: [SimpleAccount.InitializeParamsStruct]
   ): string;
-  encodeFunctionData(functionFragment: "jwtAud", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "onERC1155BatchReceived",
     values: [
@@ -249,7 +245,6 @@ export interface SimpleAccountInterface extends Interface {
   decodeFunctionResult(functionFragment: "getDeposit", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getNonce", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "jwtAud", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "onERC1155BatchReceived",
     data: BytesLike
@@ -395,8 +390,6 @@ export interface SimpleAccount extends BaseContract {
     "nonpayable"
   >;
 
-  jwtAud: TypedContractMethod<[], [string], "view">;
-
   onERC1155BatchReceived: TypedContractMethod<
     [
       arg0: AddressLike,
@@ -522,9 +515,6 @@ export interface SimpleAccount extends BaseContract {
     [void],
     "nonpayable"
   >;
-  getFunction(
-    nameOrSignature: "jwtAud"
-  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "onERC1155BatchReceived"
   ): TypedContractMethod<

@@ -47,7 +47,6 @@ export interface TestJwtAccountInterface extends Interface {
     nameOrSignature:
       | "accountId"
       | "authProviderId"
-      | "jwtAud"
       | "proofVerifier"
       | "publicKeyRegistry"
       | "verify"
@@ -58,7 +57,6 @@ export interface TestJwtAccountInterface extends Interface {
     functionFragment: "authProviderId",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "jwtAud", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "proofVerifier",
     values?: undefined
@@ -77,7 +75,6 @@ export interface TestJwtAccountInterface extends Interface {
     functionFragment: "authProviderId",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "jwtAud", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "proofVerifier",
     data: BytesLike
@@ -136,8 +133,6 @@ export interface TestJwtAccount extends BaseContract {
 
   authProviderId: TypedContractMethod<[], [string], "view">;
 
-  jwtAud: TypedContractMethod<[], [string], "view">;
-
   proofVerifier: TypedContractMethod<[], [string], "view">;
 
   publicKeyRegistry: TypedContractMethod<[], [string], "view">;
@@ -157,9 +152,6 @@ export interface TestJwtAccount extends BaseContract {
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "authProviderId"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "jwtAud"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "proofVerifier"

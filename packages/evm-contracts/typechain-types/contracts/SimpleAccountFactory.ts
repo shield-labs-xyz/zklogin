@@ -22,15 +22,13 @@ import type {
 export declare namespace SimpleAccount {
   export type InitializeParamsStruct = {
     accountId: BytesLike;
-    jwtAud: string;
     authProviderId: BytesLike;
   };
 
   export type InitializeParamsStructOutput = [
     accountId: string,
-    jwtAud: string,
     authProviderId: string
-  ] & { accountId: string; jwtAud: string; authProviderId: string };
+  ] & { accountId: string; authProviderId: string };
 }
 
 export interface SimpleAccountFactoryInterface extends Interface {
