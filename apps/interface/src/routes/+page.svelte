@@ -2,7 +2,6 @@
   import { lib } from "$lib";
   import { chain, provider, publicKeyRegistry } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
-  import { route } from "$lib/ROUTES.js";
   import SendEthCard from "$lib/SendEthCard.svelte";
   import {
     authProviderId,
@@ -119,7 +118,7 @@
         await Ui.toast.promise(
           utils.iife(async () => {
             const { hash } = await ky
-              .post(route("POST /api/register-public-keys"))
+              .post("/api/register-public-keys")
               .json<{ hash: string | null }>();
             if (hash) {
               await provider.provider.waitForTransaction(hash);

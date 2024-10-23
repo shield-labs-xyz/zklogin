@@ -1,4 +1,6 @@
 <script lang="ts">
+  import "$lib/polyfills.js";
+
   import "../app.css";
 
   import { dev } from "$app/environment";

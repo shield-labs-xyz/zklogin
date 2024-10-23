@@ -6,11 +6,13 @@ import {
 } from "$lib/services/JwtAccountService";
 import { utils } from "@repo/utils";
 import { error } from "@sveltejs/kit";
+import { config } from "dotenv";
 import { ethers } from "ethers";
 import { compact } from "lodash-es";
 
 export async function POST() {
-  const privateKey = process.env.REGISTRY_OWNER_PRIVATE_KEY;
+  config();
+  const privateKey = process.env.REGISTRY_OWNER_PRIVATE_KEY!;
   if (!privateKey) {
     error(500, "misconfigured: signer");
   }
@@ -28,7 +30,7 @@ export async function POST() {
           authProviderId,
           publicKeyHash,
         );
-        if (!isValid) {
+        if (isValid) {
           return undefined;
         }
         return publicKeyHash;
@@ -38,7 +40,7 @@ export async function POST() {
   if (pendingPublicKeyHashes.length === 0) {
     return Response.json({ hash: null });
   }
-  const tx = await publicKeyRegistry.setPublicKeysValid(
+  const tx = await publicKeyRegistry.connect(owner).setPublicKeysValid(
     pendingPublicKeyHashes.map((publicKeyHash) => ({
       providerId: authProviderId,
       publicKeyHash,

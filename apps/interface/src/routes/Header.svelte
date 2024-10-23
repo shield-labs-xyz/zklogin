@@ -1,9 +1,8 @@
 <script lang="ts">
-  import Menu from "lucide-svelte/icons/menu";
   import { page } from "$app/stores";
-  import { route } from "$lib/ROUTES";
   import { signOut } from "@auth/sveltekit/client";
   import { Ui } from "@repo/ui";
+  import Menu from "lucide-svelte/icons/menu";
 
   function isActive(href: string) {
     if (href === "/") {
@@ -51,12 +50,12 @@
 
 {#snippet navbar()}
   <a
-    href={route("/")}
+    href={"/"}
     class="flex items-center gap-2 text-lg font-semibold md:text-base"
   >
     Wallet
   </a>
-  {@render link({ text: "Home", href: route("/") })}
+  {@render link({ text: "Home", href: "/" })}
 {/snippet}
 
 {#snippet link({ text, href }: { text: string; href: string })}

@@ -292,8 +292,6 @@ export async function prepareJwt(jwt: string) {
     salt,
   ]).toString();
   const jwt_iat = jwtDecoded.payload.iat;
-  console.log("jwt_aud", jwtDecoded.payload.aud);
-  console.log("jwt_nonce", jwtDecoded.payload.nonce);
   const jwt_nonce = encodedAddressAsJwtNonce(jwtDecoded.payload.nonce);
   const public_key_hash: string = await getPublicKeyHash(publicKey.limbs);
   const input = {

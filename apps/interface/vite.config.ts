@@ -3,13 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import copy from "rollup-plugin-copy";
 import { defineConfig, type Plugin, type UserConfig } from "vite";
-import { kitRoutes } from "vite-plugin-kit-routes";
-import { nodePolyfills } from "vite-plugin-node-polyfills";
 import resolve from "vite-plugin-resolve";
 
 export default defineConfig({
   plugins: [
-    kitRoutes(),
     sveltekit(),
     copy({
       targets: [
@@ -25,7 +22,6 @@ export default defineConfig({
           "@aztec/bb.js": `export * from "https://unpkg.com/@aztec/bb.js@0.55.0/dest/browser/index.js"`,
         })
       : undefined,
-    nodePolyfills({ include: ["path"] }),
   ],
   build: {
     target: "esnext",

@@ -28,6 +28,12 @@
     success: Snippet<[T]>;
   } = $props();
 
+  $effect(() => {
+    if (query.status === "error") {
+      console.error(query.error);
+    }
+  });
+
   let hideArray = $derived(castArray(hide));
 </script>
 
