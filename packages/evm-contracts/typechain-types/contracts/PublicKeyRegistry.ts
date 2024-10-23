@@ -22,6 +22,20 @@ import type {
   TypedContractMethod,
 } from "../common";
 
+export declare namespace PublicKeyRegistry {
+  export type PublicKeyValidityStruct = {
+    providerId: BytesLike;
+    publicKeyHash: BytesLike;
+    valid: boolean;
+  };
+
+  export type PublicKeyValidityStructOutput = [
+    providerId: string,
+    publicKeyHash: string,
+    valid: boolean
+  ] & { providerId: string; publicKeyHash: string; valid: boolean };
+}
+
 export interface PublicKeyRegistryInterface extends Interface {
   getFunction(
     nameOrSignature:
@@ -30,6 +44,7 @@ export interface PublicKeyRegistryInterface extends Interface {
       | "owner"
       | "renounceOwnership"
       | "setPublicKeyValid"
+      | "setPublicKeysValid"
       | "transferOwnership"
   ): FunctionFragment;
 
@@ -53,6 +68,10 @@ export interface PublicKeyRegistryInterface extends Interface {
     values: [BytesLike, BytesLike, boolean]
   ): string;
   encodeFunctionData(
+    functionFragment: "setPublicKeysValid",
+    values: [PublicKeyRegistry.PublicKeyValidityStruct[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [AddressLike]
   ): string;
@@ -72,6 +91,10 @@ export interface PublicKeyRegistryInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setPublicKeyValid",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setPublicKeysValid",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -158,6 +181,12 @@ export interface PublicKeyRegistry extends BaseContract {
     "nonpayable"
   >;
 
+  setPublicKeysValid: TypedContractMethod<
+    [validity: PublicKeyRegistry.PublicKeyValidityStruct[]],
+    [void],
+    "nonpayable"
+  >;
+
   transferOwnership: TypedContractMethod<
     [newOwner: AddressLike],
     [void],
@@ -188,6 +217,13 @@ export interface PublicKeyRegistry extends BaseContract {
     nameOrSignature: "setPublicKeyValid"
   ): TypedContractMethod<
     [providerId: BytesLike, publicKeyHash: BytesLike, valid: boolean],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "setPublicKeysValid"
+  ): TypedContractMethod<
+    [validity: PublicKeyRegistry.PublicKeyValidityStruct[]],
     [void],
     "nonpayable"
   >;

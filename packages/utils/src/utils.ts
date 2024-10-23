@@ -8,6 +8,10 @@ export function sleep(duration: number | string) {
   return new Promise<void>((resolve) => setTimeout(resolve, durationMs));
 }
 
+export function iife<T>(fn: () => T): T {
+  return fn();
+}
+
 export function arrayPadEnd<T>(
   array: T[],
   targetLength: number,

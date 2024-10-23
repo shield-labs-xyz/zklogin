@@ -1,7 +1,8 @@
 <script lang="ts">
   import { lib } from "$lib";
-  import { chain } from "$lib/chain.js";
+  import { chain, provider, publicKeyRegistry } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
+  import { route } from "$lib/ROUTES.js";
   import SendEthCard from "$lib/SendEthCard.svelte";
   import {
     authProviderId,
@@ -13,12 +14,11 @@
   } from "$lib/services/JwtAccountService.js";
   import { EXTEND_SESSION_SEARCH_PARAM } from "$lib/utils.js";
   import * as web2Auth from "@auth/sveltekit/client";
-  import deployments from "@repo/contracts/deployments.json";
-  import { PublicKeyRegistry__factory } from "@repo/contracts/typechain-types/index.js";
   import { Ui } from "@repo/ui";
   import { utils } from "@repo/utils";
   import { createQuery } from "@tanstack/svelte-query";
   import { ethers } from "ethers";
+  import ky from "ky";
   import { isEqual } from "lodash-es";
   import ms from "ms";
   import { onMount } from "svelte";
@@ -27,11 +27,6 @@
   let { data } = $props();
 
   let jwt = $derived(data.session?.id_token);
-
-  const provider = {
-    chainId: chain.id,
-    provider: new ethers.JsonRpcProvider(chain.rpcUrls.default.http[0]),
-  };
 
   const signerPrivateKey = new LocalStore<string | undefined>(
     "signer-private-key",
@@ -115,32 +110,27 @@
     }
 
     {
-      const chainId = chain.id as unknown as keyof typeof deployments;
-      const publicKeyRegistry = PublicKeyRegistry__factory.connect(
-        deployments[chainId].contracts.PublicKeyRegistry,
-        signer,
-      );
-      const publicKeyHash = await getPublicKeyHash(
-        input.public_key_limbs,
-        input.public_key_redc_limbs,
-      );
+      const publicKeyHash = await getPublicKeyHash(input);
       const valid = await publicKeyRegistry.isPublicKeyHashValid(
         authProviderId,
         publicKeyHash,
       );
       if (!valid) {
-        assert(
-          utils.isAddressEqual(await publicKeyRegistry.owner(), signer.address),
-          "Public key hash is not registered",
-        );
-        const result: boolean = await Ui.toast.confirm({
-          confirmText: "Public key is not registered. Register it?",
-        });
-        assert(result, "rejected to register public key");
-        await publicKeyRegistry.setPublicKeyValid(
-          authProviderId,
-          publicKeyHash,
-          true,
+        await Ui.toast.promise(
+          utils.iife(async () => {
+            const { hash } = await ky
+              .post(route("POST /api/register-public-keys"))
+              .json<{ hash: string | null }>();
+            if (hash) {
+              await provider.provider.waitForTransaction(hash);
+            }
+          }),
+          {
+            loading: "Updating google public keys...",
+            success: "Google public keys updated",
+            error: (e) =>
+              `Error updating google public keys: ${utils.errorToString(e)}`,
+          },
         );
       }
     }

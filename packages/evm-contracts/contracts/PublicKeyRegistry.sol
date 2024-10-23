@@ -15,6 +15,21 @@ contract PublicKeyRegistry is Ownable(msg.sender) {
         isPublicKeyHashValid[providerId][publicKeyHash] = valid;
     }
 
+    struct PublicKeyValidity {
+        bytes32 providerId;
+        bytes32 publicKeyHash;
+        bool valid;
+    }
+
+    function setPublicKeysValid(
+        PublicKeyValidity[] calldata validity
+    ) external onlyOwner {
+        for (uint256 i = 0; i < validity.length; i++) {
+            PublicKeyValidity calldata v = validity[i];
+            isPublicKeyHashValid[v.providerId][v.publicKeyHash] = v.valid;
+        }
+    }
+
     function checkPublicKey(
         bytes32 providerId,
         bytes32 publicKeyHash

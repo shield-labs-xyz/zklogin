@@ -295,10 +295,7 @@ export async function prepareJwt(jwt: string) {
   console.log("jwt_aud", jwtDecoded.payload.aud);
   console.log("jwt_nonce", jwtDecoded.payload.nonce);
   const jwt_nonce = encodedAddressAsJwtNonce(jwtDecoded.payload.nonce);
-  const public_key_hash: string = await getPublicKeyHash(
-    publicKey.limbs.public_key_limbs,
-    publicKey.limbs.public_key_redc_limbs,
-  );
+  const public_key_hash: string = await getPublicKeyHash(publicKey.limbs);
   const input = {
     header_and_payload,
     payload_json,
@@ -339,13 +336,15 @@ export async function proveJwt(input: Awaited<ReturnType<typeof prepareJwt>>) {
   return ethers.hexlify(proof);
 }
 
-export async function getPublicKeyHash(
-  publicKeyLimbs: string[],
-  publicKeyRedcLimbs: string[],
-) {
+export async function getPublicKeyHash(publicKey: {
+  public_key_limbs: string[];
+  public_key_redc_limbs: string[];
+}) {
   const { pedersenHash } = await import("@aztec/foundation/crypto");
   return pedersenHash(
-    [...publicKeyLimbs, ...publicKeyRedcLimbs].map((x) => BigInt(x)),
+    [...publicKey.public_key_limbs, ...publicKey.public_key_redc_limbs].map(
+      (x) => BigInt(x),
+    ),
   ).toString();
 }
 
@@ -366,7 +365,7 @@ function toBoundedVec(arr: number[], maxLen: number) {
   return { storage, len: arr.length };
 }
 
-async function getGooglePublicKeys() {
+export async function getGooglePublicKeys() {
   const res = await ky
     .get("https://www.googleapis.com/oauth2/v3/certs")
     .json<{ keys: { n: string; kid: string }[] }>();

@@ -1,0 +1,49 @@
+import { provider, publicKeyRegistry } from "$lib/chain";
+import {
+  authProviderId,
+  getGooglePublicKeys,
+  getPublicKeyHash,
+} from "$lib/services/JwtAccountService";
+import { utils } from "@repo/utils";
+import { error } from "@sveltejs/kit";
+import { ethers } from "ethers";
+import { compact } from "lodash-es";
+
+export async function POST() {
+  const privateKey = process.env.REGISTRY_OWNER_PRIVATE_KEY;
+  if (!privateKey) {
+    error(500, "misconfigured: signer");
+  }
+  const owner = new ethers.Wallet(privateKey, provider.provider);
+  if (!utils.isAddressEqual(await publicKeyRegistry.owner(), owner.address)) {
+    error(500, "misconfigured: owner");
+  }
+
+  const publicKeys = await getGooglePublicKeys();
+  const pendingPublicKeyHashes = compact(
+    await Promise.all(
+      publicKeys.map(async (publicKey) => {
+        const publicKeyHash = await getPublicKeyHash(publicKey.limbs);
+        const isValid = await publicKeyRegistry.isPublicKeyHashValid(
+          authProviderId,
+          publicKeyHash,
+        );
+        if (!isValid) {
+          return undefined;
+        }
+        return publicKeyHash;
+      }),
+    ),
+  );
+  if (pendingPublicKeyHashes.length === 0) {
+    return Response.json({ hash: null });
+  }
+  const tx = await publicKeyRegistry.setPublicKeysValid(
+    pendingPublicKeyHashes.map((publicKeyHash) => ({
+      providerId: authProviderId,
+      publicKeyHash,
+      valid: true,
+    })),
+  );
+  return Response.json({ hash: tx.hash });
+}

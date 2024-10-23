@@ -2,8 +2,8 @@
   "84532": {
     "chainId": "84532",
     "contracts": {
-      "PublicKeyRegistry": "0x213ED7DA81D41EcB27859287ACe360c419E920fA",
-      "SimpleAccountFactory": "0x9Cc5440dfe93A87ABB6F38151710E48BA0DBD4d2",
+      "PublicKeyRegistry": "0xd279B6E1a3322Bc43Ca23C464b2450E5672882d4",
+      "SimpleAccountFactory": "0x14a2e78045Cd2D8F59e9217e4562DD9836939F5d",
       "UltraVerifier": "0x99d3945D1c34761173cd202DA247547c900159AF"
     },
     "name": "baseSepolia"
