@@ -6,6 +6,7 @@
   import {
     authProviderId,
     encodedAddressAsJwtNonce,
+    getPublicKeyHash,
     JWT_EXPIRATION_TIME,
     prepareJwt,
     proveJwt,
@@ -22,8 +23,6 @@
   import ms from "ms";
   import { onMount } from "svelte";
   import { assert } from "ts-essentials";
-  import { type Hex } from "viem";
-  import type { Address } from "viem/accounts";
 
   let { data } = $props();
 
@@ -121,7 +120,7 @@
         deployments[chainId].contracts.PublicKeyRegistry,
         signer,
       );
-      const publicKeyHash = await publicKeyRegistry.getPublicKeyHash(
+      const publicKeyHash = await getPublicKeyHash(
         input.public_key_limbs,
         input.public_key_redc_limbs,
       );
@@ -150,11 +149,10 @@
     console.log("proof", proof);
 
     const tx = await lib.jwtAccount.setOwner(jwt, signer, {
-      proof: ethers.hexlify(proof) as Hex,
+      proof: ethers.hexlify(proof),
       jwtIat: input.jwt_iat,
-      jwtNonce: (await signer.getAddress()) as Address,
-      publicKeyLimbs: input.public_key_limbs,
-      publicKeyRedcLimbs: input.public_key_redc_limbs,
+      jwtNonce: await signer.getAddress(),
+      publicKeyHash: input.public_key_hash,
     });
     console.log("recovery tx", tx);
     Ui.toast.success("Session extended successfully");

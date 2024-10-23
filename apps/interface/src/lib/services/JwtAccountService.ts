@@ -17,6 +17,7 @@ import {
   SimpleAccountFactory__factory,
   type SimpleAccount,
 } from "@repo/contracts/typechain-types";
+import type { JwtVerifier } from "@repo/contracts/typechain-types/contracts/SimpleAccount.js";
 import { utils } from "@repo/utils";
 import { ethers } from "ethers";
 import ky from "ky";
@@ -62,10 +63,13 @@ export class JwtAccountService {
   async setOwner(
     jwt: string,
     owner: ethers.Signer,
-    verificationData: VerificationData,
+    verificationData: JwtVerifier.VerificationDataStruct,
   ) {
     assert(
-      utils.isAddressEqual(await owner.getAddress(), verificationData.jwtNonce),
+      utils.isAddressEqual(
+        await owner.getAddress(),
+        await ethers.resolveAddress(verificationData.jwtNonce),
+      ),
       "jwt.nonce mismatch",
     );
     const account = await this.getAccount(jwt, owner);
@@ -101,14 +105,6 @@ export class JwtAccountService {
       expirationTimestamp: ethers.toNumber(ownerInfo.expirationTimestamp),
     };
   }
-}
-
-export interface VerificationData {
-  proof: Hex;
-  jwtIat: number;
-  jwtNonce: Address;
-  publicKeyLimbs: string[];
-  publicKeyRedcLimbs: string[];
 }
 
 export async function toJwtSmartAccount(
@@ -293,7 +289,13 @@ export async function prepareJwt(jwt: string) {
     JWT_AUD_MAX_LEN,
     0,
   );
+  console.log("jwt_aud", jwtDecoded.payload.aud);
+  console.log("jwt_nonce", jwtDecoded.payload.nonce);
   const jwt_nonce = encodedAddressAsJwtNonce(jwtDecoded.payload.nonce);
+  const public_key_hash: string = await getPublicKeyHash(
+    publicKey.limbs.public_key_limbs,
+    publicKey.limbs.public_key_redc_limbs,
+  );
   const input = {
     header_and_payload,
     payload_json,
@@ -305,6 +307,7 @@ export async function prepareJwt(jwt: string) {
     jwt_nonce,
     public_key_limbs: publicKey.limbs.public_key_limbs,
     public_key_redc_limbs: publicKey.limbs.public_key_redc_limbs,
+    public_key_hash,
   };
   if (showDebug) {
     console.log(input);
@@ -332,6 +335,16 @@ export async function proveJwt(input: Awaited<ReturnType<typeof prepareJwt>>) {
   console.timeEnd("generate proof");
 
   return ethers.hexlify(proof);
+}
+
+export async function getPublicKeyHash(
+  publicKeyLimbs: string[],
+  publicKeyRedcLimbs: string[],
+) {
+  const { pedersenHash } = await import("@aztec/foundation/crypto");
+  return pedersenHash(
+    [...publicKeyLimbs, ...publicKeyRedcLimbs].map((x) => BigInt(x)),
+  ).toString();
 }
 
 export function encodedAddressAsJwtNonce(address: string) {

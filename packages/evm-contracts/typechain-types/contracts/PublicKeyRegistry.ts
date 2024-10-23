@@ -3,7 +3,6 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumberish,
   BytesLike,
   FunctionFragment,
   Result,
@@ -27,7 +26,6 @@ export interface PublicKeyRegistryInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "checkPublicKey"
-      | "getPublicKeyHash"
       | "isPublicKeyHashValid"
       | "owner"
       | "renounceOwnership"
@@ -40,10 +38,6 @@ export interface PublicKeyRegistryInterface extends Interface {
   encodeFunctionData(
     functionFragment: "checkPublicKey",
     values: [BytesLike, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getPublicKeyHash",
-    values: [BigNumberish[], BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "isPublicKeyHashValid",
@@ -65,10 +59,6 @@ export interface PublicKeyRegistryInterface extends Interface {
 
   decodeFunctionResult(
     functionFragment: "checkPublicKey",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getPublicKeyHash",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -152,12 +142,6 @@ export interface PublicKeyRegistry extends BaseContract {
     "view"
   >;
 
-  getPublicKeyHash: TypedContractMethod<
-    [publicKeyLimbs: BigNumberish[], publicKeyRedcLimbs: BigNumberish[]],
-    [string],
-    "view"
-  >;
-
   isPublicKeyHashValid: TypedContractMethod<
     [arg0: BytesLike, arg1: BytesLike],
     [boolean],
@@ -189,13 +173,6 @@ export interface PublicKeyRegistry extends BaseContract {
   ): TypedContractMethod<
     [providerId: BytesLike, publicKeyHash: BytesLike],
     [boolean],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "getPublicKeyHash"
-  ): TypedContractMethod<
-    [publicKeyLimbs: BigNumberish[], publicKeyRedcLimbs: BigNumberish[]],
-    [string],
     "view"
   >;
   getFunction(

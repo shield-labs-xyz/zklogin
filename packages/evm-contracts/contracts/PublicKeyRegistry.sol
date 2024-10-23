@@ -21,18 +21,4 @@ contract PublicKeyRegistry is Ownable(msg.sender) {
     ) external view returns (bool) {
         return isPublicKeyHashValid[providerId][publicKeyHash];
     }
-
-    function getPublicKeyHash(
-        uint256[18] memory publicKeyLimbs,
-        uint256[18] memory publicKeyRedcLimbs
-    ) external pure returns (bytes32) {
-        return calcPublicKeyHash(publicKeyLimbs, publicKeyRedcLimbs);
-    }
-}
-
-function calcPublicKeyHash(
-    uint256[18] memory publicKeyLimbs,
-    uint256[18] memory publicKeyRedcLimbs
-) pure returns (bytes32) {
-    return keccak256(abi.encodePacked(publicKeyLimbs, publicKeyRedcLimbs));
 }

@@ -26,22 +26,19 @@ export declare namespace JwtVerifier {
     proof: BytesLike;
     jwtIat: BigNumberish;
     jwtNonce: AddressLike;
-    publicKeyLimbs: BigNumberish[];
-    publicKeyRedcLimbs: BigNumberish[];
+    publicKeyHash: BytesLike;
   };
 
   export type VerificationDataStructOutput = [
     proof: string,
     jwtIat: bigint,
     jwtNonce: string,
-    publicKeyLimbs: bigint[],
-    publicKeyRedcLimbs: bigint[]
+    publicKeyHash: string
   ] & {
     proof: string;
     jwtIat: bigint;
     jwtNonce: string;
-    publicKeyLimbs: bigint[];
-    publicKeyRedcLimbs: bigint[];
+    publicKeyHash: string;
   };
 }
 

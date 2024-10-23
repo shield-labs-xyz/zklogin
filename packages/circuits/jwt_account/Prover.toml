@@ -1131,6 +1131,7 @@ public_key_redc_limbs = [
   "0x8841a409e43e3d4f209acd805f8778",
   "0x016a",
 ]
+public_key_hash = "0x1b00b0954712c1b650fa67c0380793509b9bbfe854392f1a0c19da69a7a3da50"
 
 [header_and_payload]
 storage = [

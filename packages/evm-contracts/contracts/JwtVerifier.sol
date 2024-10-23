@@ -3,7 +3,7 @@ pragma solidity ^0.8.27;
 
 import {UltraVerifier} from "@repo/circuits/target/jwt_account.sol";
 import {Strings} from "./Strings.sol";
-import {PublicKeyRegistry, calcPublicKeyHash} from "./PublicKeyRegistry.sol";
+import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 
 // Note: keep in sync with Noir
 uint256 constant JWT_AUD_MAX_LEN = 256;
@@ -36,8 +36,7 @@ contract JwtVerifier {
         bytes proof;
         uint256 jwtIat;
         address jwtNonce;
-        uint256[18] publicKeyLimbs;
-        uint256[18] publicKeyRedcLimbs;
+        bytes32 publicKeyHash;
     }
 
     function _verifyJwtProof(
@@ -46,10 +45,7 @@ contract JwtVerifier {
         require(
             publicKeyRegistry.checkPublicKey(
                 authProviderId,
-                calcPublicKeyHash(
-                    verificationData.publicKeyLimbs,
-                    verificationData.publicKeyRedcLimbs
-                )
+                verificationData.publicKeyHash
             ),
             "public key hash mismatch"
         );
@@ -58,17 +54,14 @@ contract JwtVerifier {
             Strings.toHexStringWithoutPrefix(verificationData.jwtNonce)
         );
 
-        uint256 staticInputLength = 2;
+        uint256 staticInputLength = 3;
         bytes32[] memory publicInputs = new bytes32[](
-            staticInputLength +
-                JWT_AUD_MAX_LEN +
-                jwtNonce.length +
-                verificationData.publicKeyLimbs.length +
-                verificationData.publicKeyRedcLimbs.length
+            staticInputLength + JWT_AUD_MAX_LEN + jwtNonce.length
         );
         uint256 j = 0;
         publicInputs[j++] = accountId;
         publicInputs[j++] = bytes32(verificationData.jwtIat);
+        publicInputs[j++] = verificationData.publicKeyHash;
 
         for (uint256 i = 0; i < JWT_AUD_MAX_LEN; i++) {
             publicInputs[j++] = bytes32(uint256(uint8(jwtAud[i])));
@@ -76,18 +69,6 @@ contract JwtVerifier {
 
         for (uint256 i = 0; i < jwtNonce.length; i++) {
             publicInputs[j++] = bytes32(uint256(uint8(jwtNonce[i])));
-        }
-
-        for (uint256 i = 0; i < verificationData.publicKeyLimbs.length; i++) {
-            publicInputs[j++] = bytes32(verificationData.publicKeyLimbs[i]);
-        }
-
-        for (
-            uint256 i = 0;
-            i < verificationData.publicKeyRedcLimbs.length;
-            i++
-        ) {
-            publicInputs[j++] = bytes32(verificationData.publicKeyRedcLimbs[i]);
         }
 
         return proofVerifier.verify(verificationData.proof, publicInputs);
