@@ -10,8 +10,8 @@ import {
 } from "@mach-34/noir-bignum-paramgen";
 import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
 import { Noir } from "@noir-lang/noir_js";
-import circuit from "@repo/circuits/target/jwt_account.json";
 import deployments from "@repo/contracts/deployments.json";
+import circuit from "@repo/contracts/noir/target/jwt_account.json";
 import {
   SimpleAccount__factory,
   SimpleAccountFactory__factory,

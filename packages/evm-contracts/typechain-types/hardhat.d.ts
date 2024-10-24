@@ -118,14 +118,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Strings__factory>;
     getContractFactory(
-      name: "BaseUltraVerifier",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.BaseUltraVerifier__factory>;
-    getContractFactory(
-      name: "UltraVerifier",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.UltraVerifier__factory>;
-    getContractFactory(
       name: "JwtVerifier",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.JwtVerifier__factory>;
@@ -149,6 +141,14 @@ declare module "hardhat/types/runtime" {
       name: "TestJwtAccount",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestJwtAccount__factory>;
+    getContractFactory(
+      name: "BaseUltraVerifier",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BaseUltraVerifier__factory>;
+    getContractFactory(
+      name: "UltraVerifier",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UltraVerifier__factory>;
 
     getContractAt(
       name: "BaseAccount",
@@ -281,16 +281,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Strings>;
     getContractAt(
-      name: "BaseUltraVerifier",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.BaseUltraVerifier>;
-    getContractAt(
-      name: "UltraVerifier",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.UltraVerifier>;
-    getContractAt(
       name: "JwtVerifier",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -320,6 +310,16 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.TestJwtAccount>;
+    getContractAt(
+      name: "BaseUltraVerifier",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BaseUltraVerifier>;
+    getContractAt(
+      name: "UltraVerifier",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UltraVerifier>;
 
     deployContract(
       name: "BaseAccount",
@@ -426,14 +426,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
     deployContract(
-      name: "BaseUltraVerifier",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.BaseUltraVerifier>;
-    deployContract(
-      name: "UltraVerifier",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UltraVerifier>;
-    deployContract(
       name: "JwtVerifier",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.JwtVerifier>;
@@ -457,6 +449,14 @@ declare module "hardhat/types/runtime" {
       name: "TestJwtAccount",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TestJwtAccount>;
+    deployContract(
+      name: "BaseUltraVerifier",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BaseUltraVerifier>;
+    deployContract(
+      name: "UltraVerifier",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.UltraVerifier>;
 
     deployContract(
       name: "BaseAccount",
@@ -589,16 +589,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
     deployContract(
-      name: "BaseUltraVerifier",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.BaseUltraVerifier>;
-    deployContract(
-      name: "UltraVerifier",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UltraVerifier>;
-    deployContract(
       name: "JwtVerifier",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -628,6 +618,16 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TestJwtAccount>;
+    deployContract(
+      name: "BaseUltraVerifier",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BaseUltraVerifier>;
+    deployContract(
+      name: "UltraVerifier",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.UltraVerifier>;
 
     // default types
     getContractFactory(

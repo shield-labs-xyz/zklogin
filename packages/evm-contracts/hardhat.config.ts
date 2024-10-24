@@ -1,5 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-deploy";
+import "hardhat-plugin-noir";
 import { HardhatUserConfig } from "hardhat/config";
 import envConfig from "./envConfig";
 import "./shared/typed-hardhat-deploy";
@@ -13,6 +14,9 @@ const config: HardhatUserConfig = {
         runs: 100000000,
       },
     },
+  },
+  noir: {
+    version: "0.34.0",
   },
   networks: {
     baseSepolia: {

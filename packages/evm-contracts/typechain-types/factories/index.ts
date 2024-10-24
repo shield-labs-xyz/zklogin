@@ -3,5 +3,5 @@
 /* eslint-disable */
 export * as accountAbstraction from "./@account-abstraction";
 export * as openzeppelin from "./@openzeppelin";
-export * as repo from "./@repo";
 export * as contracts from "./contracts";
+export * as noir from "./noir";

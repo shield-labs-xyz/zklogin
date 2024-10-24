@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.27;
 
-import {UltraVerifier} from "@repo/circuits/target/jwt_account.sol";
+import {UltraVerifier} from "../noir/target/jwt_account.sol";
 import {Strings} from "./Strings.sol";
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 
