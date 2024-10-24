@@ -314,16 +314,27 @@ export async function prepareJwt(jwt: string) {
   return input;
 }
 
-const getNoir = utils.lazyValue(() => {
+const getNoir = utils.lazyValue(async () => {
   const noir = new Noir(circuit as any);
   const threads =
     typeof navigator !== "undefined" ? navigator.hardwareConcurrency : 1;
   console.log(`Using ${threads} threads`);
   const backend = new BarretenbergBackend(circuit as any, { threads });
+  console.time("instantiate backend");
+  await backend.instantiate();
+  console.timeEnd("instantiate backend");
   return { noir, backend };
 });
+setTimeout(async () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  // eagerly load because instantiation takes ~1 minute
+  // TODO: this does not speedup `.generateProof` at all (but it should!)
+  await getNoir();
+});
 export async function proveJwt(input: Awaited<ReturnType<typeof prepareJwt>>) {
-  const { noir, backend } = getNoir();
+  const { noir, backend } = await getNoir();
   console.time("generate witness");
   const { witness } = await noir.execute(input);
   console.timeEnd("generate witness");
