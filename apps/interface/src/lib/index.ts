@@ -19,7 +19,9 @@ const queries = new QueriesService(queryClient);
 const coinbase = new CoinbaseWalletService(publicClient, bundlerClient);
 const jwtAccount = new JwtAccountService(publicClient);
 
+const APP_NAME = "zkLogin";
 export const lib = {
+  APP_NAME,
   queries,
   coinbase,
   jwtAccount,

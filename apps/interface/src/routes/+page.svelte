@@ -204,7 +204,7 @@
 <Ui.GapContainer class="container">
   <section>
     <div class="prose mb-2">
-      <h2>Wallet</h2>
+      <h2>{lib.APP_NAME}</h2>
     </div>
   </section>
 
@@ -246,13 +246,16 @@
     </Ui.Card.Header>
     <Ui.Card.Content>
       {#if !jwt}
-        <Ui.LoadingButton
-          variant="default"
-          style="width: 100%;"
-          onclick={() => signIn(signer)}
-        >
-          Sign in with Google
-        </Ui.LoadingButton>
+        <Ui.GapContainer class="gap-2">
+          <Ui.LoadingButton
+            variant="default"
+            style="width: 100%;"
+            onclick={() => signIn(signer)}
+          >
+            Sign in with Google
+          </Ui.LoadingButton>
+          <Ui.Button href="/how" variant="secondary">How it works</Ui.Button>
+        </Ui.GapContainer>
       {:else}
         <Ui.Query query={$jwtAccountInfo}>
           {#snippet pending()}

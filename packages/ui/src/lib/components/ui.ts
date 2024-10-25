@@ -5,6 +5,7 @@ export { default as GapContainer } from "./GapContainer.svelte";
 export { default as LoadingButton } from "./LoadingButton.svelte";
 export { default as Query } from "./Query.svelte";
 export * from "./toast";
+export * as Accordion from "./ui/accordion";
 export { Badge } from "./ui/badge";
 export { Button } from "./ui/button";
 export * as Card from "./ui/card";

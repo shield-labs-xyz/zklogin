@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from "$app/stores";
+  import { lib } from "$lib";
   import { signOut } from "@auth/sveltekit/client";
   import { Ui } from "@repo/ui";
   import Menu from "lucide-svelte/icons/menu";
@@ -53,9 +54,9 @@
     href={"/"}
     class="flex items-center gap-2 text-lg font-semibold md:text-base"
   >
-    Wallet
+    {lib.APP_NAME}
   </a>
-  {@render link({ text: "Home", href: "/" })}
+  {@render link({ text: "How it works", href: "/how" })}
 {/snippet}
 
 {#snippet link({ text, href }: { text: string; href: string })}

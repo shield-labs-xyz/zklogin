@@ -8,6 +8,7 @@
   import { Ui } from "@repo/ui";
   import { QueryClientProvider } from "@tanstack/svelte-query";
   import { inject } from "@vercel/analytics";
+  import Footer from "./Footer.svelte";
   import Header from "./Header.svelte";
 
   let { children } = $props();
@@ -19,6 +20,8 @@
   <Header />
 
   {@render children()}
+
+  <Footer />
 
   <Ui.Toaster position="bottom-right" />
 </QueryClientProvider>

@@ -257,18 +257,12 @@ importers:
       '@metamask/jazzicon':
         specifier: ^2.0.0
         version: 2.0.0
-      bits-ui:
-        specifier: ^0.21.15
-        version: 0.21.16(svelte@5.0.5)
       formsnap:
         specifier: ^1.0.1
         version: 1.0.1(svelte@5.0.5)(sveltekit-superforms@2.19.1(@sveltejs/kit@2.7.2(@sveltejs/vite-plugin-svelte@3.1.2(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(@types/json-schema@7.0.15)(svelte@5.0.5))
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
-      lucide-svelte:
-        specifier: ^0.441.0
-        version: 0.441.0(svelte@5.0.5)
       svelte:
         specifier: ^5.0.0
         version: 5.0.5
@@ -306,9 +300,15 @@ importers:
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.4.47)
+      bits-ui:
+        specifier: ^0.21.16
+        version: 0.21.16(svelte@5.0.5)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      lucide-svelte:
+        specifier: ^0.441.0
+        version: 0.441.0(svelte@5.0.5)
       prettier:
         specifier: ^3.1.1
         version: 3.3.3
