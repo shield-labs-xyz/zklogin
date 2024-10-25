@@ -267,7 +267,15 @@
             {#if data}
               <Ui.GapContainer class="gap-2">
                 <section>
-                  <div>Address: {data.address}</div>
+                  <div>
+                    Address: {utils.shortAddress(data.address)}
+                    <Ui.CopyButton
+                      text={data.address}
+                      class="size-[1em]"
+                      iconClass="size-[1em]"
+                      variant="ghost"
+                    />
+                  </div>
                   <div>Network: {chain.name}</div>
                   <div>
                     {#if data.ownerInfo == null}

@@ -6,9 +6,12 @@
 
   let {
     children,
+    text,
+    iconClass,
     ...props
   }: ComponentProps<Button> & {
     text: string;
+    iconClass?: string;
   } = $props();
 
   let statusCounter = $state(0);
@@ -18,7 +21,7 @@
   {...props}
   size={props.size ?? (children ? "default" : "icon")}
   on:click={async () => {
-    await navigator.clipboard.writeText(props.text);
+    await navigator.clipboard.writeText(text);
     statusCounter++;
     setTimeout(() => {
       statusCounter--;
@@ -26,9 +29,9 @@
   }}
 >
   {#if statusCounter > 0}
-    <CopyCheck />
+    <CopyCheck class={iconClass} />
   {:else}
-    <Copy />
+    <Copy class={iconClass} />
   {/if}
   {@render children?.()}
 </Button>
