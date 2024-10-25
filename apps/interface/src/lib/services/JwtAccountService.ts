@@ -8,8 +8,6 @@ import {
   bnToLimbStrArray,
   bnToRedcLimbStrArray,
 } from "@mach-34/noir-bignum-paramgen";
-import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
-import { Noir } from "@noir-lang/noir_js";
 import deployments from "@repo/contracts/deployments.json";
 import circuit from "@repo/contracts/noir/target/jwt_account.json";
 import {
@@ -314,7 +312,11 @@ export async function prepareJwt(jwt: string) {
   return input;
 }
 
-const getNoir = utils.lazyValue(() => {
+const getNoir = utils.lazyValue(async () => {
+  const { Noir } = await import("@noir-lang/noir_js");
+  const { BarretenbergBackend } = await import(
+    "@noir-lang/backend_barretenberg"
+  );
   const noir = new Noir(circuit as any);
   const threads =
     typeof navigator !== "undefined" ? navigator.hardwareConcurrency : 1;
@@ -323,7 +325,7 @@ const getNoir = utils.lazyValue(() => {
   return { noir, backend };
 });
 export async function proveJwt(input: Awaited<ReturnType<typeof prepareJwt>>) {
-  const { noir, backend } = getNoir();
+  const { noir, backend } = await getNoir();
   console.time("generate witness");
   const { witness } = await noir.execute(input);
   console.timeEnd("generate witness");
