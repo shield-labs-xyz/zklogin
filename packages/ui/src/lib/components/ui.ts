@@ -10,6 +10,7 @@ export { Badge } from "./ui/badge";
 export { Button } from "./ui/button";
 export * as Card from "./ui/card";
 export { Input } from "./ui/input";
+export { Progress } from "./ui/progress";
 export * as Sheet from "./ui/sheet";
 export { Textarea } from "./ui/textarea";
 export { default as UserAvatar } from "./UserAvatar.svelte";

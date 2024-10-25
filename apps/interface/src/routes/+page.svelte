@@ -2,6 +2,7 @@
   import { getBundlerClient, lib, publicClient } from "$lib";
   import { chain, provider, publicKeyRegistry } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
+  import { now } from "$lib/now.svelte.js";
   import SendEthCard from "$lib/SendEthCard.svelte";
   import {
     authProviderId,
@@ -16,6 +17,7 @@
   import { Ui } from "@repo/ui";
   import { utils } from "@repo/utils";
   import { createQuery } from "@tanstack/svelte-query";
+  import { formatDistance, formatDuration, intervalToDuration } from "date-fns";
   import { ethers } from "ethers";
   import ky from "ky";
   import { isEqual } from "lodash-es";
@@ -79,13 +81,13 @@
     ),
   );
 
-  let isExtendingSession = $state(false);
+  let extendSessionStart = $state<number | undefined>();
   async function extendSession() {
     try {
-      isExtendingSession = true;
+      extendSessionStart = Date.now();
       await extendSessionInner();
     } finally {
-      isExtendingSession = false;
+      extendSessionStart = undefined;
     }
   }
   async function extendSessionInner() {
@@ -263,28 +265,44 @@
           {/snippet}
           {#snippet success(data)}
             {#if data}
-              <div>Address: {data.address}</div>
-              <div>Network: {chain.name}</div>
-              <div>
-                {#if data.ownerInfo == null}
-                  No session
-                {:else if data.ownerInfo === "expired"}
-                  Session expired
-                {:else}
-                  Session expiration: in {Math.floor(
-                    (data.ownerInfo.expirationTimestamp -
-                      Math.floor(Date.now() / 1000)) /
-                      60,
-                  )} minutes
+              <Ui.GapContainer class="gap-2">
+                <section>
+                  <div>Address: {data.address}</div>
+                  <div>Network: {chain.name}</div>
+                  <div>
+                    {#if data.ownerInfo == null}
+                      No session
+                    {:else if data.ownerInfo === "expired"}
+                      Session expired
+                    {:else}
+                      Session expiration: in {formatDistance(
+                        data.ownerInfo.expirationTimestamp * 1000,
+                        now.value,
+                      )}
+                    {/if}
+                  </div>
+                </section>
+                <Ui.LoadingButton
+                  variant="default"
+                  onclick={extendSession}
+                  loading={extendSessionStart != null}
+                >
+                  {data.ownerInfo == null ? "Create" : "Extend"} session
+                </Ui.LoadingButton>
+                {#if extendSessionStart}
+                  {@const estimatedDuration = ms("2 min")}
+                  Remaining time: {formatDuration(
+                    intervalToDuration({
+                      start: now.value,
+                      end: extendSessionStart + estimatedDuration,
+                    }),
+                  )}:
+                  <Ui.Progress
+                    value={now.value - extendSessionStart}
+                    max={estimatedDuration}
+                  />
                 {/if}
-              </div>
-              <Ui.LoadingButton
-                variant="default"
-                onclick={extendSession}
-                loading={isExtendingSession}
-              >
-                {data.ownerInfo == null ? "Create" : "Extend"} session
-              </Ui.LoadingButton>
+              </Ui.GapContainer>
             {/if}
           {/snippet}
         </Ui.Query>
