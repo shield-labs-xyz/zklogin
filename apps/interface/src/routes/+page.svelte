@@ -290,7 +290,7 @@
                   {data.ownerInfo == null ? "Create" : "Extend"} session
                 </Ui.LoadingButton>
                 {#if extendSessionStart}
-                  {@const estimatedDuration = ms("2 min")}
+                  {@const estimatedDuration = ms("1.5 min")}
                   Remaining time: {formatDuration(
                     intervalToDuration({
                       start: now.value,
