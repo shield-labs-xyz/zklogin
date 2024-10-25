@@ -296,7 +296,7 @@
                       start: now.value,
                       end: extendSessionStart + estimatedDuration,
                     }),
-                  )}:
+                  )}
                   <Ui.Progress
                     value={now.value - extendSessionStart}
                     max={estimatedDuration}
