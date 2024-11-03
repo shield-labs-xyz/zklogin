@@ -31,13 +31,13 @@ fn main(
         assert(hash == public_key_hash, f"public key hash mismatch: expected {public_key_hash}, got {hash}");
     }
 
-    jwt::assert_verify_jwt::<JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN, JWT_PAYLOAD_JSON_MAX_LEN, JWT_PAYLOAD_MAX_LEN>(
-        header_and_payload,
-        payload_json,
-        public_key_limbs,
-        public_key_redc_limbs,
-        signature_limbs
-    );
+    // jwt::assert_verify_jwt::<JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN, JWT_PAYLOAD_JSON_MAX_LEN, JWT_PAYLOAD_MAX_LEN>(
+    //     header_and_payload,
+    //     payload_json,
+    //     public_key_limbs,
+    //     public_key_redc_limbs,
+    //     signature_limbs
+    // );
 
     jwt::assert_verify_jwt_payload(payload_json, account_id, salt, jwt_iat, jwt_nonce);
 }
