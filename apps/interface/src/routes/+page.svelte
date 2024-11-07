@@ -61,10 +61,8 @@
           if (!jwt) {
             return null;
           }
-          const { account, ownerInfo } = await ethers.resolveProperties({
-            account: lib.jwtAccount.getAccount(jwt, signer),
-            ownerInfo: lib.jwtAccount.currentOwner(jwt, signer),
-          });
+          const account = await lib.jwtAccount.getAccount(jwt, signer);
+          const ownerInfo = await lib.jwtAccount.currentOwner(account);
           return {
             address: account.address,
             ownerInfo:

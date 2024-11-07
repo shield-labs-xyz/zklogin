@@ -51,9 +51,15 @@ const JWT_NONCE_LEN = 40;
 export const JWT_EXPIRATION_TIME = Math.floor(ms("1 hour") / 1000);
 
 export class JwtAccountService {
-  constructor(private publicClient: PublicClient) {}
+  constructor(
+    private publicClient: PublicClient,
+    private provider: ethers.Provider,
+  ) {}
 
-  async getAccount(jwt: string, owner: ethers.Signer) {
+  async getAccount(
+    jwt: string,
+    owner: ethers.Signer,
+  ): Promise<JwtSmartAccount> {
     const account = await toJwtSmartAccount(owner, jwt, this.publicClient);
     return account;
   }
@@ -89,13 +95,15 @@ export class JwtAccountService {
     });
   }
 
-  async currentOwner(jwt: string, owner: ethers.Signer) {
-    const account = await this.getAccount(jwt, owner);
+  async currentOwner(account: JwtSmartAccount) {
     const deployed: boolean = await isDeployed(account, this.publicClient);
     if (!deployed) {
       return null;
     }
-    const contract = SimpleAccount__factory.connect(account.address, owner);
+    const contract = SimpleAccount__factory.connect(
+      account.address,
+      this.provider,
+    );
     const ownerInfo = await contract.ownerInfo();
     const ownerAddress = await contract.currentOwner();
     return {
@@ -104,6 +112,9 @@ export class JwtAccountService {
     };
   }
 }
+
+export interface JwtSmartAccount
+  extends Awaited<ReturnType<typeof toJwtSmartAccount>> {}
 
 export async function toJwtSmartAccount(
   owner: ethers.Signer,
@@ -235,11 +246,34 @@ export const authProviderId = ethers.id("accounts.google.com");
 async function getJwtAccountInitParams(
   jwt: string,
 ): Promise<SimpleAccount.InitializeParamsStruct> {
-  const input = await prepareJwt(jwt);
+  const input = await getAccountIdFromJwt(decodeJwt(jwt));
   return {
-    accountId: input.account_id,
+    accountId: input.accountId,
     authProviderId,
   };
+}
+
+async function getAccountIdFromJwt(jwtDecoded: ReturnType<typeof decodeJwt>) {
+  const { pedersenHash } = await import("@aztec/foundation/crypto");
+  const salt = 0;
+  const accountId = pedersenHash([
+    ...noirPackBytes(
+      utils.arrayPadEnd(
+        Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.sub)),
+        JWT_SUB_MAX_LEN,
+        0,
+      ),
+    ),
+    ...noirPackBytes(
+      utils.arrayPadEnd(
+        Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.aud)),
+        JWT_AUD_MAX_LEN,
+        0,
+      ),
+    ),
+    salt,
+  ]).toString();
+  return { accountId, salt };
 }
 
 export async function prepareJwt(jwt: string) {
@@ -270,25 +304,7 @@ export async function prepareJwt(jwt: string) {
   const publicKeys = await getGooglePublicKeys();
   const publicKey = publicKeys.find((key) => key.kid === jwtDecoded.header.kid);
   assert(publicKey, "publicKey not found");
-  const salt = 0;
-  const { pedersenHash } = await import("@aztec/foundation/crypto");
-  const account_id = pedersenHash([
-    ...noirPackBytes(
-      utils.arrayPadEnd(
-        Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.sub)),
-        JWT_SUB_MAX_LEN,
-        0,
-      ),
-    ),
-    ...noirPackBytes(
-      utils.arrayPadEnd(
-        Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.aud)),
-        JWT_AUD_MAX_LEN,
-        0,
-      ),
-    ),
-    salt,
-  ]).toString();
+  const { accountId: account_id, salt } = await getAccountIdFromJwt(jwtDecoded);
   const jwt_iat = jwtDecoded.payload.iat;
   const jwt_nonce = encodedAddressAsJwtNonce(jwtDecoded.payload.nonce);
   const public_key_hash: string = await getPublicKeyHash(publicKey.limbs);
