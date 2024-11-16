@@ -29,6 +29,13 @@ const deploy: DeployFunction = async ({
     from: deployer,
     log: true,
   });
+
+  const entryPoint = "0x0000000071727De22E5E9d8BAf0edAc6f37da032"; // 0.7.0
+  await typedDeployments.deploy("SimpleAccountFactory", {
+    from: deployer,
+    log: true,
+    args: [entryPoint, proofVerifier.address, publicKeyRegistry.address],
+  });
 };
 
 deploy.tags = ["all"];

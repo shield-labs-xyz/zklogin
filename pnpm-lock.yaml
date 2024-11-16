@@ -98,8 +98,8 @@ importers:
         specifier: ^1.5.4
         version: 1.5.4
       viem:
-        specifier: ^2.21.22
-        version: 2.21.22(typescript@5.6.3)(zod@3.23.8)
+        specifier: ^2.21.45
+        version: 2.21.45(typescript@5.6.3)(zod@3.23.8)
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -4324,14 +4324,6 @@ packages:
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
-
-  viem@2.21.22:
-    resolution: {integrity: sha512-jU+WniqIhwDXfgWWkNX7YqlGqenzTa5roLDNs2cbcUGQXxG8aQt1vlTqeezM8W1kepkaU/jvR2QSq/lGirpzrQ==}
-    peerDependencies:
-      typescript: '>=5.0.4'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
 
   viem@2.21.45:
     resolution: {integrity: sha512-I+On/IiaObQdhDKWU5Rurh6nf3G7reVkAODG5ECIfjsrGQ3EPJnxirUPT4FNV6bWER5iphoG62/TidwuTSOA1A==}
@@ -8837,24 +8829,6 @@ snapshots:
     optional: true
 
   vary@1.1.2: {}
-
-  viem@2.21.22(typescript@5.6.3)(zod@3.23.8):
-    dependencies:
-      '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.6.0
-      '@noble/hashes': 1.5.0
-      '@scure/bip32': 1.5.0
-      '@scure/bip39': 1.4.0
-      abitype: 1.0.6(typescript@5.6.3)(zod@3.23.8)
-      isows: 1.0.6(ws@8.18.0)
-      webauthn-p256: 0.0.10
-      ws: 8.18.0
-    optionalDependencies:
-      typescript: 5.6.3
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-      - zod
 
   viem@2.21.45(typescript@5.6.3)(zod@3.23.8):
     dependencies:

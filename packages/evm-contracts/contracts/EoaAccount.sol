@@ -24,6 +24,7 @@ contract EoaAccount is JwtVerifierP256 {
         UltraVerifier proofVerifier_
     ) external {
         require(msg.sender == address(this), "not self");
+
         webauthnPublicKey = webauthnPublicKey_;
 
         accountId = accountId_;

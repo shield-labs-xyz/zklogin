@@ -253,7 +253,9 @@ async function getJwtAccountInitParams(
   };
 }
 
-async function getAccountIdFromJwt(jwtDecoded: ReturnType<typeof decodeJwt>) {
+export async function getAccountIdFromJwt(
+  jwtDecoded: ReturnType<typeof decodeJwt>,
+) {
   const { pedersenHash } = await import("@aztec/foundation/crypto");
   const salt = 0;
   const accountId = pedersenHash([

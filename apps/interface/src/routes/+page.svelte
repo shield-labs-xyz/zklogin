@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getBundlerClient, lib, publicClient } from "$lib";
+  import { lib } from "$lib";
   import { chain, provider, publicKeyRegistry } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
   import { now } from "$lib/now.svelte.js";
@@ -10,7 +10,6 @@
     getPublicKeyHash,
     JWT_EXPIRATION_TIME,
     prepareJwt,
-    proveJwt,
   } from "$lib/services/JwtAccountService.js";
   import { EXTEND_SESSION_SEARCH_PARAM } from "$lib/utils.js";
   import * as web2Auth from "@auth/sveltekit/client";
@@ -24,6 +23,7 @@
   import ms from "ms";
   import { onMount } from "svelte";
   import { assert } from "ts-essentials";
+  import { privateKeyToAccount } from "viem/accounts";
 
   let { data } = $props();
 
@@ -134,19 +134,37 @@
       }
     }
 
-    const proof = await proveJwt(input);
-    console.log("proof", proof);
+    const acc = privateKeyToAccount(
+      "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6",
+    );
+    // const proof = await proveJwt(input);
+    // console.log("proof", proof);
 
-    const tx = await lib.jwtAccount.setOwner(jwt, signer, {
-      proof: ethers.hexlify(proof),
-      jwtIat: input.jwt_iat,
-      jwtNonce: await signer.getAddress(),
-      publicKeyHash: input.public_key_hash,
+    const tx = await lib.eip7702.authorize({
+      jwt,
+      account: acc,
     });
-    console.log("recovery tx", tx);
-    await getBundlerClient(publicClient).waitForUserOperationReceipt({
-      hash: tx,
-    });
+    console.log("tx", tx);
+    await provider.provider.waitForTransaction(tx);
+
+    const result = await new ethers.Contract(
+      acc.address,
+      ["function hello() public view returns (string memory)"],
+      provider.provider,
+    ).hello!();
+    console.log("result", result);
+
+    // const tx = await lib.jwtAccount.setOwner(jwt, signer, {
+    //   proof: ethers.hexlify(proof),
+    //   jwtIat: input.jwt_iat,
+    //   jwtNonce: await signer.getAddress(),
+    //   publicKeyHash: input.public_key_hash,
+    // });
+    // console.log("recovery tx", tx);
+    // await getBundlerClient(publicClient).waitForUserOperationReceipt({
+    //   hash: tx,
+    // });
+
     Ui.toast.success("Session extended successfully");
     lib.queries.invalidateAll();
     // const jwtAccount = await lib.jwtAccount.getAccount(jwt, signer.address);
