@@ -62,6 +62,8 @@ export type { SafeCast } from "./@openzeppelin/contracts/utils/math/SafeCast";
 export { SafeCast__factory } from "./factories/@openzeppelin/contracts/utils/math/SafeCast__factory";
 export type { Strings } from "./@openzeppelin/contracts/utils/Strings";
 export { Strings__factory } from "./factories/@openzeppelin/contracts/utils/Strings__factory";
+export type { EoaAccount } from "./contracts/EoaAccount";
+export { EoaAccount__factory } from "./factories/contracts/EoaAccount__factory";
 export type { JwtVerifier } from "./contracts/JwtVerifier";
 export { JwtVerifier__factory } from "./factories/contracts/JwtVerifier__factory";
 export type { PublicKeyRegistry } from "./contracts/PublicKeyRegistry";

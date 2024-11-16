@@ -5,6 +5,7 @@ declare module "hardhat/types/runtime" {
     PublicKeyRegistry: "PublicKeyRegistry";
     SimpleAccountFactory: "SimpleAccountFactory";
     UltraVerifier: "UltraVerifier";
+    EoaAccount: "EoaAccount";
   }
 }
 
@@ -24,11 +25,9 @@ const deploy: DeployFunction = async ({
     log: true,
   });
 
-  const entryPoint = "0x0000000071727De22E5E9d8BAf0edAc6f37da032"; // 0.7.0
-  await typedDeployments.deploy("SimpleAccountFactory", {
+  await typedDeployments.deploy("EoaAccount", {
     from: deployer,
     log: true,
-    args: [entryPoint, proofVerifier.address, publicKeyRegistry.address],
   });
 };
 

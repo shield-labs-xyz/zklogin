@@ -118,6 +118,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Strings__factory>;
     getContractFactory(
+      name: "EoaAccount",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.EoaAccount__factory>;
+    getContractFactory(
       name: "JwtVerifier",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.JwtVerifier__factory>;
@@ -281,6 +285,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Strings>;
     getContractAt(
+      name: "EoaAccount",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.EoaAccount>;
+    getContractAt(
       name: "JwtVerifier",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -426,6 +435,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
     deployContract(
+      name: "EoaAccount",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.EoaAccount>;
+    deployContract(
       name: "JwtVerifier",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.JwtVerifier>;
@@ -588,6 +601,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
+    deployContract(
+      name: "EoaAccount",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.EoaAccount>;
     deployContract(
       name: "JwtVerifier",
       args: any[],
