@@ -242,7 +242,7 @@ export async function toJwtSmartAccount(
   return account;
 }
 
-export const authProviderId = ethers.id("accounts.google.com");
+export const authProviderId = ethers.id("accounts.google.com") as `0x${string}`;
 async function getJwtAccountInitParams(
   jwt: string,
 ): Promise<SimpleAccount.InitializeParamsStruct> {

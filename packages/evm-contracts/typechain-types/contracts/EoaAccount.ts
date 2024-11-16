@@ -135,7 +135,13 @@ export interface EoaAccountInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setAccountId",
-    values: [ECDSA.PublicKeyStruct, BytesLike, AddressLike, AddressLike]
+    values: [
+      ECDSA.PublicKeyStruct,
+      BytesLike,
+      BytesLike,
+      AddressLike,
+      AddressLike
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "webauthnPublicKey",
@@ -259,6 +265,7 @@ export interface EoaAccount extends BaseContract {
     [
       webauthnPublicKey_: ECDSA.PublicKeyStruct,
       accountId_: BytesLike,
+      authProviderId_: BytesLike,
       publicKeyRegistry_: AddressLike,
       proofVerifier_: AddressLike
     ],
@@ -333,6 +340,7 @@ export interface EoaAccount extends BaseContract {
     [
       webauthnPublicKey_: ECDSA.PublicKeyStruct,
       accountId_: BytesLike,
+      authProviderId_: BytesLike,
       publicKeyRegistry_: AddressLike,
       proofVerifier_: AddressLike
     ],

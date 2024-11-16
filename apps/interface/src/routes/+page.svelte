@@ -10,6 +10,7 @@
     getPublicKeyHash,
     JWT_EXPIRATION_TIME,
     prepareJwt,
+    proveJwt,
   } from "$lib/services/JwtAccountService.js";
   import { EXTEND_SESSION_SEARCH_PARAM } from "$lib/utils.js";
   import * as web2Auth from "@auth/sveltekit/client";
@@ -42,6 +43,11 @@
 
   let signer = $derived(
     new ethers.Wallet(signerPrivateKey.value, provider.provider),
+  );
+
+  const relayer = new ethers.Wallet(
+    "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
+    provider.provider,
   );
 
   // let ownersQuery = $derived(
@@ -94,6 +100,7 @@
   async function extendSessionInner() {
     assert(jwt, "no session");
     const input = await prepareJwt(jwt);
+    await storePublicKeyIfNotStored(input);
     const jwtNonceMatches = isEqual(
       encodedAddressAsJwtNonce((await signer.getAddress()).toLowerCase()),
       input.jwt_nonce,
@@ -111,31 +118,7 @@
       return;
     }
 
-    {
-      const publicKeyHash = await getPublicKeyHash(input);
-      const valid = await publicKeyRegistry.isPublicKeyHashValid(
-        authProviderId,
-        publicKeyHash,
-      );
-      if (!valid) {
-        await Ui.toast.promise(
-          utils.iife(async () => {
-            const { hash } = await ky
-              .post("/api/register-public-keys")
-              .json<{ hash: string | null }>();
-            if (hash) {
-              await provider.provider.waitForTransaction(hash);
-            }
-          }),
-          {
-            loading: "Updating google public keys...",
-            success: "Google public keys updated",
-            error: (e) =>
-              `Error updating google public keys: ${utils.errorToString(e)}`,
-          },
-        );
-      }
-    }
+    await storePublicKeyIfNotStored(input);
 
     const acc = privateKeyToAccount(
       "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6",
@@ -164,6 +147,51 @@
     const result = await accContract.hello!();
     console.log("result", result);
 
+    // const tx = await lib.jwtAccount.setOwner(jwt, signer, {
+    //   proof: ethers.hexlify(proof),
+    //   jwtIat: input.jwt_iat,
+    //   jwtNonce: await signer.getAddress(),
+    //   publicKeyHash: input.public_key_hash,
+    // });
+    // console.log("recovery tx", tx);
+    // await getBundlerClient(publicClient).waitForUserOperationReceipt({
+    //   hash: tx,
+    // });
+
+    {
+      // recover
+
+      const recoverCred = await createCredential({
+        user: {
+          name: "me recover",
+        },
+      });
+      const proof = await proveJwt(input);
+      const recTx = await (accContract.connect(relayer) as any).recover!(
+        {
+          proof: ethers.hexlify(proof),
+          jwtIat: input.jwt_iat,
+          jwtNonce: await signer.getAddress(),
+          publicKeyHash: input.public_key_hash,
+        },
+        parsePublicKey(recoverCred.publicKey),
+      );
+      console.log("recTx", recTx);
+      await recTx.wait();
+      await executeTx(recoverCred, accContract);
+    }
+
+    Ui.toast.success("Session extended successfully");
+    lib.queries.invalidateAll();
+    // const jwtAccount = await lib.jwtAccount.getAccount(jwt, signer.address);
+    // const tx2 = await lib.coinbase.addOwner(jwtAccount, signer.address);
+    // console.log("new owner tx", tx2);
+  }
+
+  async function executeTx(
+    cred: Awaited<ReturnType<typeof createCredential>>,
+    accContract: ethers.Contract,
+  ) {
     const nonce = await accContract.nonce!();
     const to = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
     const value = ethers.parseEther("0.00000123");
@@ -192,12 +220,9 @@
 
     console.log(
       "balance before",
-      await provider.provider.getBalance(acc.address),
+      await provider.provider.getBalance(accContract),
     );
-    const relayer = new ethers.Wallet(
-      "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
-      provider.provider,
-    );
+
     const tx2 = await (accContract.connect(relayer) as any).execute!(
       to,
       data,
@@ -209,24 +234,40 @@
     await tx2.wait();
     console.log(
       "balance after",
-      await provider.provider.getBalance(acc.address),
+      await provider.provider.getBalance(accContract),
     );
-    // const tx = await lib.jwtAccount.setOwner(jwt, signer, {
-    //   proof: ethers.hexlify(proof),
-    //   jwtIat: input.jwt_iat,
-    //   jwtNonce: await signer.getAddress(),
-    //   publicKeyHash: input.public_key_hash,
-    // });
-    // console.log("recovery tx", tx);
-    // await getBundlerClient(publicClient).waitForUserOperationReceipt({
-    //   hash: tx,
-    // });
+  }
 
-    Ui.toast.success("Session extended successfully");
-    lib.queries.invalidateAll();
-    // const jwtAccount = await lib.jwtAccount.getAccount(jwt, signer.address);
-    // const tx2 = await lib.coinbase.addOwner(jwtAccount, signer.address);
-    // console.log("new owner tx", tx2);
+  async function storePublicKeyIfNotStored(publicKey: {
+    public_key_limbs: string[];
+    public_key_redc_limbs: string[];
+  }) {
+    const publicKeyHash = await getPublicKeyHash(publicKey);
+    const valid = await publicKeyRegistry.isPublicKeyHashValid(
+      authProviderId,
+      publicKeyHash,
+    );
+    if (valid) {
+      console.log("public key is valid");
+      return;
+    }
+    console.log("updating public key...");
+    await Ui.toast.promise(
+      utils.iife(async () => {
+        const { hash } = await ky
+          .post("/api/register-public-keys")
+          .json<{ hash: string | null }>();
+        if (hash) {
+          await provider.provider.waitForTransaction(hash);
+        }
+      }),
+      {
+        loading: "Updating google public keys...",
+        success: "Google public keys updated",
+        error: (e) =>
+          `Error updating google public keys: ${utils.errorToString(e)}`,
+      },
+    );
   }
 
   async function signIn(

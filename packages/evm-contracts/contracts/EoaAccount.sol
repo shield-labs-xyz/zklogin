@@ -9,7 +9,7 @@ import {ECDSA} from "./ECDSA.sol";
 
 contract EoaAccount is JwtVerifierP256 {
     bytes32 public accountId;
-    bytes32 public authProviderId = keccak256("google");
+    bytes32 public authProviderId;
     PublicKeyRegistry public publicKeyRegistry;
     UltraVerifier public proofVerifier;
 
@@ -20,6 +20,7 @@ contract EoaAccount is JwtVerifierP256 {
     function setAccountId(
         ECDSA.PublicKey calldata webauthnPublicKey_,
         bytes32 accountId_,
+        bytes32 authProviderId_,
         PublicKeyRegistry publicKeyRegistry_,
         UltraVerifier proofVerifier_
     ) external {
@@ -28,6 +29,7 @@ contract EoaAccount is JwtVerifierP256 {
         webauthnPublicKey = webauthnPublicKey_;
 
         accountId = accountId_;
+        authProviderId = authProviderId_;
         publicKeyRegistry = publicKeyRegistry_;
         proofVerifier = proofVerifier_;
     }

@@ -4,7 +4,7 @@ import deployments from "@repo/contracts/deployments.json";
 import { EoaAccount__factory } from "@repo/contracts/typechain-types";
 import { createWalletClient, http, type Account, type Client } from "viem";
 import { signAuthorization } from "viem/experimental";
-import { getAccountIdFromJwt } from "./JwtAccountService";
+import { authProviderId, getAccountIdFromJwt } from "./JwtAccountService";
 
 export class Eip7702Service {
   constructor(private client: Client) {}
@@ -40,7 +40,13 @@ export class Eip7702Service {
       abi: EoaAccount__factory.abi,
       address: account.address,
       functionName: "setAccountId",
-      args: [webauthnPublicKey, accountId, publicKeyRegistry, proofVerifier],
+      args: [
+        webauthnPublicKey,
+        accountId,
+        authProviderId,
+        publicKeyRegistry,
+        proofVerifier,
+      ],
       authorizationList: [auth],
       account: account,
       chain: this.client.chain,
