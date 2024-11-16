@@ -9,7 +9,15 @@ import { getAccountIdFromJwt } from "./JwtAccountService";
 export class Eip7702Service {
   constructor(private client: Client) {}
 
-  async authorize({ account, jwt }: { account: Account; jwt: string }) {
+  async authorize({
+    account,
+    jwt,
+    webauthnPublicKey,
+  }: {
+    account: Account;
+    jwt: string;
+    webauthnPublicKey: { x: bigint; y: bigint };
+  }) {
     const contractAddress = deployments[chain.id].contracts
       .EoaAccount as `0x${string}`;
     const auth = await signAuthorization(this.client, {
@@ -23,7 +31,6 @@ export class Eip7702Service {
       transport: http(),
     });
 
-    const webauthnPublicKey = { x: 0n, y: 0n };
     const { accountId } = await getAccountIdFromJwt(decodeJwt(jwt));
     const publicKeyRegistry = deployments[chain.id].contracts
       .PublicKeyRegistry as `0x${string}`;

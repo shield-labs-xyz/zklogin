@@ -21,6 +21,46 @@ import type {
   TypedContractMethod,
 } from "../common";
 
+export declare namespace ECDSA {
+  export type SignatureStruct = { r: BigNumberish; s: BigNumberish };
+
+  export type SignatureStructOutput = [r: bigint, s: bigint] & {
+    r: bigint;
+    s: bigint;
+  };
+
+  export type PublicKeyStruct = { x: BigNumberish; y: BigNumberish };
+
+  export type PublicKeyStructOutput = [x: bigint, y: bigint] & {
+    x: bigint;
+    y: bigint;
+  };
+}
+
+export declare namespace WebAuthnP256 {
+  export type MetadataStruct = {
+    authenticatorData: BytesLike;
+    clientDataJSON: string;
+    challengeIndex: BigNumberish;
+    typeIndex: BigNumberish;
+    userVerificationRequired: boolean;
+  };
+
+  export type MetadataStructOutput = [
+    authenticatorData: string,
+    clientDataJSON: string,
+    challengeIndex: bigint,
+    typeIndex: bigint,
+    userVerificationRequired: boolean
+  ] & {
+    authenticatorData: string;
+    clientDataJSON: string;
+    challengeIndex: bigint;
+    typeIndex: bigint;
+    userVerificationRequired: boolean;
+  };
+}
+
 export declare namespace JwtVerifierP256 {
   export type VerificationDataStruct = {
     proof: BytesLike;
@@ -42,22 +82,16 @@ export declare namespace JwtVerifierP256 {
   };
 }
 
-export declare namespace EoaAccount {
-  export type WebauthnPublicKeyStruct = { x: BigNumberish; y: BigNumberish };
-
-  export type WebauthnPublicKeyStructOutput = [x: bigint, y: bigint] & {
-    x: bigint;
-    y: bigint;
-  };
-}
-
 export interface EoaAccountInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "accountId"
       | "authProviderId"
       | "dummy"
+      | "execute"
+      | "getDigest"
       | "hello"
+      | "nonce"
       | "proofVerifier"
       | "publicKeyRegistry"
       | "recover"
@@ -71,7 +105,22 @@ export interface EoaAccountInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "dummy", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "execute",
+    values: [
+      AddressLike,
+      BytesLike,
+      BigNumberish,
+      ECDSA.SignatureStruct,
+      WebAuthnP256.MetadataStruct
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getDigest",
+    values: [AddressLike, BytesLike, BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "hello", values?: undefined): string;
+  encodeFunctionData(functionFragment: "nonce", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "proofVerifier",
     values?: undefined
@@ -82,19 +131,11 @@ export interface EoaAccountInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "recover",
-    values: [
-      JwtVerifierP256.VerificationDataStruct,
-      EoaAccount.WebauthnPublicKeyStruct
-    ]
+    values: [JwtVerifierP256.VerificationDataStruct, ECDSA.PublicKeyStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "setAccountId",
-    values: [
-      EoaAccount.WebauthnPublicKeyStruct,
-      BytesLike,
-      AddressLike,
-      AddressLike
-    ]
+    values: [ECDSA.PublicKeyStruct, BytesLike, AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "webauthnPublicKey",
@@ -107,7 +148,10 @@ export interface EoaAccountInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "dummy", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getDigest", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hello", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "nonce", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "proofVerifier",
     data: BytesLike
@@ -176,7 +220,27 @@ export interface EoaAccount extends BaseContract {
 
   dummy: TypedContractMethod<[], [void], "nonpayable">;
 
+  execute: TypedContractMethod<
+    [
+      to: AddressLike,
+      data: BytesLike,
+      value: BigNumberish,
+      signature: ECDSA.SignatureStruct,
+      metadata: WebAuthnP256.MetadataStruct
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  getDigest: TypedContractMethod<
+    [to: AddressLike, data: BytesLike, value: BigNumberish],
+    [string],
+    "view"
+  >;
+
   hello: TypedContractMethod<[], [string], "view">;
+
+  nonce: TypedContractMethod<[], [bigint], "view">;
 
   proofVerifier: TypedContractMethod<[], [string], "view">;
 
@@ -185,7 +249,7 @@ export interface EoaAccount extends BaseContract {
   recover: TypedContractMethod<
     [
       verificationData: JwtVerifierP256.VerificationDataStruct,
-      newP256PublicKey: EoaAccount.WebauthnPublicKeyStruct
+      newP256PublicKey: ECDSA.PublicKeyStruct
     ],
     [void],
     "nonpayable"
@@ -193,7 +257,7 @@ export interface EoaAccount extends BaseContract {
 
   setAccountId: TypedContractMethod<
     [
-      webauthnPublicKey_: EoaAccount.WebauthnPublicKeyStruct,
+      webauthnPublicKey_: ECDSA.PublicKeyStruct,
       accountId_: BytesLike,
       publicKeyRegistry_: AddressLike,
       proofVerifier_: AddressLike
@@ -222,8 +286,31 @@ export interface EoaAccount extends BaseContract {
     nameOrSignature: "dummy"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "execute"
+  ): TypedContractMethod<
+    [
+      to: AddressLike,
+      data: BytesLike,
+      value: BigNumberish,
+      signature: ECDSA.SignatureStruct,
+      metadata: WebAuthnP256.MetadataStruct
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "getDigest"
+  ): TypedContractMethod<
+    [to: AddressLike, data: BytesLike, value: BigNumberish],
+    [string],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "hello"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "nonce"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "proofVerifier"
   ): TypedContractMethod<[], [string], "view">;
@@ -235,7 +322,7 @@ export interface EoaAccount extends BaseContract {
   ): TypedContractMethod<
     [
       verificationData: JwtVerifierP256.VerificationDataStruct,
-      newP256PublicKey: EoaAccount.WebauthnPublicKeyStruct
+      newP256PublicKey: ECDSA.PublicKeyStruct
     ],
     [void],
     "nonpayable"
@@ -244,7 +331,7 @@ export interface EoaAccount extends BaseContract {
     nameOrSignature: "setAccountId"
   ): TypedContractMethod<
     [
-      webauthnPublicKey_: EoaAccount.WebauthnPublicKeyStruct,
+      webauthnPublicKey_: ECDSA.PublicKeyStruct,
       accountId_: BytesLike,
       publicKeyRegistry_: AddressLike,
       proofVerifier_: AddressLike

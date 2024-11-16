@@ -23,7 +23,10 @@
   import ms from "ms";
   import { onMount } from "svelte";
   import { assert } from "ts-essentials";
+  import { slice } from "viem";
   import { privateKeyToAccount } from "viem/accounts";
+  import { createCredential, parsePublicKey, sign } from "webauthn-p256";
+  import { accountAbi } from "./abi.js";
 
   let { data } = $props();
 
@@ -140,20 +143,74 @@
     // const proof = await proveJwt(input);
     // console.log("proof", proof);
 
+    const cred = await createCredential({
+      user: {
+        name: "me",
+      },
+    });
     const tx = await lib.eip7702.authorize({
       jwt,
       account: acc,
+      webauthnPublicKey: parsePublicKey(cred.publicKey),
     });
     console.log("tx", tx);
     await provider.provider.waitForTransaction(tx);
 
-    const result = await new ethers.Contract(
+    const accContract = new ethers.Contract(
       acc.address,
-      ["function hello() public view returns (string memory)"],
+      accountAbi,
       provider.provider,
-    ).hello!();
+    );
+    const result = await accContract.hello!();
     console.log("result", result);
 
+    const nonce = await accContract.nonce!();
+    const to = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+    const value = ethers.parseEther("0.00000123");
+    const data = "0x";
+    const digest = ethers.AbiCoder.defaultAbiCoder().encode(
+      ["uint256", "address", "bytes", "uint256"],
+      [nonce, to, data, value],
+    );
+    const digestHash = ethers.keccak256(digest) as `0x${string}`;
+    console.log("real digest", digestHash);
+    console.log("digest", await accContract.getDigest!(to, data, value));
+
+    console.log("real public key", await accContract.webauthnPublicKey!());
+    const pubadsf = parsePublicKey(cred.publicKey);
+    console.log("public key", {
+      x: pubadsf.x,
+      y: pubadsf.y,
+    });
+
+    const signature = await sign({ hash: digestHash, credentialId: cred.id });
+    const r = slice(signature.signature, 0, 32);
+    const s = slice(signature.signature, 32, 64);
+    console.log("signature", signature.signature);
+    console.log("r", r);
+    console.log("s", s);
+
+    console.log(
+      "balance before",
+      await provider.provider.getBalance(acc.address),
+    );
+    const relayer = new ethers.Wallet(
+      "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
+      provider.provider,
+    );
+    const tx2 = await (accContract.connect(relayer) as any).execute!(
+      to,
+      data,
+      value,
+      { r, s },
+      signature.webauthn,
+    );
+    console.log("tx2", tx2);
+    await tx2.wait();
+    console.log(
+      "balance after",
+      await provider.provider.getBalance(acc.address),
+    );
     // const tx = await lib.jwtAccount.setOwner(jwt, signer, {
     //   proof: ethers.hexlify(proof),
     //   jwtIat: input.jwt_iat,

@@ -40,6 +40,7 @@
     "ts-essentials": "^10.0.2",
     "ufo": "^1.5.4",
     "viem": "^2.21.45",
+    "webauthn-p256": "^0.0.10",
     "zod": "^3.23.8"
   },
   "devDependencies": {
