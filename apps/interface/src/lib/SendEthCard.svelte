@@ -4,10 +4,8 @@
   import { createQuery } from "@tanstack/svelte-query";
   import { ethers } from "ethers";
   import { assert } from "ts-essentials";
-  import type { Address } from "viem";
   import { z } from "zod";
   import { zAddress } from "./utils";
-  import { ethersSignerToWalletClient, getBundlerClient } from "./viemClients";
 
   let {
     jwt,
@@ -28,8 +26,9 @@
           if (!jwt) {
             raw = 0n;
           } else {
-            const account = await lib.jwtAccount.getAccount(jwt, signer);
-            raw = await signer.provider!.getBalance(account.address);
+            throw new Error("not implemented");
+            // const account = await lib.jwtAccount.getAccount(jwt, signer);
+            // raw = await signer.provider!.getBalance(account.address);
           }
           return `${ethers.formatEther(raw)} ETH`;
         },
@@ -59,21 +58,22 @@
       })}
       onsubmit={async (data) => {
         assert(jwt, "no session");
-        const bundlerClient = getBundlerClient(
-          await ethersSignerToWalletClient(signer),
-        );
-        const account = await lib.jwtAccount.getAccount(jwt, signer);
-        const tx = await bundlerClient.sendUserOperation({
-          account,
-          calls: [
-            {
-              to: data.recipient as Address,
-              value: ethers.parseEther(data.amount),
-            },
-          ],
-        });
-        console.log("tx", tx);
-        Ui.toast.success("Transaction sent successfully");
+        throw new Error("not implemented");
+        // const bundlerClient = getBundlerClient(
+        //   await ethersSignerToWalletClient(signer),
+        // );
+        // const account = await lib.jwtAccount.getAccount(jwt, signer);
+        // const tx = await bundlerClient.sendUserOperation({
+        //   account,
+        //   calls: [
+        //     {
+        //       to: data.recipient as Address,
+        //       value: ethers.parseEther(data.amount),
+        //     },
+        //   ],
+        // });
+        // console.log("tx", tx);
+        // Ui.toast.success("Transaction sent successfully");
       }}
     >
       {#snippet children(form, formData)}
