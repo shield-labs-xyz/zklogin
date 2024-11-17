@@ -53,7 +53,9 @@ export class Eip7702Service {
     jwt: string;
     webAuthnPublicKey: Hex;
   }) {
-    await this.#requestJwtIfInvalid({ jwt, webAuthnPublicKey });
+    if (!(await this.#requestJwtIfInvalid({ jwt, webAuthnPublicKey }))) {
+      throw new Error("jwt invalid");
+    }
 
     const contractAddress = deployments[chain.id].contracts
       .EoaAccount as `0x${string}`;
@@ -101,7 +103,9 @@ export class Eip7702Service {
     jwt: string;
     webAuthnPublicKey: Hex;
   }) {
-    await this.#requestJwtIfInvalid({ jwt, webAuthnPublicKey });
+    if (!(await this.#requestJwtIfInvalid({ jwt, webAuthnPublicKey }))) {
+      throw new Error("jwt invalid");
+    }
 
     const accContract = this.#toAccountContract(address);
     const input = await prepareJwt(jwt);
@@ -166,7 +170,7 @@ export class Eip7702Service {
   }: {
     jwt: string;
     webAuthnPublicKey: Hex;
-  }) {
+  }): Promise<boolean> {
     const input = await prepareJwt(jwt);
     const jwtNonceMatches = isEqual(
       encodedAddressAsJwtNonce(this.#toNonce(webAuthnPublicKey).toLowerCase()),
@@ -177,7 +181,7 @@ export class Eip7702Service {
       input.jwt_iat + JWT_EXPIRATION_TIME <
       Math.floor((Date.now() - expirationMargin) / 1000);
     if (jwtNonceMatches && !jwtExpired) {
-      return;
+      return true;
     }
     Ui.toast.log(
       "Sign in again please to link your wallet to your Google account",
@@ -186,6 +190,7 @@ export class Eip7702Service {
     await this.requestJwt({
       webAuthnPublicKey,
     });
+    return false;
   }
 
   #toNonce(webAuthnPublicKey: Hex) {

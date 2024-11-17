@@ -4,7 +4,9 @@
   import { now } from "$lib/now.svelte.js";
   import { Ui } from "@repo/ui";
   import { utils } from "@repo/utils";
+  import { createQuery } from "@tanstack/svelte-query";
   import { formatDuration, intervalToDuration } from "date-fns";
+  import { ethers } from "ethers";
   import ms from "ms";
   import { assert } from "ts-essentials";
   import { privateKeyToAccount } from "viem/accounts";
@@ -15,6 +17,20 @@
 
   const acc = privateKeyToAccount(
     "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6",
+  );
+
+  let codeConnectedQuery = $derived(
+    createQuery(
+      {
+        queryKey: ["codeSize", acc.address],
+        queryFn: async () => {
+          const code = await provider.provider.getCode(acc.address);
+          return ethers.dataLength(code) > 0;
+        },
+        refetchInterval: ms("10 sec"),
+      },
+      lib.queries.queryClient,
+    ),
   );
 
   async function connect() {
@@ -28,6 +44,9 @@
     });
     console.log("tx", tx);
     await provider.provider.waitForTransaction(tx);
+
+    Ui.toast.success("Connected Passkeys and Google account successfully");
+    lib.queries.invalidateAll();
   }
 
   let extendSessionStart = $state<number | undefined>();
@@ -85,6 +104,15 @@
           variant="ghost"
         />
       </div>
+
+      <div>
+        Passkeys and Google connected:
+        <Ui.Query query={$codeConnectedQuery}>
+          {#snippet success(data)}
+            {data}
+          {/snippet}
+        </Ui.Query>
+      </div>
       <div>Network: {chain.name}</div>
 
       {#if !jwt}
@@ -107,8 +135,12 @@
         </Ui.GapContainer>
       {:else}
         <Ui.GapContainer>
-          <Ui.LoadingButton variant="default" onclick={connect}>
-            Connect
+          <Ui.LoadingButton
+            variant="default"
+            onclick={connect}
+            disabled={$codeConnectedQuery.data === true}
+          >
+            Connect Passkeys and Google
           </Ui.LoadingButton>
           <Ui.GapContainer>
             <Ui.LoadingButton
@@ -116,6 +148,7 @@
               onclick={async () => {
                 await recover();
               }}
+              disabled={$codeConnectedQuery.data === false}
             >
               Recover
             </Ui.LoadingButton>
