@@ -33,6 +33,20 @@
     ),
   );
 
+  let balanceQuery = $derived(
+    createQuery(
+      {
+        queryKey: ["balance", provider.chainId, acc.address],
+        queryFn: async () => {
+          const raw = await provider.provider.getBalance(acc.address);
+          return `${ethers.formatEther(raw)} ETH`;
+        },
+        refetchInterval: ms("10 sec"),
+      },
+      lib.queries.queryClient,
+    ),
+  );
+
   async function connect() {
     assert(jwt, "no session");
 
@@ -73,11 +87,6 @@
     console.log("recTxHash", recTxHash);
     await provider.provider.waitForTransaction(recTxHash);
 
-    await lib.eip7702.executeTx({
-      credentialId: recoverCred.id,
-      address: acc.address,
-    });
-
     Ui.toast.success("Recovered successfully");
     lib.queries.invalidateAll();
   }
@@ -108,6 +117,13 @@
       <div>
         Passkeys and Google connected:
         <Ui.Query query={$codeConnectedQuery}>
+          {#snippet success(data)}
+            {data}
+          {/snippet}
+        </Ui.Query>
+      </div>
+      <div>
+        Balance: <Ui.Query query={$balanceQuery}>
           {#snippet success(data)}
             {data}
           {/snippet}
@@ -168,6 +184,21 @@
               </div>
             {/if}
           </Ui.GapContainer>
+
+          <Ui.LoadingButton
+            variant="default"
+            disabled={$codeConnectedQuery.data === false}
+            onclick={async () => {
+              const cred = await lib.webAuthn.useCredential();
+              await lib.eip7702.executeTx({
+                credentialId: cred.id,
+                address: acc.address,
+              });
+              lib.queries.invalidateAll();
+            }}
+          >
+            Send ETH
+          </Ui.LoadingButton>
         </Ui.GapContainer>
       {/if}
     </Ui.Card.Content>
