@@ -40,12 +40,21 @@ export async function POST() {
   if (pendingPublicKeyHashes.length === 0) {
     return Response.json({ hash: null });
   }
-  const tx = await publicKeyRegistry.connect(owner).setPublicKeysValid(
-    pendingPublicKeyHashes.map((publicKeyHash) => ({
-      providerId: authProviderId,
-      publicKeyHash,
-      valid: true,
-    })),
-  );
-  return Response.json({ hash: tx.hash });
+  console.log(`updating ${pendingPublicKeyHashes.length} public keys`);
+  try {
+    const tx = await publicKeyRegistry.connect(owner).setPublicKeysValid(
+      pendingPublicKeyHashes.map((publicKeyHash) => ({
+        providerId: authProviderId,
+        publicKeyHash,
+        valid: true,
+      })),
+    );
+    return Response.json({ hash: tx.hash });
+  } catch (e: any) {
+    console.error(e);
+    return Response.json(
+      { error: "Failed to send transaction" },
+      { status: 500 },
+    );
+  }
 }

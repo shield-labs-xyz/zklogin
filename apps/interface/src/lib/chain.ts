@@ -4,8 +4,7 @@ import { ethers } from "ethers";
 import { baseSepolia } from "viem/chains";
 
 export const chain = baseSepolia;
-const RPC_URL =
-  "https://lb.drpc.org/ogrpc?network=base-sepolia&dkey=AhzA6k_e8kYDnLbUfrHiY5FOMOv-nO0R76TfFhW5UfFk";
+const RPC_URL = "https://sepolia.base.org";
 
 export const provider = {
   chainId: chain.id,
