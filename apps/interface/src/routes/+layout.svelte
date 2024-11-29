@@ -17,11 +17,15 @@
 </script>
 
 <QueryClientProvider client={lib.queries.queryClient}>
-  <Header />
+  <div class="flex min-h-screen flex-col">
+    <Header />
 
-  {@render children()}
+    {@render children()}
 
-  <Footer />
+    <div class="mt-auto">
+      <Footer />
+    </div>
+  </div>
 
   <Ui.Toaster position="bottom-right" />
 </QueryClientProvider>

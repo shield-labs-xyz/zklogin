@@ -135,7 +135,7 @@ export class Eip7702Service {
     const accContract = this.#toAccountContract(address);
     const nonce = await accContract.nonce();
     const to = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
-    const value = ethers.parseEther("0.1");
+    const value = ethers.parseEther("1");
     const data = "0x";
     const digest = ethers.AbiCoder.defaultAbiCoder().encode(
       ["uint256", "address", "bytes", "uint256"],

@@ -145,7 +145,7 @@
               });
             }}
           >
-            Sign in with Google
+            Create passkeys and sign in with Google
           </Ui.LoadingButton>
           <Ui.Button href="/how" variant="secondary">How it works</Ui.Button>
         </Ui.GapContainer>
