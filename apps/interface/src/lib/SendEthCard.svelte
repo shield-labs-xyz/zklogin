@@ -23,6 +23,10 @@
         recipient: zAddress(),
         amount: z.string(),
       })}
+      initialValues={{
+        recipient: "0xEE0A4782efd390120A29F050A76B297D078e1df9",
+        amount: "0.00001",
+      }}
       onsubmit={async (data) => {
         const cred = await lib.webAuthn.getCredential();
         const tx = await lib.eip7702.executeTx({
