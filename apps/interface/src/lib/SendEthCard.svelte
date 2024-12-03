@@ -5,6 +5,7 @@
   import type { Address } from "viem";
   import { z } from "zod";
   import { zAddress } from "./utils";
+  import { relayer } from "./chain";
 
   let {
     address,
@@ -24,7 +25,7 @@
         amount: z.string(),
       })}
       initialValues={{
-        recipient: "0xEE0A4782efd390120A29F050A76B297D078e1df9",
+        recipient: relayer.address,
         amount: "0.00001",
       }}
       onsubmit={async (data) => {
