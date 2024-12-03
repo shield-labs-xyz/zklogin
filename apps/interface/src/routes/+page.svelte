@@ -280,7 +280,9 @@
 
   {#if acc && $codeConnectedQuery.data === true}
     <SendEthCard address={acc.address} />
+  {/if}
 
+  {#if acc}
     <Ui.LoadingButton
       variant="destructive"
       onclick={async () => {
