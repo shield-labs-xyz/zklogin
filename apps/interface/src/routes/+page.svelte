@@ -79,10 +79,7 @@
       {
         queryKey: ["balance", provider.chainId, acc?.address],
         queryFn: async () => {
-          const raw = acc
-            ? await provider.provider.getBalance(acc.address)
-            : 0n;
-          return `${ethers.formatEther(raw)} ETH`;
+          return acc ? await provider.provider.getBalance(acc.address) : 0n;
         },
         refetchInterval: ms("10 sec"),
       },
@@ -173,7 +170,7 @@
         <div>
           Balance: <Ui.Query query={$balanceQuery}>
             {#snippet success(data)}
-              {data}
+              {ethers.formatEther(data)} ETH
             {/snippet}
           </Ui.Query>
         </div>
@@ -198,6 +195,11 @@
           {:else if $codeConnectedQuery.data === false}
             <Ui.LoadingButton variant="default" onclick={connect}>
               Connect Passkeys and Google
+              {#if $balanceQuery.data === 0n}
+                <Ui.Badge variant="destructive" class="ml-2">
+                  Top up your balance first
+                </Ui.Badge>
+              {/if}
             </Ui.LoadingButton>
           {:else if $credentialIsCorrectQuery.data === false}
             <Ui.LoadingButton variant="default" onclick={recover}>
