@@ -87,4 +87,6 @@ contract EoaAccount is JwtVerifierP256 {
     {
         return webauthnPublicKey;
     }
+
+    receive() external payable {}
 }
