@@ -80,17 +80,11 @@ contract EoaAccount is JwtVerifierP256 {
         require(success, "call failed");
     }
 
-    function getDigest(
-        address to,
-        bytes memory data,
-        uint256 value
-    ) public view returns (bytes32) {
-        return keccak256(abi.encode(nonce, to, data, value));
-    }
-
-    function dummy() external {}
-
-    function hello() external pure returns (string memory) {
-        return "hello world";
+    function getWebAuthnPublicKey()
+        external
+        view
+        returns (ECDSA.PublicKey memory)
+    {
+        return webauthnPublicKey;
     }
 }

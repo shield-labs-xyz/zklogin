@@ -25,6 +25,10 @@ const config: HardhatUserConfig = {
       url: "https://sepolia.base.org",
       chainId: 84532,
     },
+    odysseyTestnet: {
+      url: "https://odyssey.ithaca.xyz",
+      chainId: 911867,
+    },
   },
   etherscan: {
     apiKey: {

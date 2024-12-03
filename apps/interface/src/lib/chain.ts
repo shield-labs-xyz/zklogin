@@ -1,11 +1,11 @@
 import deployments from "@repo/contracts/deployments.json";
 import { PublicKeyRegistry__factory } from "@repo/contracts/typechain-types";
 import { ethers } from "ethers";
-import { anvil } from "viem/chains";
+import { odysseyTestnet } from "viem/chains";
 
-export const chain = anvil;
-const RPC_URL = "http://localhost:8545";
-// "https://lb.drpc.org/ogrpc?network=base-sepolia&dkey=AhzA6k_e8kYDnLbUfrHiY5FOMOv-nO0R76TfFhW5UfFk";
+export const chain = odysseyTestnet;
+// const RPC_URL = "http://localhost:8545";
+const RPC_URL = "https://odyssey.ithaca.xyz";
 
 export const provider = {
   chainId: chain.id,
@@ -18,6 +18,6 @@ export const publicKeyRegistry = PublicKeyRegistry__factory.connect(
 );
 
 export const relayer = new ethers.Wallet(
-  "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
+  "0x4e560d1db4456119f9256bb65b4321ad54b860882c46b5ecb6ba92ca4d725dad",
   provider.provider,
 );

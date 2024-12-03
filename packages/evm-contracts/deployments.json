@@ -2,7 +2,7 @@
   "31337": {
     "chainId": "31337",
     "contracts": {
-      "EoaAccount": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+      "EoaAccount": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
       "PublicKeyRegistry": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       "SimpleAccountFactory": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
       "UltraVerifier": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
@@ -17,5 +17,15 @@
       "UltraVerifier": "0x99d3945D1c34761173cd202DA247547c900159AF"
     },
     "name": "baseSepolia"
+  },
+  "911867": {
+    "chainId": "911867",
+    "contracts": {
+      "EoaAccount": "0xe3646a25b8C6D0f05Cd4963c50dc7bAa6ced8122",
+      "PublicKeyRegistry": "0x14a2e78045Cd2D8F59e9217e4562DD9836939F5d",
+      "SimpleAccountFactory": "0x8177399B3764423211A1774300e6D8b2C7C6a22d",
+      "UltraVerifier": "0x641D6d03Cba51AEBe02b626918c9aA004fCb6013"
+    },
+    "name": "odyssey"
   }
 }

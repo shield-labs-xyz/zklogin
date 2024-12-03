@@ -1,41 +1,16 @@
 <script lang="ts">
   import { lib } from "$lib";
   import { Ui } from "@repo/ui";
-  import { createQuery } from "@tanstack/svelte-query";
   import { ethers } from "ethers";
-  import { assert } from "ts-essentials";
+  import type { Address } from "viem";
   import { z } from "zod";
   import { zAddress } from "./utils";
 
   let {
-    jwt,
-    signer,
-    disabled,
+    address,
   }: {
-    jwt: string | undefined;
-    signer: ethers.Wallet;
-    disabled: boolean;
+    address: Address;
   } = $props();
-
-  let balanceQuery = $derived(
-    createQuery(
-      {
-        queryKey: ["balance", jwt && ethers.id(jwt)],
-        queryFn: async () => {
-          let raw: bigint;
-          if (!jwt) {
-            raw = 0n;
-          } else {
-            throw new Error("not implemented");
-            // const account = await lib.jwtAccount.getAccount(jwt, signer);
-            // raw = await signer.provider!.getBalance(account.address);
-          }
-          return `${ethers.formatEther(raw)} ETH`;
-        },
-      },
-      lib.queries.queryClient,
-    ),
-  );
 </script>
 
 <Ui.Card.Root>
@@ -43,37 +18,22 @@
     <Ui.Card.Title>Send ETH</Ui.Card.Title>
   </Ui.Card.Header>
   <Ui.Card.Content>
-    <div>
-      Balance: <Ui.Query query={$balanceQuery}>
-        {#snippet success(data)}
-          {data}
-        {/snippet}
-      </Ui.Query>
-    </div>
-
     <Ui.Form
       schema={z.object({
         recipient: zAddress(),
         amount: z.string(),
       })}
       onsubmit={async (data) => {
-        assert(jwt, "no session");
-        throw new Error("not implemented");
-        // const bundlerClient = getBundlerClient(
-        //   await ethersSignerToWalletClient(signer),
-        // );
-        // const account = await lib.jwtAccount.getAccount(jwt, signer);
-        // const tx = await bundlerClient.sendUserOperation({
-        //   account,
-        //   calls: [
-        //     {
-        //       to: data.recipient as Address,
-        //       value: ethers.parseEther(data.amount),
-        //     },
-        //   ],
-        // });
-        // console.log("tx", tx);
-        // Ui.toast.success("Transaction sent successfully");
+        const cred = await lib.webAuthn.getCredential();
+        const tx = await lib.eip7702.executeTx({
+          credentialId: cred.id,
+          address,
+          to: data.recipient,
+          value: ethers.parseEther(data.amount),
+        });
+        console.log("tx", tx);
+        lib.queries.invalidateAll();
+        Ui.toast.success("Transaction sent successfully");
       }}
     >
       {#snippet children(form, formData)}
@@ -95,9 +55,7 @@
           <Ui.Form.FieldErrors />
         </Ui.Form.Field>
 
-        <Ui.Form.SubmitButton variant="default">
-          {disabled ? "Create a session first" : "Send"}
-        </Ui.Form.SubmitButton>
+        <Ui.Form.SubmitButton variant="default">Send</Ui.Form.SubmitButton>
       {/snippet}
     </Ui.Form>
   </Ui.Card.Content>

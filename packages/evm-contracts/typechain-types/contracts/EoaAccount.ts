@@ -87,10 +87,8 @@ export interface EoaAccountInterface extends Interface {
     nameOrSignature:
       | "accountId"
       | "authProviderId"
-      | "dummy"
       | "execute"
-      | "getDigest"
-      | "hello"
+      | "getWebAuthnPublicKey"
       | "nonce"
       | "proofVerifier"
       | "publicKeyRegistry"
@@ -104,7 +102,6 @@ export interface EoaAccountInterface extends Interface {
     functionFragment: "authProviderId",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "dummy", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "execute",
     values: [
@@ -116,10 +113,9 @@ export interface EoaAccountInterface extends Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "getDigest",
-    values: [AddressLike, BytesLike, BigNumberish]
+    functionFragment: "getWebAuthnPublicKey",
+    values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "hello", values?: undefined): string;
   encodeFunctionData(functionFragment: "nonce", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "proofVerifier",
@@ -153,10 +149,11 @@ export interface EoaAccountInterface extends Interface {
     functionFragment: "authProviderId",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "dummy", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getDigest", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "hello", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getWebAuthnPublicKey",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "nonce", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "proofVerifier",
@@ -224,8 +221,6 @@ export interface EoaAccount extends BaseContract {
 
   authProviderId: TypedContractMethod<[], [string], "view">;
 
-  dummy: TypedContractMethod<[], [void], "nonpayable">;
-
   execute: TypedContractMethod<
     [
       to: AddressLike,
@@ -238,13 +233,11 @@ export interface EoaAccount extends BaseContract {
     "nonpayable"
   >;
 
-  getDigest: TypedContractMethod<
-    [to: AddressLike, data: BytesLike, value: BigNumberish],
-    [string],
+  getWebAuthnPublicKey: TypedContractMethod<
+    [],
+    [ECDSA.PublicKeyStructOutput],
     "view"
   >;
-
-  hello: TypedContractMethod<[], [string], "view">;
 
   nonce: TypedContractMethod<[], [bigint], "view">;
 
@@ -290,9 +283,6 @@ export interface EoaAccount extends BaseContract {
     nameOrSignature: "authProviderId"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "dummy"
-  ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
     nameOrSignature: "execute"
   ): TypedContractMethod<
     [
@@ -306,15 +296,8 @@ export interface EoaAccount extends BaseContract {
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "getDigest"
-  ): TypedContractMethod<
-    [to: AddressLike, data: BytesLike, value: BigNumberish],
-    [string],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "hello"
-  ): TypedContractMethod<[], [string], "view">;
+    nameOrSignature: "getWebAuthnPublicKey"
+  ): TypedContractMethod<[], [ECDSA.PublicKeyStructOutput], "view">;
   getFunction(
     nameOrSignature: "nonce"
   ): TypedContractMethod<[], [bigint], "view">;

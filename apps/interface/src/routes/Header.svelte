@@ -44,7 +44,7 @@
   >
     <div class="grow"></div>
     {#if $page.data.session}
-      <Ui.Button onclick={() => signOut()}>Sign out</Ui.Button>
+      <Ui.Button onclick={() => signOut()}>Sign out of Google</Ui.Button>
     {/if}
   </div>
 </header>

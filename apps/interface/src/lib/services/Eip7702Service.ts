@@ -128,14 +128,16 @@ export class Eip7702Service {
   async executeTx({
     credentialId,
     address,
+    to,
+    value,
   }: {
+    to: string;
+    value: bigint;
     credentialId: string;
     address: string;
   }) {
     const accContract = this.#toAccountContract(address);
     const nonce = await accContract.nonce();
-    const to = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
-    const value = ethers.parseEther("1");
     const data = "0x";
     const digest = ethers.AbiCoder.defaultAbiCoder().encode(
       ["uint256", "address", "bytes", "uint256"],
@@ -191,6 +193,24 @@ export class Eip7702Service {
       webAuthnPublicKey,
     });
     return false;
+  }
+
+  async isWebAuthnPublicKeyCorrect({
+    address,
+
+    webAuthnPublicKey,
+  }: {
+    address: string;
+    webAuthnPublicKey: Hex;
+  }) {
+    const accContract = this.#toAccountContract(address);
+    const publicKeyOnChain = await accContract.webauthnPublicKey();
+    return (
+      ethers.concat([
+        ethers.zeroPadValue(ethers.toBeArray(publicKeyOnChain.x), 32),
+        ethers.zeroPadValue(ethers.toBeArray(publicKeyOnChain.y), 32),
+      ]) === webAuthnPublicKey
+    );
   }
 
   #toNonce(webAuthnPublicKey: Hex) {

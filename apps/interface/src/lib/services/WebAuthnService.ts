@@ -10,14 +10,14 @@ export class WebAuthnService {
     undefined,
   );
 
-  async useOrCreateCredential({ name }: { name: string }) {
+  async getOrCreateCredential({ name }: { name: string }) {
     if (!this.#cred.value) {
       this.#cred.value = await this.#createCredential({ name });
     }
     return this.#cred.value;
   }
 
-  async useCredential() {
+  async getCredential() {
     return this.#cred.value!;
   }
 

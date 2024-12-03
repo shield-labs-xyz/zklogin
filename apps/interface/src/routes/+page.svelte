@@ -1,7 +1,9 @@
 <script lang="ts">
   import { lib } from "$lib";
   import { chain, provider } from "$lib/chain.js";
+  import { LocalStore } from "$lib/localStorage.svelte.js";
   import { now } from "$lib/now.svelte.js";
+  import SendEthCard from "$lib/SendEthCard.svelte";
   import { Ui } from "@repo/ui";
   import { utils } from "@repo/utils";
   import { createQuery } from "@tanstack/svelte-query";
@@ -9,23 +11,62 @@
   import { ethers } from "ethers";
   import ms from "ms";
   import { assert } from "ts-essentials";
-  import { privateKeyToAccount } from "viem/accounts";
+  import { isAddress, type Hex } from "viem";
+  import {
+    generatePrivateKey,
+    privateKeyToAccount,
+    privateKeyToAddress,
+  } from "viem/accounts";
 
   let { data } = $props();
 
   let jwt = $derived(data.session?.id_token);
 
-  const acc = privateKeyToAccount(
-    "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6",
-  );
+  const accStore = new LocalStore<
+    | {
+        type: "address";
+        address: Hex;
+      }
+    | {
+        type: "privateKey";
+        privateKey: Hex;
+        address: Hex;
+      }
+    | undefined
+  >("eoa-account", undefined);
+  let acc = $derived(accStore.value);
 
   let codeConnectedQuery = $derived(
     createQuery(
       {
-        queryKey: ["codeSize", acc.address],
+        queryKey: ["codeSize", acc?.address],
         queryFn: async () => {
-          const code = await provider.provider.getCode(acc.address);
+          if (!acc) {
+            return false;
+          }
+          const code = await provider.provider.getCode(acc?.address);
           return ethers.dataLength(code) > 0;
+        },
+        refetchInterval: ms("10 sec"),
+      },
+      lib.queries.queryClient,
+    ),
+  );
+
+  let credentialIsCorrectQuery = $derived(
+    createQuery(
+      {
+        queryKey: ["credentialIsCorrect", provider.chainId, acc?.address],
+        queryFn: async () => {
+          if (!acc) {
+            return true;
+          }
+          const cred = await lib.webAuthn.getCredential();
+          const isCorrect = await lib.eip7702.isWebAuthnPublicKeyCorrect({
+            address: acc.address,
+            webAuthnPublicKey: cred.publicKey,
+          });
+          return isCorrect;
         },
         refetchInterval: ms("10 sec"),
       },
@@ -36,9 +77,11 @@
   let balanceQuery = $derived(
     createQuery(
       {
-        queryKey: ["balance", provider.chainId, acc.address],
+        queryKey: ["balance", provider.chainId, acc?.address],
         queryFn: async () => {
-          const raw = await provider.provider.getBalance(acc.address);
+          const raw = acc
+            ? await provider.provider.getBalance(acc.address)
+            : 0n;
           return `${ethers.formatEther(raw)} ETH`;
         },
         refetchInterval: ms("10 sec"),
@@ -49,11 +92,14 @@
 
   async function connect() {
     assert(jwt, "no session");
+    utils.assertConnected(acc);
+    assert(acc.type === "privateKey", "cannot connect to a recovered account");
 
-    const cred = await lib.webAuthn.useOrCreateCredential({ name: "me" });
+    const accountWithPrivateKey = privateKeyToAccount(acc.privateKey);
+    const cred = await lib.webAuthn.getOrCreateCredential({ name: "me" });
     const tx = await lib.eip7702.authorize({
       jwt,
-      account: acc,
+      account: accountWithPrivateKey,
       webAuthnPublicKey: cred.publicKey,
     });
     console.log("tx", tx);
@@ -66,8 +112,9 @@
   let extendSessionStart = $state<number | undefined>();
   async function recover() {
     assert(jwt, "no session");
+    utils.assertConnected(acc);
 
-    const recoverCred = await lib.webAuthn.useOrCreateCredential({
+    const recoverCred = await lib.webAuthn.getOrCreateCredential({
       name: "me recover",
     });
 
@@ -104,68 +151,56 @@
       <Ui.Card.Title>Google account</Ui.Card.Title>
     </Ui.Card.Header>
     <Ui.Card.Content>
-      <div>
-        Address: {utils.shortAddress(acc.address)}
-        <Ui.CopyButton
-          text={acc.address}
-          class="size-[1em]"
-          iconClass="size-[1em]"
-          variant="ghost"
-        />
-      </div>
+      {#if acc}
+        <div>
+          Address: {utils.shortAddress(acc.address)}
+          <Ui.CopyButton
+            text={acc.address}
+            class="size-[1em]"
+            iconClass="size-[1em]"
+            variant="ghost"
+          />
+        </div>
 
-      <div>
-        Passkeys and Google connected:
-        <Ui.Query query={$codeConnectedQuery}>
-          {#snippet success(data)}
-            {data}
-          {/snippet}
-        </Ui.Query>
-      </div>
-      <div>
-        Balance: <Ui.Query query={$balanceQuery}>
-          {#snippet success(data)}
-            {data}
-          {/snippet}
-        </Ui.Query>
-      </div>
-      <div>Network: {chain.name}</div>
+        <div>
+          Passkeys and Google connected:
+          <Ui.Query query={$codeConnectedQuery}>
+            {#snippet success(data)}
+              {data}
+            {/snippet}
+          </Ui.Query>
+        </div>
+        <div>
+          Balance: <Ui.Query query={$balanceQuery}>
+            {#snippet success(data)}
+              {data}
+            {/snippet}
+          </Ui.Query>
+        </div>
+        <div>Network: {chain.name}</div>
 
-      {#if !jwt}
         <Ui.GapContainer class="gap-2">
-          <Ui.LoadingButton
-            variant="default"
-            style="width: 100%;"
-            onclick={async () => {
-              const cred = await lib.webAuthn.useOrCreateCredential({
-                name: "me",
-              });
-              await lib.eip7702.requestJwt({
-                webAuthnPublicKey: cred.publicKey,
-              });
-            }}
-          >
-            Create passkeys and sign in with Google
-          </Ui.LoadingButton>
-          <Ui.Button href="/how" variant="secondary">How it works</Ui.Button>
-        </Ui.GapContainer>
-      {:else}
-        <Ui.GapContainer>
-          <Ui.LoadingButton
-            variant="default"
-            onclick={connect}
-            disabled={$codeConnectedQuery.data === true}
-          >
-            Connect Passkeys and Google
-          </Ui.LoadingButton>
-          <Ui.GapContainer>
+          {#if !jwt}
             <Ui.LoadingButton
               variant="default"
+              style="width: 100%;"
               onclick={async () => {
-                await recover();
+                const cred = await lib.webAuthn.getOrCreateCredential({
+                  name: "me",
+                });
+                await lib.eip7702.requestJwt({
+                  webAuthnPublicKey: cred.publicKey,
+                });
               }}
-              disabled={$codeConnectedQuery.data === false}
             >
+              Create passkeys and sign in with Google
+            </Ui.LoadingButton>
+          {:else if $codeConnectedQuery.data === false}
+            <Ui.LoadingButton variant="default" onclick={connect}>
+              Connect Passkeys and Google
+            </Ui.LoadingButton>
+          {:else if $credentialIsCorrectQuery.data === false}
+            <Ui.LoadingButton variant="default" onclick={recover}>
               Recover
             </Ui.LoadingButton>
             {#if extendSessionStart}
@@ -183,32 +218,64 @@
                 />
               </div>
             {/if}
-          </Ui.GapContainer>
-
+          {/if}
+          <Ui.Button href="/how" variant="secondary">How it works</Ui.Button>
+        </Ui.GapContainer>
+      {:else}
+        <Ui.GapContainer>
           <Ui.LoadingButton
             variant="default"
-            disabled={$codeConnectedQuery.data === false}
             onclick={async () => {
-              const cred = await lib.webAuthn.useCredential();
-              await lib.eip7702.executeTx({
-                credentialId: cred.id,
-                address: acc.address,
-              });
-              lib.queries.invalidateAll();
+              const privateKey = generatePrivateKey();
+              accStore.value = {
+                type: "privateKey",
+                privateKey,
+                address: privateKeyToAddress(privateKey),
+              };
             }}
           >
-            Send ETH
+            Create account
           </Ui.LoadingButton>
+
+          <Ui.GapContainer>
+            <Ui.LoadingButton
+              variant="default"
+              onclick={async () => {
+                const address = prompt("Enter the address you want to recover");
+                if (address == null) {
+                  return;
+                }
+                assert(isAddress(address), `Invalid address: ${address}`);
+                accStore.value = {
+                  type: "address",
+                  address,
+                };
+              }}
+            >
+              Recover
+            </Ui.LoadingButton>
+          </Ui.GapContainer>
         </Ui.GapContainer>
       {/if}
     </Ui.Card.Content>
   </Ui.Card.Root>
-  <!--
-  <SendEthCard
-    {jwt}
-    {signer}
-    disabled={!jwt ||
-      !$jwtAccountInfo.data?.ownerInfo ||
-      $jwtAccountInfo.data.ownerInfo === "expired"}
-  /> -->
+
+  {#if acc && $codeConnectedQuery.data === true}
+    <SendEthCard address={acc.address} />
+
+    <Ui.LoadingButton
+      variant="destructive"
+      onclick={async () => {
+        const result: boolean = await Ui.toast.confirm({
+          confirmText: "Are you sure you want to forget this account?",
+        });
+        if (!result) {
+          return;
+        }
+        accStore.value = undefined;
+      }}
+    >
+      Forget account
+    </Ui.LoadingButton>
+  {/if}
 </Ui.GapContainer>
