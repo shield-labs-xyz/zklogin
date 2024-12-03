@@ -1,6 +1,6 @@
 <script lang="ts">
   import { lib } from "$lib";
-  import { chain, provider } from "$lib/chain.js";
+  import { chain, provider, relayer } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
   import { now } from "$lib/now.svelte.js";
   import SendEthCard from "$lib/SendEthCard.svelte";
@@ -173,6 +173,22 @@
               {ethers.formatEther(data)} ETH
             {/snippet}
           </Ui.Query>
+
+          {#if $balanceQuery.data === 0n}
+            <Ui.LoadingButton
+              variant="default"
+              size="sm"
+              onclick={async () => {
+                const tx = await relayer.sendTransaction({
+                  to: acc.address,
+                  value: ethers.parseEther("0.001"),
+                });
+                await tx.wait();
+              }}
+            >
+              Top up
+            </Ui.LoadingButton>
+          {/if}
         </div>
         <div>Network: {chain.name}</div>
 
