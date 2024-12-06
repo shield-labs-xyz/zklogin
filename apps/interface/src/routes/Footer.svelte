@@ -12,7 +12,7 @@
             href="https://oleh.wtf"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold hover:underline">oleh</a
+            class="font-semibold hover:underline">oleh.wtf</a
           >
         </p>
       </div>
