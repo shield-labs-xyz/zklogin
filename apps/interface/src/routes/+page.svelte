@@ -62,6 +62,9 @@
             return true;
           }
           const cred = await lib.webAuthn.getCredential();
+          if (!cred) {
+            return false;
+          }
           const isCorrect = await lib.eip7702.isWebAuthnPublicKeyCorrect({
             address: acc.address,
             webAuthnPublicKey: cred.publicKey,

@@ -2,10 +2,11 @@
   import { lib } from "$lib";
   import { Ui } from "@repo/ui";
   import { ethers } from "ethers";
+  import { assert } from "ts-essentials";
   import type { Address } from "viem";
   import { z } from "zod";
-  import { zAddress } from "./utils";
   import { relayer } from "./chain";
+  import { zAddress } from "./utils";
 
   let {
     address,
@@ -30,6 +31,7 @@
       }}
       onsubmit={async (data) => {
         const cred = await lib.webAuthn.getCredential();
+        assert(cred, "no credential");
         const tx = await lib.eip7702.executeTx({
           credentialId: cred.id,
           address,

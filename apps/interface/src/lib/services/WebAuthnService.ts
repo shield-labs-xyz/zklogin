@@ -18,7 +18,7 @@ export class WebAuthnService {
   }
 
   async getCredential() {
-    return this.#cred.value!;
+    return this.#cred.value;
   }
 
   async #createCredential({
