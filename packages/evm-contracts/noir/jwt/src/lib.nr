@@ -13,7 +13,7 @@ global JWT_SUB_MAX_LEN: u32 = 64; // UUID is 36 chars but we add some buffer to 
 // TODO(security): if aud is too long, account is lost
 global JWT_AUD_MAX_LEN: u32 = 256;
 // Note: keep in sync with JS
-global JWT_NONCE_LEN: u32 = 40; // eth address is 40 chars
+global JWT_NONCE_LEN: u32 = 64; // 32 bytes
 
 global PUBKEY_LIMBS_LEN: u32 = 18;
 global SIGNATURE_LIMBS_LEN: u32 = 18;
@@ -59,7 +59,7 @@ pub fn assert_verify_jwt_payload<let N: u32>(payload_json_padded: [u8; N], accou
 
     {
         // verify "jwt.nonce"
-        let jwt_nonce: [u8; 40] = extract_jwt_payload_field_str(haystack, "nonce");
+        let jwt_nonce: [u8; JWT_NONCE_LEN] = extract_jwt_payload_field_str(haystack, "nonce");
         assert(jwt_nonce == expected_jwt_nonce, f"jwt.nonce mismatch: expected {expected_jwt_nonce}, got {jwt_nonce}");
     }
 
@@ -173,7 +173,8 @@ mod tests {
         let sub = "116322252320755218222".as_bytes().pad_end::<crate::JWT_SUB_MAX_LEN>(0);
         let aud = "698109474805-nvfg9hh31kjmb6mmn51d4oiombgr3s3v.apps.googleusercontent.com".as_bytes().pad_end::<crate::JWT_AUD_MAX_LEN>(0);
         let account_id = std::hash::pedersen_hash(nodash::pack_bytes(sub).concat(nodash::pack_bytes(aud)).concat([salt]));
-        assert_verify_jwt_payload(payload_json_padded, account_id, salt, iat, "d8dA6BF26964aF9D7eEd9e03E53415D37aA96045".as_bytes());
+        let payload_json_padded = "{\"iss\":\"https://accounts.google.com\",\"azp\":\"698109474805-nvfg9hh31kjmb6mmn51d4oiombgr3s3v.apps.googleusercontent.com\",\"aud\":\"698109474805-nvfg9hh31kjmb6mmn51d4oiombgr3s3v.apps.googleusercontent.com\",\"sub\":\"116322252320755218222\",\"email\":\"base.email.wallet@gmail.com\",\"email_verified\":true,\"at_hash\":\"W6V7cfuDcUXMy3jXsindSg\",\"nonce\":\"000000000000000000000000d8dA6BF26964aF9D7eEd9e03E53415D37aA96045\",\"name\":\"Test Gmail\",\"picture\":\"https://lh3.googleusercontent.com/a/ACg8ocJUkqWaZU1Kq_TJ1NmjOWYKAgURskqR_H_mEmuHBeFFIBHxVQ=s96-c\",\"given_name\":\"Test\",\"family_name\":\"Gmail\",\"iat\":1729204366,\"exp\":1729207966}".as_bytes();
+        assert_verify_jwt_payload(payload_json_padded, account_id, salt, iat, ["0".as_bytes()[0]; 24].concat("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045".as_bytes()));
     }
 
 

@@ -115,7 +115,7 @@ contract SimpleAccount is
         require(result, "JwtAccount: invalid proof");
 
         ownerInfo = Owner({
-            owner: verificationData.jwtNonce,
+            owner: address(uint160(uint256(verificationData.jwtNonce))),
             expirationTimestamp: uint96(block.timestamp) + OWNER_EXPIRATION_TIME
         });
     }

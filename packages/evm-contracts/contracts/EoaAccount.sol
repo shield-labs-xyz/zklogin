@@ -39,9 +39,8 @@ contract EoaAccount is JwtVerifierP256 {
         ECDSA.PublicKey calldata newP256PublicKey
     ) external {
         require(
-            // TODO(security): don't truncate hash
-            address(bytes20(keccak256(abi.encode(newP256PublicKey)))) ==
-                (verificationData.jwtNonce),
+            keccak256(abi.encode(newP256PublicKey)) ==
+                verificationData.jwtNonce,
             "invalid WebAuthn public key"
         );
 

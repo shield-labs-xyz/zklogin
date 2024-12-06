@@ -1,9 +1,7 @@
-import { provider, publicKeyRegistry } from "$lib/chain";
-import {
-  authProviderId,
-  getGooglePublicKeys,
-  getPublicKeyHash,
-} from "$lib/services/JwtAccountService";
+import { lib } from "$lib";
+import { provider } from "$lib/chain";
+import deployments from "@repo/contracts/deployments.json";
+import { PublicKeyRegistry__factory } from "@repo/contracts/typechain-types";
 import { utils } from "@repo/utils";
 import { error } from "@sveltejs/kit";
 import { config } from "dotenv";
@@ -16,36 +14,50 @@ export async function POST() {
   if (!privateKey) {
     error(500, "misconfigured: signer");
   }
+
+  const publicKeyRegistry = PublicKeyRegistry__factory.connect(
+    deployments[provider.chainId].contracts.PublicKeyRegistry,
+    provider.provider,
+  );
+
   const owner = new ethers.Wallet(privateKey, provider.provider);
   if (!utils.isAddressEqual(await publicKeyRegistry.owner(), owner.address)) {
     error(500, "misconfigured: owner");
   }
 
-  const publicKeys = await getGooglePublicKeys();
-  const pendingPublicKeyHashes = compact(
+  const publicKeys = await lib.publicKeyRegistry.getPublicKeys();
+  const pendingPublicKeys = compact(
     await Promise.all(
       publicKeys.map(async (publicKey) => {
-        const publicKeyHash = await getPublicKeyHash(publicKey.limbs);
         const isValid = await publicKeyRegistry.isPublicKeyHashValid(
-          authProviderId,
-          publicKeyHash,
+          publicKey.authProviderId,
+          publicKey.hash,
         );
         if (isValid) {
           return undefined;
         }
-        return publicKeyHash;
+        return publicKey;
       }),
     ),
   );
-  if (pendingPublicKeyHashes.length === 0) {
+  if (pendingPublicKeys.length === 0) {
     return Response.json({ hash: null });
   }
-  const tx = await publicKeyRegistry.connect(owner).setPublicKeysValid(
-    pendingPublicKeyHashes.map((publicKeyHash) => ({
-      providerId: authProviderId,
-      publicKeyHash,
-      valid: true,
-    })),
-  );
-  return Response.json({ hash: tx.hash });
+  console.log(`updating ${pendingPublicKeys.length} public keys`);
+  try {
+    const tx = await publicKeyRegistry.connect(owner).setPublicKeysValid(
+      pendingPublicKeys.map((publicKey) => ({
+        providerId: publicKey.authProviderId,
+        publicKeyHash: publicKey.hash,
+        valid: true,
+      })),
+    );
+    return Response.json({ hash: tx.hash });
+  } catch (e: any) {
+    console.error(e);
+    return Response.json(
+      { error: "Failed to send transaction" },
+      { status: 500 },
+    );
+  }
 }

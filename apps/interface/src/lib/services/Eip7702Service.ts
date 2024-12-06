@@ -6,8 +6,7 @@ import { EoaAccount__factory } from "@repo/contracts/typechain-types";
 import { Ui } from "@repo/ui";
 import { utils } from "@repo/utils";
 import { ethers } from "ethers";
-import { isEqual } from "lodash-es";
-import ms from "ms";
+import { assert } from "ts-essentials";
 import {
   createWalletClient,
   http,
@@ -18,19 +17,13 @@ import {
 } from "viem";
 import { signAuthorization } from "viem/experimental";
 import { parsePublicKey, sign } from "webauthn-p256";
-import {
-  authProviderId,
-  encodedAddressAsJwtNonce,
-  getAccountIdFromJwt,
-  JWT_EXPIRATION_TIME,
-  prepareJwt,
-  proveJwt,
-} from "./JwtAccountService";
-import type { PublicKeysRegistryService } from "./PublicKeysRegistryService";
+import { getAccountIdFromJwt, type JwtProverService } from "./JwtProverService";
+import type { PublicKeyRegistryService } from "./PublicKeysRegistryService";
 
 export class Eip7702Service {
   constructor(
-    private publicKeysRegistry: PublicKeysRegistryService,
+    private jwtProver: JwtProverService,
+    private publicKeyRegistry: PublicKeyRegistryService,
     private client: Client,
   ) {}
 
@@ -71,6 +64,7 @@ export class Eip7702Service {
     });
 
     const { accountId } = await getAccountIdFromJwt(decodeJwt(jwt));
+    const publicKey = await this.publicKeyRegistry.getPublicKeyByJwt(jwt);
     const publicKeyRegistry = deployments[chain.id].contracts
       .PublicKeyRegistry as `0x${string}`;
     const proofVerifier = deployments[chain.id].contracts
@@ -82,7 +76,7 @@ export class Eip7702Service {
       args: [
         parsePublicKey(webAuthnPublicKey),
         accountId,
-        authProviderId,
+        publicKey.authProviderId,
         publicKeyRegistry,
         proofVerifier,
       ],
@@ -107,12 +101,16 @@ export class Eip7702Service {
       throw new Error("jwt invalid");
     }
 
+    await this.publicKeyRegistry.requestPublicKeysUpdate();
+
+    const result = await this.jwtProver.proveJwt(
+      jwt,
+      this.#toNonce(webAuthnPublicKey).slice("0x".length),
+    );
+    assert(result, "jwt invalid");
+    const { input, proof } = result;
+
     const accContract = this.#toAccountContract(address);
-    const input = await prepareJwt(jwt);
-
-    await this.publicKeysRegistry.storePublicKeyIfNotStored(input);
-
-    const proof = await proveJwt(input);
     const tx = await accContract.connect(relayer).recover(
       {
         proof: ethers.hexlify(proof),
@@ -173,16 +171,11 @@ export class Eip7702Service {
     jwt: string;
     webAuthnPublicKey: Hex;
   }): Promise<boolean> {
-    const input = await prepareJwt(jwt);
-    const jwtNonceMatches = isEqual(
-      encodedAddressAsJwtNonce(this.#toNonce(webAuthnPublicKey).toLowerCase()),
-      input.jwt_nonce,
+    const isValid: boolean = await this.jwtProver.checkJwt(
+      jwt,
+      this.#toNonce(webAuthnPublicKey).slice("0x".length),
     );
-    const expirationMargin = Math.min(ms("20 min"), JWT_EXPIRATION_TIME / 2);
-    const jwtExpired =
-      input.jwt_iat + JWT_EXPIRATION_TIME <
-      Math.floor((Date.now() - expirationMargin) / 1000);
-    if (jwtNonceMatches && !jwtExpired) {
+    if (isValid) {
       return true;
     }
     Ui.toast.log(
@@ -215,15 +208,11 @@ export class Eip7702Service {
 
   #toNonce(webAuthnPublicKey: Hex) {
     const parsed = parsePublicKey(webAuthnPublicKey);
-    const hex = ethers.dataSlice(
-      ethers.keccak256(
-        ethers.AbiCoder.defaultAbiCoder().encode(
-          ["uint256", "uint256"],
-          [parsed.x, parsed.y],
-        ),
+    const hex = ethers.keccak256(
+      ethers.AbiCoder.defaultAbiCoder().encode(
+        ["uint256", "uint256"],
+        [parsed.x, parsed.y],
       ),
-      0,
-      20,
     );
     return hex;
   }

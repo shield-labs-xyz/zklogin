@@ -60,7 +60,7 @@ task("export-all")
         return [chainId, flatten];
       }),
     );
-    // delete flattenExports["31337"]; // ignore hardhat deployments
+    delete flattenExports["31337"]; // ignore hardhat deployments
     fs.writeFileSync(
       filename,
       jsonStringifyDeterministic(flattenExports, { space: "  " }),

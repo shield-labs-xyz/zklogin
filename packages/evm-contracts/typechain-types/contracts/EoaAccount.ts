@@ -65,7 +65,7 @@ export declare namespace JwtVerifierP256 {
   export type VerificationDataStruct = {
     proof: BytesLike;
     jwtIat: BigNumberish;
-    jwtNonce: AddressLike;
+    jwtNonce: BytesLike;
     publicKeyHash: BytesLike;
   };
 

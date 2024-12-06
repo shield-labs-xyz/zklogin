@@ -23,7 +23,6 @@ fn main(
     public_key_limbs: [Field; 18],
     public_key_redc_limbs: [Field; 18],
     //
-    // temporary owner address
     jwt_nonce: pub [u8; jwt::JWT_NONCE_LEN]
 ) {
     {
