@@ -145,14 +145,12 @@ export class ZkLogin {
 
 const getNoir = utils.lazyValue(async () => {
   const { Noir } = await import("@noir-lang/noir_js");
-  const { BarretenbergBackend } = await import(
-    "@noir-lang/backend_barretenberg"
-  );
+  const { UltraPlonkBackend } = await import("@aztec/bb.js");
   const noir = new Noir(circuit as any);
   const threads =
     typeof navigator !== "undefined" ? navigator.hardwareConcurrency : 1;
   console.log(`Using ${threads} threads`);
-  const backend = new BarretenbergBackend(circuit as any, { threads });
+  const backend = new UltraPlonkBackend(circuit.bytecode, { threads });
   return { noir, backend };
 });
 
