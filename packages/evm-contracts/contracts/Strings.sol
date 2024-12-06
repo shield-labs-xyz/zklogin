@@ -3,7 +3,6 @@ pragma solidity ^0.8.27;
 
 library Strings {
     bytes16 private constant HEX_DIGITS = "0123456789abcdef";
-    uint8 private constant ADDRESS_LENGTH = 20;
 
     /**
      * @dev The `value` string doesn't fit in the specified `length`.
@@ -27,8 +26,8 @@ library Strings {
     }
 
     function toHexStringWithoutPrefix(
-        address addr
+        bytes32 value
     ) internal pure returns (string memory) {
-        return toHexStringWithoutPrefix(uint256(uint160(addr)), ADDRESS_LENGTH);
+        return toHexStringWithoutPrefix(uint256(value), 32);
     }
 }

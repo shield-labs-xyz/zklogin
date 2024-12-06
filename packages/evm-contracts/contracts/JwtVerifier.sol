@@ -28,7 +28,7 @@ contract JwtVerifier {
     struct VerificationData {
         bytes proof;
         uint256 jwtIat;
-        address jwtNonce;
+        bytes32 jwtNonce;
         bytes32 publicKeyHash;
     }
 

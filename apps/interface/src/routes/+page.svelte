@@ -4,6 +4,7 @@
   import { LocalStore } from "$lib/localStorage.svelte.js";
   import { now } from "$lib/now.svelte.js";
   import SendEthCard from "$lib/SendEthCard.svelte";
+  import { toJwtNonce } from "$lib/services/JwtAccountService.js";
   import { EXTEND_SESSION_SEARCH_PARAM } from "$lib/utils.js";
   import * as web2Auth from "@auth/sveltekit/client";
   import { Ui } from "@repo/ui";
@@ -69,12 +70,7 @@
   async function extendSessionInner() {
     assert(jwt, "no session");
 
-    await lib.publicKeyRegistry.requestPublicKeysUpdate();
-
-    const result = await lib.jwtProver.proveJwt(
-      jwt,
-      toJwtNonce(await signer.getAddress()),
-    );
+    const result = await lib.jwtProver.proveJwt(jwt, await toJwtNonce(signer));
     if (!result) {
       Ui.toast.log(
         "Sign in again please to link your wallet to your Google account",
@@ -90,7 +86,6 @@
     const tx = await lib.jwtAccount.setOwner(jwt, signer, {
       proof,
       jwtIat: input.jwt_iat,
-      jwtNonce: await signer.getAddress(),
       publicKeyHash: input.public_key_hash,
     });
     console.log("recovery tx", tx);
@@ -105,7 +100,7 @@
     signer: ethers.Signer,
     { extendSessionAfterLogin = false } = {},
   ) {
-    const nonce = toJwtNonce(await signer.getAddress());
+    const nonce = await toJwtNonce(signer);
     const callbackUrl = new URL(location.href);
     if (extendSessionAfterLogin) {
       callbackUrl.searchParams.set(
@@ -120,10 +115,6 @@
         nonce,
       },
     );
-  }
-
-  function toJwtNonce(address: string) {
-    return address.toLowerCase().slice("0x".length);
   }
 
   onMount(async () => {

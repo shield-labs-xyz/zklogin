@@ -1,4 +1,3 @@
-import { decodeJwt, isDeployed } from "$lib/utils";
 import deployments from "@repo/contracts/deployments.json";
 import {
   SimpleAccount__factory,
@@ -16,6 +15,7 @@ import {
   getUserOperationHash,
   toSmartAccount,
 } from "viem/account-abstraction";
+import { decodeJwt, isDeployed } from "../utils";
 import {
   ethersSignerToWalletClient,
   getBundlerClient,
@@ -47,16 +47,16 @@ export class JwtAccountService {
   async setOwner(
     jwt: string,
     owner: ethers.Signer,
-    verificationData: JwtVerifier.VerificationDataStruct,
+    params: Omit<JwtVerifier.VerificationDataStruct, "jwtNonce">,
   ) {
-    assert(
-      utils.isAddressEqual(
-        await owner.getAddress(),
-        await ethers.resolveAddress(verificationData.jwtNonce),
-      ),
-      "jwt.nonce mismatch",
-    );
+    const verificationData = {
+      ...params,
+      jwtNonce: ethers.zeroPadValue(await owner.getAddress(), 32),
+    };
+
     const account = await this.getAccount(jwt, owner);
+
+    await this.publicKeyRegistry.requestPublicKeysUpdate();
 
     const bundlerClient = getBundlerClient(
       await ethersSignerToWalletClient(owner),
@@ -91,6 +91,13 @@ export class JwtAccountService {
       expirationTimestamp: ethers.toNumber(ownerInfo.expirationTimestamp),
     };
   }
+}
+
+export async function toJwtNonce(address: ethers.AddressLike) {
+  return ethers
+    .zeroPadValue(await ethers.resolveAddress(address), 32)
+    .toLowerCase()
+    .slice("0x".length);
 }
 
 export interface JwtSmartAccount
