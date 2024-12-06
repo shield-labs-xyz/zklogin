@@ -2,6 +2,7 @@ import {
   base64UrlToBase64,
   base64UrlToBigInt,
   decodeJwt,
+  isDeployed,
   splitJwt,
 } from "$lib/utils";
 import {
@@ -32,7 +33,6 @@ import {
   ethersSignerToWalletClient,
   getBundlerClient,
 } from "../viemClients.js";
-import { isDeployed } from "./CoinbaseWalletService";
 
 // Note: keep in sync with Noir
 const JWT_HEADER_MAX_LEN = 256;

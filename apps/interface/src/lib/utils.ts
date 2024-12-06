@@ -1,6 +1,12 @@
 import { ethers } from "ethers";
 import { assert } from "ts-essentials";
-import { bytesToBigInt, bytesToString } from "viem";
+import {
+  bytesToBigInt,
+  bytesToString,
+  size,
+  type Address,
+  type PublicClient,
+} from "viem";
 import { z } from "zod";
 
 export function zAddress() {
@@ -68,3 +74,12 @@ export const EXTEND_SESSION_SEARCH_PARAM = {
   key: "extend-session",
   value: "true",
 };
+
+export async function isDeployed(
+  { address }: { address: Address },
+  publicClient: PublicClient,
+) {
+  const code = await publicClient.getCode({ address });
+  const deployed = size(code ?? "0x") > 0;
+  return deployed;
+}

@@ -41,18 +41,6 @@
     new ethers.Wallet(signerPrivateKey.value, provider.provider),
   );
 
-  // let ownersQuery = $derived(
-  //   createQuery(
-  //     {
-  //       queryKey: ["owners", lib.coinbase.address],
-  //       queryFn: async () => {
-  //         return await lib.coinbase.getOwners(owner);
-  //       },
-  //     },
-  //     lib.queries.queryClient,
-  //   ),
-  // );
-
   let jwtAccountInfo = $derived(
     createQuery(
       {
@@ -149,9 +137,6 @@
     });
     Ui.toast.success("Session extended successfully");
     lib.queries.invalidateAll();
-    // const jwtAccount = await lib.jwtAccount.getAccount(jwt, signer.address);
-    // const tx2 = await lib.coinbase.addOwner(jwtAccount, signer.address);
-    // console.log("new owner tx", tx2);
   }
 
   async function signIn(
@@ -189,16 +174,6 @@
     history.replaceState(null, "", url.href);
     await extendSession();
   });
-
-  // async function connectGoogle() {
-  //   assert(jwt, "no session");
-  //   const account = await lib.jwtAccount.getAccount(
-  //     jwt,
-  //     signer,
-  //   );
-  //   const tx = await lib.coinbase.addOwner(owner, account);
-  //   console.log("tx", tx);
-  // }
 </script>
 
 <Ui.GapContainer class="container">
@@ -207,38 +182,6 @@
       <h2>{lib.APP_NAME}</h2>
     </div>
   </section>
-
-  <!--
-  <Ui.Card.Root>
-    <Ui.Card.Header>
-      <Ui.Card.Title>Coinbase Wallet</Ui.Card.Title>
-      {#if lib.coinbase.address}
-        {lib.coinbase.address}
-      {:else}
-        <Ui.LoadingButton
-          variant="default"
-          style="width: 100%;"
-          onclick={async () => {
-            await lib.coinbase.getAccount(owner);
-          }}
-        >
-          Create smart wallet
-        </Ui.LoadingButton>
-      {/if}
-    </Ui.Card.Header>
-
-    <Ui.Card.Content>
-      <h3>Owners</h3>
-      <Ui.Query query={$ownersQuery}>
-        {#snippet success(data)}
-          {#each data as owner}
-            <div>{owner}</div>
-          {/each}
-        {/snippet}
-      </Ui.Query>
-    </Ui.Card.Content>
-  </Ui.Card.Root>
-  -->
 
   <Ui.Card.Root>
     <Ui.Card.Header>
