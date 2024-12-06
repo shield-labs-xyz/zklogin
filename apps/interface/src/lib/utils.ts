@@ -1,3 +1,4 @@
+import { utils } from "@repo/utils";
 import { ethers } from "ethers";
 import { assert } from "ts-essentials";
 import {
@@ -82,4 +83,38 @@ export async function isDeployed(
   const code = await publicClient.getCode({ address });
   const deployed = size(code ?? "0x") > 0;
   return deployed;
+}
+
+export function toBoundedVec(arr: number[], maxLen: number) {
+  const storage = utils.arrayPadEnd(arr, maxLen, 0);
+  return { storage, len: arr.length };
+}
+
+export function noirPackBytes(arr: number[]) {
+  // keep in sync with Noir
+  const arrPadded = utils.arrayPadEnd(
+    arr,
+    (Math.floor(arr.length / 31) + 1) * 31,
+    0,
+  );
+  const res = [];
+  for (let i = 0; i < arrPadded.length / 31; i++) {
+    const chunk = arrPadded.slice(i * 31, i * 31 + 31);
+    res.push(fieldFromBytes(chunk));
+  }
+  return res;
+
+  function fieldFromBytes(bytes: number[]) {
+    assert(
+      bytes.length < 32,
+      `fieldFromBytes: N must be less than 32. Got: ${bytes.length}`,
+    );
+    let asField = 0n;
+    let offset = 1n;
+    for (let i = 0; i < bytes.length; i++) {
+      asField += BigInt(bytes[i]!) * offset;
+      offset *= 256n;
+    }
+    return asField;
+  }
 }

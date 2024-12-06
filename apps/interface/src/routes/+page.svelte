@@ -1,17 +1,9 @@
 <script lang="ts">
   import { getBundlerClient, lib, publicClient } from "$lib";
-  import { chain, provider, publicKeyRegistry } from "$lib/chain.js";
+  import { chain, provider } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
   import { now } from "$lib/now.svelte.js";
   import SendEthCard from "$lib/SendEthCard.svelte";
-  import {
-    authProviderId,
-    encodedAddressAsJwtNonce,
-    getPublicKeyHash,
-    JWT_EXPIRATION_TIME,
-    prepareJwt,
-    proveJwt,
-  } from "$lib/services/JwtAccountService.js";
   import { EXTEND_SESSION_SEARCH_PARAM } from "$lib/utils.js";
   import * as web2Auth from "@auth/sveltekit/client";
   import { Ui } from "@repo/ui";
@@ -19,8 +11,6 @@
   import { createQuery } from "@tanstack/svelte-query";
   import { formatDistance, formatDuration, intervalToDuration } from "date-fns";
   import { ethers } from "ethers";
-  import ky from "ky";
-  import { isEqual } from "lodash-es";
   import ms from "ms";
   import { onMount } from "svelte";
   import { assert } from "ts-essentials";
@@ -78,16 +68,14 @@
   }
   async function extendSessionInner() {
     assert(jwt, "no session");
-    const input = await prepareJwt(jwt);
-    const jwtNonceMatches = isEqual(
-      encodedAddressAsJwtNonce((await signer.getAddress()).toLowerCase()),
-      input.jwt_nonce,
+
+    await lib.publicKeyRegistry.requestPublicKeysUpdate();
+
+    const result = await lib.jwtProver.proveJwt(
+      jwt,
+      toJwtNonce(await signer.getAddress()),
     );
-    const expirationMargin = Math.min(ms("20 min"), JWT_EXPIRATION_TIME / 2);
-    const jwtExpired =
-      input.jwt_iat + JWT_EXPIRATION_TIME <
-      Math.floor((Date.now() - expirationMargin) / 1000);
-    if (!jwtNonceMatches || jwtExpired) {
+    if (!result) {
       Ui.toast.log(
         "Sign in again please to link your wallet to your Google account",
       );
@@ -95,38 +83,12 @@
       await signIn(signer, { extendSessionAfterLogin: true });
       return;
     }
+    const { proof, input } = result;
 
-    {
-      const publicKeyHash = await getPublicKeyHash(input);
-      const valid = await publicKeyRegistry.isPublicKeyHashValid(
-        authProviderId,
-        publicKeyHash,
-      );
-      if (!valid) {
-        await Ui.toast.promise(
-          utils.iife(async () => {
-            const { hash } = await ky
-              .post("/api/register-public-keys")
-              .json<{ hash: string | null }>();
-            if (hash) {
-              await provider.provider.waitForTransaction(hash);
-            }
-          }),
-          {
-            loading: "Updating google public keys...",
-            success: "Google public keys updated",
-            error: (e) =>
-              `Error updating google public keys: ${utils.errorToString(e)}`,
-          },
-        );
-      }
-    }
-
-    const proof = await proveJwt(input);
     console.log("proof", proof);
 
     const tx = await lib.jwtAccount.setOwner(jwt, signer, {
-      proof: ethers.hexlify(proof),
+      proof,
       jwtIat: input.jwt_iat,
       jwtNonce: await signer.getAddress(),
       publicKeyHash: input.public_key_hash,
@@ -143,9 +105,7 @@
     signer: ethers.Signer,
     { extendSessionAfterLogin = false } = {},
   ) {
-    const nonce = ethers
-      .hexlify(ethers.getBytes(await signer.getAddress()))
-      .slice("0x".length);
+    const nonce = toJwtNonce(await signer.getAddress());
     const callbackUrl = new URL(location.href);
     if (extendSessionAfterLogin) {
       callbackUrl.searchParams.set(
@@ -160,6 +120,10 @@
         nonce,
       },
     );
+  }
+
+  function toJwtNonce(address: string) {
+    return address.toLowerCase().slice("0x".length);
   }
 
   onMount(async () => {
