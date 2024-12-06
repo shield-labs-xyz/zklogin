@@ -11,11 +11,11 @@
   "911867": {
     "chainId": "911867",
     "contracts": {
-      "EoaAccount": "0xe3646a25b8C6D0f05Cd4963c50dc7bAa6ced8122",
-      "PublicKeyRegistry": "0x14a2e78045Cd2D8F59e9217e4562DD9836939F5d",
-      "SimpleAccountFactory": "0x8177399B3764423211A1774300e6D8b2C7C6a22d",
-      "UltraVerifier": "0x641D6d03Cba51AEBe02b626918c9aA004fCb6013"
+      "EoaAccount": "0xEfe594CDCc7c3E4DCCF25f75D5203A740445E838",
+      "PublicKeyRegistry": "0x828DEae396706557A02484055D59Adc0376812e4",
+      "SimpleAccountFactory": "0xa712976C582ACa81e2800eF27afcdf157252aAdf",
+      "UltraVerifier": "0xE27Da4C4BC8a447Bb17Bb73eb431EfeBc2faDfaB"
     },
-    "name": "odyssey"
+    "name": "odysseyTestnet"
   }
 }
