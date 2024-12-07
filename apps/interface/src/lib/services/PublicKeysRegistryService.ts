@@ -18,7 +18,7 @@ export class PublicKeyRegistryService {
       return;
     }
 
-    await provider.provider.waitForTransaction(hash);
+    await provider.waitForTransaction(hash);
   }
 
   async getPublicKeyByJwt(jwt: string) {

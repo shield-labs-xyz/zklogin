@@ -28,9 +28,7 @@
     signerPrivateKey.value = ethers.Wallet.createRandom().privateKey;
   }
 
-  let signer = $derived(
-    new ethers.Wallet(signerPrivateKey.value, provider.provider),
-  );
+  let signer = $derived(new ethers.Wallet(signerPrivateKey.value, provider));
 
   let jwtAccountInfo = $derived(
     createQuery(

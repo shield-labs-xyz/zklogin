@@ -21,7 +21,7 @@ const queries = new QueriesService(queryClient);
 const publicKeyRegistry = new PublicKeyRegistryService();
 const jwtAccount = new JwtAccountService(
   publicClient,
-  provider.provider,
+  provider,
   publicKeyRegistry,
 );
 const jwtProver = new JwtProverService(publicKeyRegistry);
