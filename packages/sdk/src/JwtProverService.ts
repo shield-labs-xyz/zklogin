@@ -2,7 +2,7 @@ import { bnToLimbStrArray } from "@mach-34/noir-bignum-paramgen";
 import circuit from "@repo/contracts/noir/target/jwt_account.json";
 import { utils } from "@repo/utils";
 import { isEqual } from "lodash-es";
-import { Base64, Bytes, Hex } from "ox";
+import { Base64, Bytes } from "ox";
 import type { PublicKeyRegistryService } from "./PublicKeysRegistryService.js";
 import { decodeJwt, noirPackBytes, splitJwt, toBoundedVec } from "./utils.js";
 
@@ -25,7 +25,7 @@ export class JwtProverService {
   async proveJwt(jwt: string, expectedNonce: string) {
     const input = await this.prepareJwt(jwt);
 
-    const isValid: boolean = await this.#checkJwt(input, expectedNonce);
+    const isValid: boolean = await this.checkJwt(input, expectedNonce);
     if (!isValid) {
       return undefined;
     }
@@ -97,20 +97,18 @@ export class JwtProverService {
     return input;
   }
 
-  async #checkJwt(
-    input: Awaited<ReturnType<typeof this.prepareJwt>>,
+  async checkJwt(
+    jwt: Awaited<ReturnType<typeof this.prepareJwt>> | string,
     expectedNonce: string,
   ): Promise<boolean> {
-    const jwtNonceMatches = isEqual(
-      toNoirNonce(expectedNonce),
-      input.jwt_nonce,
-    );
+    jwt = typeof jwt === "string" ? await this.prepareJwt(jwt) : jwt;
+    const jwtNonceMatches = isEqual(toNoirNonce(expectedNonce), jwt.jwt_nonce);
     const expirationMargin = Math.min(
       20 * 60 /*seconds*/,
       JWT_EXPIRATION_TIME / 2,
     );
     const jwtExpired =
-      input.jwt_iat + JWT_EXPIRATION_TIME <
+      jwt.jwt_iat + JWT_EXPIRATION_TIME <
       Math.floor((Date.now() - expirationMargin) / 1000);
     return jwtNonceMatches && !jwtExpired;
   }
