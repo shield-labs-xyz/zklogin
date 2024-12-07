@@ -1,18 +1,10 @@
 import { bnToLimbStrArray } from "@mach-34/noir-bignum-paramgen";
 import circuit from "@repo/contracts/noir/target/jwt_account.json";
 import { utils } from "@repo/utils";
-import { ethers } from "ethers";
 import { isEqual } from "lodash-es";
-import ms from "ms";
-import {
-  base64UrlToBase64,
-  base64UrlToBigInt,
-  decodeJwt,
-  noirPackBytes,
-  splitJwt,
-  toBoundedVec,
-} from "../utils";
-import type { PublicKeyRegistryService } from "./PublicKeysRegistryService";
+import { Base64, Bytes, Hex } from "ox";
+import type { PublicKeyRegistryService } from "./PublicKeysRegistryService.js";
+import { decodeJwt, noirPackBytes, splitJwt, toBoundedVec } from "./utils.js";
 
 // Note: keep in sync with Noir
 const JWT_HEADER_MAX_LEN = 256;
@@ -24,12 +16,11 @@ const JWT_PAYLOAD_MAX_LEN = Math.ceil(JWT_PAYLOAD_JSON_MAX_LEN / 3) * 4;
 const JWT_SUB_MAX_LEN = 64;
 // Note: keep in sync with Noir
 const JWT_AUD_MAX_LEN = 256;
-
 // Note: keep in sync with Solidity
-export const JWT_EXPIRATION_TIME = Math.floor(ms("1 hour") / 1000);
+const JWT_EXPIRATION_TIME = 60 * 60; // seconds
 
 export class JwtProverService {
-  constructor(private publicKeyRegistry: PublicKeyRegistryService) {}
+  constructor(readonly publicKeyRegistry: PublicKeyRegistryService) {}
 
   async proveJwt(jwt: string, expectedNonce: string) {
     const input = await this.prepareJwt(jwt);
@@ -48,7 +39,7 @@ export class JwtProverService {
     console.timeEnd("generate proof");
 
     return {
-      proof: ethers.hexlify(proof),
+      proof: Bytes.toHex(proof),
       input,
     };
   }
@@ -58,11 +49,11 @@ export class JwtProverService {
       splitJwt(jwt);
 
     const header_and_payload = toBoundedVec(
-      Array.from(ethers.toUtf8Bytes(`${headerBase64Url}.${payloadBase64Url}`)),
+      Array.from(Bytes.fromString(`${headerBase64Url}.${payloadBase64Url}`)),
       JWT_HEADER_MAX_LEN + 1 + JWT_PAYLOAD_MAX_LEN,
     );
     const payload_json = utils.arrayPadEnd(
-      Array.from(ethers.decodeBase64(base64UrlToBase64(payloadBase64Url))),
+      Array.from(Base64.toBytes(payloadBase64Url)),
       JWT_PAYLOAD_JSON_MAX_LEN,
       " ".charCodeAt(0),
     );
@@ -72,11 +63,11 @@ export class JwtProverService {
         `
       global header_base64url: [u8; ${headerBase64Url.length}] = ${JSON.stringify(headerBase64Url)}.as_bytes();
       global payload_base64url: [u8; ${payloadBase64Url.length}] = ${JSON.stringify(payloadBase64Url)}.as_bytes();
-      global payload_json_padded = ${JSON.stringify(ethers.toUtf8String(Uint8Array.from(payload_json)))}.as_bytes();`,
+      global payload_json_padded = ${JSON.stringify(Bytes.toString(Uint8Array.from(payload_json)))}.as_bytes();`,
       );
     }
     const signature_limbs = bnToLimbStrArray(
-      base64UrlToBigInt(signatureBase64Url),
+      Bytes.toBigInt(Base64.toBytes(signatureBase64Url)),
     );
     const jwtDecoded = decodeJwt(jwt);
     const publicKey = await this.publicKeyRegistry.getPublicKeyByKid(
@@ -114,7 +105,10 @@ export class JwtProverService {
       toNoirNonce(expectedNonce),
       input.jwt_nonce,
     );
-    const expirationMargin = Math.min(ms("20 min"), JWT_EXPIRATION_TIME / 2);
+    const expirationMargin = Math.min(
+      20 * 60 /*seconds*/,
+      JWT_EXPIRATION_TIME / 2,
+    );
     const jwtExpired =
       input.jwt_iat + JWT_EXPIRATION_TIME <
       Math.floor((Date.now() - expirationMargin) / 1000);
@@ -143,14 +137,14 @@ export async function getAccountIdFromJwt(
   const accountId = pedersenHash([
     ...noirPackBytes(
       utils.arrayPadEnd(
-        Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.sub)),
+        Array.from(Bytes.fromString(jwtDecoded.payload.sub)),
         JWT_SUB_MAX_LEN,
         0,
       ),
     ),
     ...noirPackBytes(
       utils.arrayPadEnd(
-        Array.from(ethers.toUtf8Bytes(jwtDecoded.payload.aud)),
+        Array.from(Bytes.fromString(jwtDecoded.payload.aud)),
         JWT_AUD_MAX_LEN,
         0,
       ),
@@ -161,5 +155,5 @@ export async function getAccountIdFromJwt(
 }
 
 function toNoirNonce(nonce: string) {
-  return Array.from(ethers.toUtf8Bytes(nonce));
+  return Array.from(Bytes.fromString(nonce));
 }

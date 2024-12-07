@@ -1,0 +1,46 @@
+{
+  "name": "@shield-labs/zklogin",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "publishConfig": {
+    "main": "dist/index.js",
+    "module": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "dev": "pnpm _chore && tsc -w",
+    "build": "pnpm _chore && rm -rf dist && tsc",
+    "test": "pnpm test:lint && pnpm test:unit",
+    "test:unit": "pnpm _chore && vitest run",
+    "test:lint": "pnpm _chore && tsc --noEmit --emitDeclarationOnly false && prettier --check .",
+    "test:lint:fix": "pnpm _chore && prettier --write . && eslint . --fix",
+    "prepublishOnly": "pnpm test:lint && pnpm build",
+    "_chore": "pnpm i"
+  },
+  "dependencies": {
+    "@aztec/foundation": "0.55.0",
+    "@mach-34/noir-bignum-paramgen": "1.0.2",
+    "@noir-lang/backend_barretenberg": "0.34.0",
+    "@noir-lang/noir_js": "0.34.0",
+    "@repo/contracts": "workspace:*",
+    "@repo/utils": "workspace:*",
+    "ky": "^1.7.2",
+    "lodash-es": "^4.17.21",
+    "ox": "^0.4.0",
+    "ts-essentials": "^10.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.12",
+    "prettier": "^3.2.5",
+    "typescript": "^5.5.2"
+  }
+}
