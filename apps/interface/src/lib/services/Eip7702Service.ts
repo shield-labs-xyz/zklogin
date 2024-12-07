@@ -1,10 +1,10 @@
 import { chain, provider, relayer } from "$lib/chain";
-import { decodeJwt } from "$lib/utils";
 import * as web2Auth from "@auth/sveltekit/client";
 import deployments from "@repo/contracts/deployments.json";
 import { EoaAccount__factory } from "@repo/contracts/typechain-types";
 import { Ui } from "@repo/ui";
 import { utils } from "@repo/utils";
+import { zklogin } from "@shield-labs/zklogin";
 import { ethers } from "ethers";
 import { assert } from "ts-essentials";
 import {
@@ -17,13 +17,10 @@ import {
 } from "viem";
 import { signAuthorization } from "viem/experimental";
 import { parsePublicKey, sign } from "webauthn-p256";
-import { getAccountIdFromJwt, type JwtProverService } from "./JwtProverService";
-import type { PublicKeyRegistryService } from "./PublicKeysRegistryService";
 
 export class Eip7702Service {
   constructor(
-    private jwtProver: JwtProverService,
-    private publicKeyRegistry: PublicKeyRegistryService,
+    private jwtProver: zklogin.JwtProverService,
     private client: Client,
   ) {}
 
@@ -63,8 +60,11 @@ export class Eip7702Service {
       transport: http(),
     });
 
-    const { accountId } = await getAccountIdFromJwt(decodeJwt(jwt));
-    const publicKey = await this.publicKeyRegistry.getPublicKeyByJwt(jwt);
+    const { accountId } = await zklogin.getAccountIdFromJwt(
+      zklogin.decodeJwt(jwt),
+    );
+    const publicKey =
+      await this.jwtProver.publicKeyRegistry.getPublicKeyByJwt(jwt);
     const publicKeyRegistry = deployments[chain.id].contracts
       .PublicKeyRegistry as `0x${string}`;
     const proofVerifier = deployments[chain.id].contracts
@@ -101,7 +101,7 @@ export class Eip7702Service {
       throw new Error("jwt invalid");
     }
 
-    await this.publicKeyRegistry.requestPublicKeysUpdate();
+    await this.jwtProver.publicKeyRegistry.requestPublicKeysUpdate();
 
     const result = await this.jwtProver.proveJwt(
       jwt,

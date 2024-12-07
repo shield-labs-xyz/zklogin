@@ -2,13 +2,10 @@ import {
   bnToLimbStrArray,
   bnToRedcLimbStrArray,
 } from "@mach-34/noir-bignum-paramgen";
-import { Ui } from "@repo/ui";
-import { utils } from "@repo/utils";
-import { ethers } from "ethers";
 import ky from "ky";
+import { Base64, Bytes, Hash } from "ox";
 import { z } from "zod";
-import { provider } from "../chain";
-import { base64UrlToBigInt, decodeJwt } from "../utils";
+import { decodeJwt } from "./utils.js";
 
 export class PublicKeyRegistryService {
   async requestPublicKeysUpdate() {
@@ -20,12 +17,8 @@ export class PublicKeyRegistryService {
       return;
     }
 
-    await Ui.toast.promise(provider.provider.waitForTransaction(hash), {
-      loading: "Updating google public keys...",
-      success: "Google public keys updated",
-      error: (e) =>
-        `Error updating google public keys: ${utils.errorToString(e)}`,
-    });
+    // TODO: wait for transaction
+    // await provider.waitForTransaction(hash);
   }
 
   async getPublicKeyByJwt(jwt: string) {
@@ -56,7 +49,7 @@ export class PublicKeyRegistryService {
   }
 
   async #getPublicKeysByUrl(url: string) {
-    const authProviderId = ethers.id(url) as `0x${string}`;
+    const authProviderId = Bytes.toHex(Hash.keccak256(Bytes.fromString(url)));
     const res = z
       .object({
         keys: z.array(
@@ -68,7 +61,7 @@ export class PublicKeyRegistryService {
       })
       .parse(await ky.get(url).json());
     const keys = res.keys.map(async (key) => {
-      const publicKey = base64UrlToBigInt(key.n);
+      const publicKey = Bytes.toBigInt(Base64.toBytes(key.n));
       const limbs = {
         public_key_limbs: bnToLimbStrArray(publicKey),
         public_key_redc_limbs: bnToRedcLimbStrArray(publicKey),

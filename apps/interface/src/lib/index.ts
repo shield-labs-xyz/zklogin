@@ -1,8 +1,9 @@
 import { browser } from "$app/environment";
+import { zklogin } from "@shield-labs/zklogin";
 import { QueryClient } from "@tanstack/svelte-query";
+import { provider } from "./chain.js";
 import { Eip7702Service } from "./services/Eip7702Service.js";
-import { JwtProverService } from "./services/JwtProverService.js";
-import { PublicKeyRegistryService } from "./services/PublicKeysRegistryService.js";
+import { JwtAccountService } from "./services/JwtAccountService.js";
 import { QueriesService } from "./services/QueriesService.svelte.js";
 import { WebAuthnService } from "./services/WebAuthnService.js";
 import { publicClient } from "./viemClients.js";
@@ -19,9 +20,15 @@ const queryClient = new QueryClient({
 
 const queries = new QueriesService(queryClient);
 const webAuthn = new WebAuthnService();
-const publicKeyRegistry = new PublicKeyRegistryService();
-const jwtProver = new JwtProverService(publicKeyRegistry);
-const eip7702 = new Eip7702Service(jwtProver, publicKeyRegistry, publicClient);
+const jwtProver = new zklogin.JwtProverService(
+  new zklogin.PublicKeyRegistryService(),
+);
+const eip7702 = new Eip7702Service(jwtProver, publicClient);
+const jwtAccount = new JwtAccountService(
+  publicClient,
+  provider,
+  jwtProver.publicKeyRegistry,
+);
 
 const APP_NAME = "zkLogin";
 export const lib = {
@@ -29,6 +36,5 @@ export const lib = {
   queries,
   eip7702,
   webAuthn,
-  publicKeyRegistry,
   jwtProver,
 };

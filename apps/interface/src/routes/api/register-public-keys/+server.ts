@@ -1,5 +1,5 @@
 import { lib } from "$lib";
-import { provider } from "$lib/chain";
+import { chain, provider } from "$lib/chain";
 import deployments from "@repo/contracts/deployments.json";
 import { PublicKeyRegistry__factory } from "@repo/contracts/typechain-types";
 import { utils } from "@repo/utils";
@@ -16,16 +16,16 @@ export async function POST() {
   }
 
   const publicKeyRegistry = PublicKeyRegistry__factory.connect(
-    deployments[provider.chainId].contracts.PublicKeyRegistry,
-    provider.provider,
+    deployments[chain.id].contracts.PublicKeyRegistry,
+    provider,
   );
 
-  const owner = new ethers.Wallet(privateKey, provider.provider);
+  const owner = new ethers.Wallet(privateKey, provider);
   if (!utils.isAddressEqual(await publicKeyRegistry.owner(), owner.address)) {
     error(500, "misconfigured: owner");
   }
 
-  const publicKeys = await lib.publicKeyRegistry.getPublicKeys();
+  const publicKeys = await lib.jwtProver.publicKeyRegistry.getPublicKeys();
   const pendingPublicKeys = compact(
     await Promise.all(
       publicKeys.map(async (publicKey) => {

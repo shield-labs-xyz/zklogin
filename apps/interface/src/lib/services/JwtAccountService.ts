@@ -6,6 +6,7 @@ import {
 } from "@repo/contracts/typechain-types";
 import type { JwtVerifier } from "@repo/contracts/typechain-types/contracts/SimpleAccount.js";
 import { utils } from "@repo/utils";
+import { zklogin } from "@shield-labs/zklogin";
 import { ethers } from "ethers";
 import { assert } from "ts-essentials";
 import type { Address, Hex, PublicClient, SignableMessage } from "viem";
@@ -15,19 +16,17 @@ import {
   getUserOperationHash,
   toSmartAccount,
 } from "viem/account-abstraction";
-import { decodeJwt, isDeployed } from "../utils";
+import { isDeployed } from "../utils";
 import {
   ethersSignerToWalletClient,
   getBundlerClient,
 } from "../viemClients.js";
-import { getAccountIdFromJwt } from "./JwtProverService.js";
-import type { PublicKeyRegistryService } from "./PublicKeysRegistryService.js";
 
 export class JwtAccountService {
   constructor(
     private publicClient: PublicClient,
     private provider: ethers.Provider,
-    private publicKeyRegistry: PublicKeyRegistryService,
+    private publicKeyRegistry: zklogin.PublicKeyRegistryService,
   ) {}
 
   async getAccount(
@@ -237,7 +236,9 @@ async function getJwtAccountInitParams({
   jwt: string;
   authProviderId: string;
 }): Promise<SimpleAccount.InitializeParamsStruct> {
-  const { accountId } = await getAccountIdFromJwt(decodeJwt(jwt));
+  const { accountId } = await zklogin.getAccountIdFromJwt(
+    zklogin.decodeJwt(jwt),
+  );
   return {
     accountId,
     authProviderId,

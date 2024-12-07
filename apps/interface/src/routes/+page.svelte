@@ -56,7 +56,7 @@
   let credentialIsCorrectQuery = $derived(
     createQuery(
       {
-        queryKey: ["credentialIsCorrect", provider.chainId, acc?.address],
+        queryKey: ["credentialIsCorrect", chain.id, acc?.address],
         queryFn: async () => {
           if (!acc) {
             return true;
@@ -80,9 +80,9 @@
   let balanceQuery = $derived(
     createQuery(
       {
-        queryKey: ["balance", provider.chainId, acc?.address],
+        queryKey: ["balance", chain.id, acc?.address],
         queryFn: async () => {
-          return acc ? await provider.provider.getBalance(acc.address) : 0n;
+          return acc ? await provider.getBalance(acc.address) : 0n;
         },
         refetchInterval: ms("10 sec"),
       },
