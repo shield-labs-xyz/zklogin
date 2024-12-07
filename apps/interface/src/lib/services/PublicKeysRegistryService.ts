@@ -2,8 +2,6 @@ import {
   bnToLimbStrArray,
   bnToRedcLimbStrArray,
 } from "@mach-34/noir-bignum-paramgen";
-import { Ui } from "@repo/ui";
-import { utils } from "@repo/utils";
 import { ethers } from "ethers";
 import ky from "ky";
 import { z } from "zod";
@@ -20,12 +18,7 @@ export class PublicKeyRegistryService {
       return;
     }
 
-    await Ui.toast.promise(provider.provider.waitForTransaction(hash), {
-      loading: "Updating google public keys...",
-      success: "Google public keys updated",
-      error: (e) =>
-        `Error updating google public keys: ${utils.errorToString(e)}`,
-    });
+    await provider.provider.waitForTransaction(hash);
   }
 
   async getPublicKeyByJwt(jwt: string) {
