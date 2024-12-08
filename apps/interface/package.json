@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@auth/sveltekit": "^1.7.0",
+    "@aztec/foundation": "0.55.0",
     "@metamask/jazzicon": "^2.0.0",
     "@noir-lang/acvm_js": "0.50.0",
     "@noir-lang/noir_wasm": "0.34.0",

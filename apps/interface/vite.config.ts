@@ -5,7 +5,7 @@ import copy from "rollup-plugin-copy";
 import { defineConfig, type Plugin } from "vite";
 import resolve from "vite-plugin-resolve";
 
-export default defineConfig((configEnv) => ({
+export default defineConfig(() => ({
   plugins: [
     sveltekit(),
     copy({
@@ -18,7 +18,7 @@ export default defineConfig((configEnv) => ({
     wasmContentTypePlugin(),
     resolve({
       util: `export const inspect = {}`,
-      ...(process.env.NODE_ENV === "production" && !configEnv.isSsrBuild
+      ...(process.env.NODE_ENV === "production"
         ? {
             // `unreachable` error in wasm is caused by incorrect version of bb.js. Consult pnpm-lock.yaml
             "@aztec/bb.js": `export * from "https://unpkg.com/@aztec/bb.js@0.55.0/dest/browser/index.js"`,

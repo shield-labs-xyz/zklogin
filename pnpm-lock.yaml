@@ -28,6 +28,9 @@ importers:
       '@auth/sveltekit':
         specifier: ^1.7.0
         version: 1.7.0(@sveltejs/kit@2.7.2(@sveltejs/vite-plugin-svelte@4.0.0(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(svelte@5.0.5)
+      '@aztec/foundation':
+        specifier: 0.55.0
+        version: 0.55.0
       '@metamask/jazzicon':
         specifier: ^2.0.0
         version: 2.0.0
@@ -4855,7 +4858,7 @@ snapshots:
     dependencies:
       '@aztec/bb.js': 0.55.0
       '@koa/cors': 5.0.0
-      '@noble/curves': 1.6.0
+      '@noble/curves': 1.7.0
       bn.js: 5.2.1
       debug: 4.3.7(supports-color@8.1.1)
       detect-node: 2.1.0
