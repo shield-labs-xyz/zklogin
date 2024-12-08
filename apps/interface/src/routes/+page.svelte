@@ -68,7 +68,7 @@
   async function extendSessionInner() {
     assert(jwt, "no session");
 
-    const result = await lib.jwtProver.proveJwt(jwt, await toJwtNonce(signer));
+    const result = await lib.zkLogin.proveJwt(jwt, await toJwtNonce(signer));
     if (!result) {
       Ui.toast.log(
         "Sign in again please to link your wallet to your Google account",

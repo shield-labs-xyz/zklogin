@@ -5,7 +5,7 @@ import circuit from "@shield-labs/zklogin-contracts/noir/target/jwt_account.json
 import { isEqual } from "lodash-es";
 import { Base64, Bytes, type Hex } from "ox";
 import { assert } from "ts-essentials";
-import type { PublicKeyRegistryService } from "./PublicKeysRegistryService.js";
+import { PublicKeyRegistry } from "./PublicKeyRegistry.js";
 import { decodeJwt, noirPackBytes, splitJwt, toBoundedVec } from "./utils.js";
 
 // Note: keep in sync with Noir
@@ -21,8 +21,8 @@ const JWT_AUD_MAX_LEN = 256;
 // Note: keep in sync with Solidity
 const JWT_EXPIRATION_TIME = 60 * 60; // seconds
 
-export class JwtProverService {
-  constructor(readonly publicKeyRegistry: PublicKeyRegistryService) {}
+export class ZkLogin {
+  constructor(readonly publicKeyRegistry = new PublicKeyRegistry()) {}
 
   async proveJwt(jwt: string, expectedNonce: string) {
     const input = await this.prepareJwt(jwt);

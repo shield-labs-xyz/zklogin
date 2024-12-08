@@ -18,16 +18,14 @@ const queryClient = new QueryClient({
 
 const chain = new ChainService();
 const queries = new QueriesService(queryClient);
-const jwtProver = new zklogin.JwtProverService(
-  new zklogin.PublicKeyRegistryService(""),
-);
-const jwtAccount = new JwtAccountService(publicClient, provider, jwtProver);
+const zkLogin = new zklogin.ZkLogin(new zklogin.PublicKeyRegistry(""));
+const jwtAccount = new JwtAccountService(publicClient, provider, zkLogin);
 
 const APP_NAME = "zkLogin";
 export const lib = {
   APP_NAME,
   queries,
   chain,
-  jwtProver,
+  zkLogin,
   jwtAccount,
 };

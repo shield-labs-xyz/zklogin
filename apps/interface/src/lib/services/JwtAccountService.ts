@@ -25,14 +25,14 @@ export class JwtAccountService {
   constructor(
     private publicClient: PublicClient & { chain: Chain },
     private provider: ethers.Provider,
-    private jwtProver: zklogin.JwtProverService,
+    private zkLogin: zklogin.ZkLogin,
   ) {}
 
   async getAccount(
     jwt: string,
     owner: ethers.Signer,
   ): Promise<JwtSmartAccount> {
-    const accountData = await this.jwtProver.getAccountDataFromJwt(
+    const accountData = await this.zkLogin.getAccountDataFromJwt(
       jwt,
       this.publicClient.chain.id,
     );
@@ -56,7 +56,7 @@ export class JwtAccountService {
 
     const account = await this.getAccount(jwt, owner);
 
-    const hash = await this.jwtProver.publicKeyRegistry.requestPublicKeysUpdate(
+    const hash = await this.zkLogin.publicKeyRegistry.requestPublicKeysUpdate(
       this.publicClient.chain.id,
     );
     if (hash) {

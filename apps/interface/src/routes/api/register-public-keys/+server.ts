@@ -48,7 +48,7 @@ export async function POST({ request }) {
     error(500, "misconfigured: owner");
   }
 
-  const publicKeys = await lib.jwtProver.publicKeyRegistry.getPublicKeys();
+  const publicKeys = await lib.zkLogin.publicKeyRegistry.getPublicKeys();
   const pendingPublicKeys = compact(
     await Promise.all(
       publicKeys.map(async (publicKey) => {

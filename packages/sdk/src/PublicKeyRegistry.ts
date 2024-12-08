@@ -8,7 +8,7 @@ import { Base64, Bytes, Hash, Hex } from "ox";
 import { z } from "zod";
 import { decodeJwt, HOSTED_SERVICE_URL } from "./utils.js";
 
-export class PublicKeyRegistryService {
+export class PublicKeyRegistry {
   constructor(private apiUrl = HOSTED_SERVICE_URL) {}
 
   // TODO: more specific chainId type

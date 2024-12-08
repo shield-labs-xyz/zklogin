@@ -1,2 +1,2 @@
-export { JwtProverService } from "./JwtProverService.js";
-export { PublicKeyRegistryService } from "./PublicKeysRegistryService.js";
+export { ZkLogin } from "./ZkLoginSdk.js";
+export { PublicKeyRegistry } from "./PublicKeyRegistry.js";
