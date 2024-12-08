@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "pnpm _chore && vite dev --port 5193",
-    "build": "pnpm _chore && pnpm test:lint && vite build",
+    "build": "pnpm _chore && pnpm test:lint && vite build --ssr",
     "preview": "vite preview",
     "test": "pnpm test:lint && pnpm test:unit",
     "test:unit": "pnpm _chore && vitest run",
