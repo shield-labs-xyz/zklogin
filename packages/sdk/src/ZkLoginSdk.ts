@@ -58,7 +58,7 @@ export class ZkLogin {
     const publicKeyRegistry = deployments[checkedChainId].contracts
       .PublicKeyRegistry as Hex.Hex;
     const proofVerifier = deployments[checkedChainId].contracts
-      .UltraVerifier as Hex.Hex;
+      .HonkVerifier as Hex.Hex;
 
     const publicKey = await this.publicKeyRegistry.getPublicKeyByKid(
       decoded.header.kid,
@@ -145,12 +145,12 @@ export class ZkLogin {
 
 const getNoir = utils.lazyValue(async () => {
   const { Noir } = await import("@noir-lang/noir_js");
-  const { UltraPlonkBackend } = await import("@aztec/bb.js");
+  const { UltraHonkBackend } = await import("@aztec/bb.js");
   const noir = new Noir(circuit as any);
   const threads =
     typeof navigator !== "undefined" ? navigator.hardwareConcurrency : 1;
   console.log(`Using ${threads} threads`);
-  const backend = new UltraPlonkBackend(circuit.bytecode, { threads });
+  const backend = new UltraHonkBackend(circuit.bytecode, { threads });
   return { noir, backend };
 });
 

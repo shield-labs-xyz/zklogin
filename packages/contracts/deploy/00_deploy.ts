@@ -5,6 +5,7 @@ declare module "hardhat/types/runtime" {
     PublicKeyRegistry: "PublicKeyRegistry";
     SimpleAccountFactory: "SimpleAccountFactory";
     UltraVerifier: "UltraVerifier";
+    HonkVerifier: "HonkVerifier";
   }
 }
 
@@ -20,6 +21,11 @@ const deploy: DeployFunction = async ({
   });
 
   await typedDeployments.deploy("UltraVerifier", {
+    from: deployer,
+    log: true,
+  });
+
+  await typedDeployments.deploy("HonkVerifier", {
     from: deployer,
     log: true,
   });
