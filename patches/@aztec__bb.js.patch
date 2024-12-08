@@ -1,0 +1,46 @@
+diff --git a/dest/browser/index.js b/dest/browser/index.js
+index 811186d94322e0bfeac3891b6dab40e23c481fa7..61cce0dc721635f6590736a5145b57dc41719726 100644
+--- a/dest/browser/index.js
++++ b/dest/browser/index.js
+@@ -7343,7 +7343,7 @@ BarretenbergWasmMain.MAX_THREADS = 32;
+ /* harmony import */ var comlink__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(375);
+ 
+ function getSharedMemoryAvailable() {
+-    const globalScope = typeof window !== 'undefined' ? window : self;
++    const globalScope = typeof window !== 'undefined' ? window : globalThis;
+     return typeof SharedArrayBuffer !== 'undefined' && globalScope.crossOriginIsolated;
+ }
+ function getRemoteBarretenbergWasm(worker) {
+@@ -14860,8 +14860,8 @@ const randomBytes = (len) => {
+     const getWebCrypto = () => {
+         if (typeof window !== 'undefined' && window.crypto)
+             return window.crypto;
+-        if (typeof self !== 'undefined' && self.crypto)
+-            return self.crypto;
++        if (typeof globalThis !== 'undefined' && globalThis.crypto)
++            return globalThis.crypto;
+         return undefined;
+     };
+     const crypto = getWebCrypto();
+@@ -16127,7 +16127,7 @@ function generateUUID() {
+ /******/ 	
+ /******/ 	}
+ /******/ 	
+-/******/ 	var chunkLoadingGlobal = self["webpackChunk_aztec_bb_js"] = self["webpackChunk_aztec_bb_js"] || [];
++/******/ 	var chunkLoadingGlobal = globalThis["webpackChunk_aztec_bb_js"] = globalThis["webpackChunk_aztec_bb_js"] || [];
+ /******/ 	chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
+ /******/ 	chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
+ /******/ })();
+diff --git a/package.json b/package.json
+index 42a97212870a0be469f3fee55be595b1735dfd25..e17f7e10c543e45791734ec4a9c1a52ff5b64aa8 100644
+--- a/package.json
++++ b/package.json
+@@ -10,7 +10,7 @@
+     ".": {
+       "require": "./dest/node-cjs/index.js",
+       "browser": "./dest/browser/index.js",
+-      "default": "./dest/node/index.js"
++      "default": "./dest/browser/index.js"
+     }
+   },
+   "bin": "./dest/node/main.js",

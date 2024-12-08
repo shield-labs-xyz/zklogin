@@ -15,6 +15,15 @@
             class="font-semibold hover:underline">oleh.wtf</a
           >
         </p>
+        <p>
+          <a
+            href="/privacy"
+            class="text-sm text-gray-600 hover:underline"
+            rel="noopener noreferrer"
+          >
+            Privacy Policy
+          </a>
+        </p>
       </div>
       <div class="mb-4 md:mb-0">
         <p class="text-sm text-gray-600">
