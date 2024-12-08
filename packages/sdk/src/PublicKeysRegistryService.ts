@@ -2,15 +2,16 @@ import {
   bnToLimbStrArray,
   bnToRedcLimbStrArray,
 } from "@mach-34/noir-bignum-paramgen";
+import { utils } from "@shield-labs/utils";
 import ky from "ky";
 import { Base64, Bytes, Hash } from "ox";
 import { z } from "zod";
-import { decodeJwt } from "./utils.js";
+import { decodeJwt, HOSTED_SERVICE_URL } from "./utils.js";
 
 export class PublicKeyRegistryService {
   async requestPublicKeysUpdate() {
     const { hash } = await ky
-      .post("/api/register-public-keys")
+      .post(utils.joinUrl(HOSTED_SERVICE_URL, "/api/register-public-keys"))
       .json<{ hash: string | null }>();
 
     if (!hash) {
