@@ -105,7 +105,7 @@ contract SimpleAccount is
             verificationData.jwtIat + JWT_EXPIRATION_TIME >= block.timestamp,
             "JwtAccount: expired proof"
         );
-        bool result = ZkLogin.verifyJwtProof(accountData, verificationData);
+        bool result = ZkLogin.verifyProof(accountData, verificationData);
         require(result, "JwtAccount: invalid proof");
 
         ownerInfo = Owner({

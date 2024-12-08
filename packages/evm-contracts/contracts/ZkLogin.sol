@@ -20,7 +20,7 @@ library ZkLogin {
         bytes32 publicKeyHash;
     }
 
-    function verifyJwtProof(
+    function verifyProof(
         AccountData memory accountData,
         VerificationData memory verificationData
     ) internal view returns (bool) {

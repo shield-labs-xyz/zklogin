@@ -14,7 +14,7 @@ contract TestJwtAccount {
     function verify(
         ZkLogin.VerificationData calldata verificationData
     ) external {
-        bool result = ZkLogin.verifyJwtProof(accountData, verificationData);
+        bool result = ZkLogin.verifyProof(accountData, verificationData);
         require(result, "JwtAccount: invalid proof");
     }
 }
