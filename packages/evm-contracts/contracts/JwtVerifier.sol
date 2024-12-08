@@ -5,7 +5,7 @@ import {UltraVerifier} from "../noir/target/jwt_account.sol";
 import {Strings} from "./Strings.sol";
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 
-contract JwtVerifier {
+library JwtVerifier {
     struct AccountData {
         bytes32 accountId;
         bytes32 authProviderId;
@@ -20,9 +20,9 @@ contract JwtVerifier {
         bytes32 publicKeyHash;
     }
 
-    function _verifyJwtProof(
+    function verifyJwtProof(
         AccountData memory accountData,
-        VerificationData memory verificationData
+        JwtVerifier.VerificationData memory verificationData
     ) internal view returns (bool) {
         require(
             accountData.publicKeyRegistry.checkPublicKey(
