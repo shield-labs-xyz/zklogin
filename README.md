@@ -15,6 +15,8 @@ zkLogin uses zero knowledge proofs to verify the ownership of a Google account t
 
 zkLogin uses [Noir](https://noir-lang.org/) to generate zk proofs and verify them on-chain.
 
+Checkout slides from my talk at NoirCon 0 for an in depth explanation of the technology: [NoirCon 0 zkLogin slides](https://www.canva.com/design/DAGVuaqexRM/Tq8sEd2AE60vh3PZwbsWjw/view?utm_content=DAGVuaqexRM&utm_campaign=designshare&utm_medium=link&utm_source=editor).
+
 ## Integrate into your project
 
 [zkLogin SDK Docs](./packages/sdk/README.md)
