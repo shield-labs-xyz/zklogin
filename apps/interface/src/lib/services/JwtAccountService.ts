@@ -1,11 +1,11 @@
-import deployments from "@repo/contracts/deployments.json";
+import { utils } from "@shield-labs/utils";
+import { zklogin } from "@shield-labs/zklogin";
+import deployments from "@shield-labs/zklogin-contracts/deployments.json";
 import {
   SimpleAccount__factory,
   SimpleAccountFactory__factory,
-} from "@repo/contracts/typechain-types";
-import type { JwtVerifier } from "@repo/contracts/typechain-types/contracts/SimpleAccount.js";
-import { utils } from "@shield-labs/utils";
-import { zklogin } from "@shield-labs/zklogin";
+} from "@shield-labs/zklogin-contracts/typechain-types";
+import type { JwtVerifier } from "@shield-labs/zklogin-contracts/typechain-types/contracts/SimpleAccount.js";
 import { ethers } from "ethers";
 import { assert } from "ts-essentials";
 import type { Address, Hex, PublicClient, SignableMessage } from "viem";

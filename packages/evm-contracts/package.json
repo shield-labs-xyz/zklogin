@@ -1,11 +1,15 @@
 {
-  "name": "@repo/contracts",
-  "private": true,
+  "name": "@shield-labs/zklogin-contracts",
+  "version": "0.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "compile": "hardhat compile --typecheck",
     "test": "hardhat test --typecheck",
     "test:no-typecheck": "hardhat test",
-    "deploy": "hardhat deploy-and-export --tags all"
+    "deploy": "hardhat deploy-and-export --tags all",
+    "prepublishOnly": "pnpm compile"
   },
   "devDependencies": {
     "@account-abstraction/contracts": "0.7.0",
