@@ -71,7 +71,7 @@ export declare namespace SimpleAccount {
   ] & { target: string; value: bigint; data: string };
 }
 
-export declare namespace JwtVerifier {
+export declare namespace ZkLogin {
   export type AccountDataStruct = {
     accountId: BytesLike;
     authProviderId: BytesLike;
@@ -173,7 +173,7 @@ export interface SimpleAccountInterface extends Interface {
   encodeFunctionData(functionFragment: "getNonce", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [JwtVerifier.AccountDataStruct]
+    values: [ZkLogin.AccountDataStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "onERC1155BatchReceived",
@@ -200,7 +200,7 @@ export interface SimpleAccountInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setOwner",
-    values: [JwtVerifier.VerificationDataStruct]
+    values: [ZkLogin.VerificationDataStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
@@ -382,7 +382,7 @@ export interface SimpleAccount extends BaseContract {
   getNonce: TypedContractMethod<[], [bigint], "view">;
 
   initialize: TypedContractMethod<
-    [accountData_: JwtVerifier.AccountDataStruct],
+    [accountData_: ZkLogin.AccountDataStruct],
     [void],
     "nonpayable"
   >;
@@ -426,7 +426,7 @@ export interface SimpleAccount extends BaseContract {
   proxiableUUID: TypedContractMethod<[], [string], "view">;
 
   setOwner: TypedContractMethod<
-    [verificationData: JwtVerifier.VerificationDataStruct],
+    [verificationData: ZkLogin.VerificationDataStruct],
     [void],
     "nonpayable"
   >;
@@ -512,7 +512,7 @@ export interface SimpleAccount extends BaseContract {
   getFunction(
     nameOrSignature: "initialize"
   ): TypedContractMethod<
-    [accountData_: JwtVerifier.AccountDataStruct],
+    [accountData_: ZkLogin.AccountDataStruct],
     [void],
     "nonpayable"
   >;
@@ -562,7 +562,7 @@ export interface SimpleAccount extends BaseContract {
   getFunction(
     nameOrSignature: "setOwner"
   ): TypedContractMethod<
-    [verificationData: JwtVerifier.VerificationDataStruct],
+    [verificationData: ZkLogin.VerificationDataStruct],
     [void],
     "nonpayable"
   >;

@@ -21,7 +21,7 @@ import type {
   TypedContractMethod,
 } from "../common";
 
-export declare namespace JwtVerifier {
+export declare namespace ZkLogin {
   export type AccountDataStruct = {
     accountId: BytesLike;
     authProviderId: BytesLike;
@@ -70,7 +70,7 @@ export interface TestJwtAccountInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "verify",
-    values: [JwtVerifier.VerificationDataStruct]
+    values: [ZkLogin.VerificationDataStruct]
   ): string;
 
   decodeFunctionResult(
@@ -137,7 +137,7 @@ export interface TestJwtAccount extends BaseContract {
   >;
 
   verify: TypedContractMethod<
-    [verificationData: JwtVerifier.VerificationDataStruct],
+    [verificationData: ZkLogin.VerificationDataStruct],
     [void],
     "nonpayable"
   >;
@@ -163,7 +163,7 @@ export interface TestJwtAccount extends BaseContract {
   getFunction(
     nameOrSignature: "verify"
   ): TypedContractMethod<
-    [verificationData: JwtVerifier.VerificationDataStruct],
+    [verificationData: ZkLogin.VerificationDataStruct],
     [void],
     "nonpayable"
   >;

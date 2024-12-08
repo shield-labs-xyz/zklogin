@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {SimpleAccount, IEntryPoint} from "./SimpleAccount.sol";
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
-import {JwtVerifier} from "./JwtVerifier.sol";
+import {ZkLogin} from "./ZkLogin.sol";
 
 /**
  * A sample factory contract for SimpleAccount
@@ -28,7 +28,7 @@ contract SimpleAccountFactory {
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
     function createAccount(
-        JwtVerifier.AccountData calldata params
+        ZkLogin.AccountData calldata params
     ) public returns (SimpleAccount ret) {
         // TODO: create2 address should depend only on accountId and jwt.aud (and maybe "jwt.iss"?)
         ret = SimpleAccount(
@@ -45,7 +45,7 @@ contract SimpleAccountFactory {
      * calculate the counterfactual address of this account as it would be returned by createAccount()
      */
     function getAccountAddress(
-        JwtVerifier.AccountData calldata params
+        ZkLogin.AccountData calldata params
     ) public view returns (address) {
         return
             Create2.computeAddress(

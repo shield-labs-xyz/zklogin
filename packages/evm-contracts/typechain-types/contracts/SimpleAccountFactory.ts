@@ -20,7 +20,7 @@ import type {
   TypedContractMethod,
 } from "../common";
 
-export declare namespace JwtVerifier {
+export declare namespace ZkLogin {
   export type AccountDataStruct = {
     accountId: BytesLike;
     authProviderId: BytesLike;
@@ -55,11 +55,11 @@ export interface SimpleAccountFactoryInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createAccount",
-    values: [JwtVerifier.AccountDataStruct]
+    values: [ZkLogin.AccountDataStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "getAccountAddress",
-    values: [JwtVerifier.AccountDataStruct]
+    values: [ZkLogin.AccountDataStruct]
   ): string;
 
   decodeFunctionResult(
@@ -122,13 +122,13 @@ export interface SimpleAccountFactory extends BaseContract {
   accountImplementation: TypedContractMethod<[], [string], "view">;
 
   createAccount: TypedContractMethod<
-    [params: JwtVerifier.AccountDataStruct],
+    [params: ZkLogin.AccountDataStruct],
     [string],
     "nonpayable"
   >;
 
   getAccountAddress: TypedContractMethod<
-    [params: JwtVerifier.AccountDataStruct],
+    [params: ZkLogin.AccountDataStruct],
     [string],
     "view"
   >;
@@ -143,17 +143,13 @@ export interface SimpleAccountFactory extends BaseContract {
   getFunction(
     nameOrSignature: "createAccount"
   ): TypedContractMethod<
-    [params: JwtVerifier.AccountDataStruct],
+    [params: ZkLogin.AccountDataStruct],
     [string],
     "nonpayable"
   >;
   getFunction(
     nameOrSignature: "getAccountAddress"
-  ): TypedContractMethod<
-    [params: JwtVerifier.AccountDataStruct],
-    [string],
-    "view"
-  >;
+  ): TypedContractMethod<[params: ZkLogin.AccountDataStruct], [string], "view">;
 
   filters: {};
 }

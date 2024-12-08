@@ -5,7 +5,7 @@ import {UltraVerifier} from "../noir/target/jwt_account.sol";
 import {Strings} from "./Strings.sol";
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 
-library JwtVerifier {
+library ZkLogin {
     struct AccountData {
         bytes32 accountId;
         bytes32 authProviderId;
@@ -22,7 +22,7 @@ library JwtVerifier {
 
     function verifyJwtProof(
         AccountData memory accountData,
-        JwtVerifier.VerificationData memory verificationData
+        VerificationData memory verificationData
     ) internal view returns (bool) {
         require(
             accountData.publicKeyRegistry.checkPublicKey(

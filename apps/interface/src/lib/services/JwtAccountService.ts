@@ -5,7 +5,7 @@ import {
   SimpleAccount__factory,
   SimpleAccountFactory__factory,
 } from "@shield-labs/zklogin-contracts/typechain-types";
-import type { JwtVerifier } from "@shield-labs/zklogin-contracts/typechain-types/contracts/SimpleAccount.js";
+import type { ZkLogin } from "@shield-labs/zklogin-contracts/typechain-types/contracts/SimpleAccount.js";
 import { ethers } from "ethers";
 import { assert } from "ts-essentials";
 import type { Address, Chain, Hex, PublicClient, SignableMessage } from "viem";
@@ -47,7 +47,7 @@ export class JwtAccountService {
   async setOwner(
     jwt: string,
     owner: ethers.Signer,
-    params: Omit<JwtVerifier.VerificationDataStruct, "jwtNonce">,
+    params: Omit<ZkLogin.VerificationDataStruct, "jwtNonce">,
   ) {
     const verificationData = {
       ...params,
@@ -111,7 +111,7 @@ export interface JwtSmartAccount
 async function toJwtSmartAccount(
   owner: ethers.Signer,
   client: PublicClient,
-  accountData: JwtVerifier.AccountDataStruct,
+  accountData: ZkLogin.AccountDataStruct,
 ) {
   const accountIface = SimpleAccount__factory.createInterface();
   const unrestrictedSelectors = [accountIface.getFunction("setOwner")].map(

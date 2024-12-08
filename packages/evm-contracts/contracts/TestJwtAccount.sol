@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.27;
 
-import {JwtVerifier} from "./JwtVerifier.sol";
+import {ZkLogin} from "./ZkLogin.sol";
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 
 contract TestJwtAccount {
-    JwtVerifier.AccountData public accountData;
+    ZkLogin.AccountData public accountData;
 
-    constructor(JwtVerifier.AccountData memory accountData_) {
+    constructor(ZkLogin.AccountData memory accountData_) {
         accountData = accountData_;
     }
 
     function verify(
-        JwtVerifier.VerificationData calldata verificationData
+        ZkLogin.VerificationData calldata verificationData
     ) external {
-        bool result = JwtVerifier.verifyJwtProof(accountData, verificationData);
+        bool result = ZkLogin.verifyJwtProof(accountData, verificationData);
         require(result, "JwtAccount: invalid proof");
     }
 }

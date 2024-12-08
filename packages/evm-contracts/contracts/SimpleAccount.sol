@@ -14,7 +14,7 @@ import "@account-abstraction/contracts/core/Helpers.sol";
 import "@account-abstraction/contracts/samples/callback/TokenCallbackHandler.sol";
 
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
-import {JwtVerifier} from "./JwtVerifier.sol";
+import {ZkLogin} from "./ZkLogin.sol";
 
 // Note: keep in sync with JS
 // How long owner session is valid for
@@ -44,7 +44,7 @@ contract SimpleAccount is
     }
     Owner public ownerInfo;
 
-    JwtVerifier.AccountData public accountData;
+    ZkLogin.AccountData public accountData;
 
     constructor(IEntryPoint anEntryPoint) {
         _entryPoint = anEntryPoint;
@@ -57,7 +57,7 @@ contract SimpleAccount is
      * the implementation by calling `upgradeTo()`
      */
     function initialize(
-        JwtVerifier.AccountData calldata accountData_
+        ZkLogin.AccountData calldata accountData_
     ) public virtual initializer {
         accountData = accountData_;
     }
@@ -99,13 +99,13 @@ contract SimpleAccount is
     }
 
     function setOwner(
-        JwtVerifier.VerificationData calldata verificationData
+        ZkLogin.VerificationData calldata verificationData
     ) public {
         require(
             verificationData.jwtIat + JWT_EXPIRATION_TIME >= block.timestamp,
             "JwtAccount: expired proof"
         );
-        bool result = JwtVerifier.verifyJwtProof(accountData, verificationData);
+        bool result = ZkLogin.verifyJwtProof(accountData, verificationData);
         require(result, "JwtAccount: invalid proof");
 
         ownerInfo = Owner({
