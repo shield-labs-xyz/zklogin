@@ -1,5 +1,16 @@
 # @shield-labs/zklogin
 
+## 0.4.0
+
+### Minor Changes
+
+- 8c5413a: feat: update bb version
+
+### Patch Changes
+
+- Updated dependencies [8c5413a]
+  - @shield-labs/zklogin-contracts@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

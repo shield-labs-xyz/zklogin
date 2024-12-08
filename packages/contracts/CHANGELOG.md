@@ -1,5 +1,11 @@
 # @shield-labs/zklogin-contracts
 
+## 0.4.0
+
+### Minor Changes
+
+- 8c5413a: feat: update bb version
+
 ## 0.3.0
 
 ### Minor Changes
