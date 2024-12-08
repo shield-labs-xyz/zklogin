@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
+  '@aztec/bb.js':
+    hash: dnucwh4qohajpoy4ns2dkouzc4
+    path: patches/@aztec__bb.js.patch
   oauth4webapi@3.0.0:
     hash: zsn2zwycmobvy6ss6tleap4mp4
     path: patches/oauth4webapi@3.0.0.patch
@@ -29,8 +32,8 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0(@sveltejs/kit@2.7.2(@sveltejs/vite-plugin-svelte@4.0.0(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(svelte@5.0.5)
       '@aztec/foundation':
-        specifier: 0.64.0
-        version: 0.64.0
+        specifier: 0.65.2
+        version: 0.65.2
       '@metamask/jazzicon':
         specifier: ^2.0.0
         version: 2.0.0
@@ -255,11 +258,11 @@ importers:
   packages/sdk:
     dependencies:
       '@aztec/bb.js':
-        specifier: 0.64.0
-        version: 0.64.0
+        specifier: 0.65.2
+        version: 0.65.2(patch_hash=dnucwh4qohajpoy4ns2dkouzc4)
       '@aztec/foundation':
-        specifier: 0.64.0
-        version: 0.64.0
+        specifier: 0.65.2
+        version: 0.65.2
       '@mach-34/noir-bignum-paramgen':
         specifier: 1.1.0
         version: 1.1.0
@@ -463,12 +466,12 @@ packages:
       nodemailer:
         optional: true
 
-  '@aztec/bb.js@0.64.0':
-    resolution: {integrity: sha512-sQYmIfn6NddGFw2ZWO4miMDB9I79yFza79eiLdSdApoVURg3XW7g9rFAkbm6rZ0036xU53fO3yhnR7diPT/cng==}
+  '@aztec/bb.js@0.65.2':
+    resolution: {integrity: sha512-4wOZgB+6nkhJTocOTDlOlO2vs9tpL654EF3sUeNfmWHT+Titvf1ylLIezgO7BYkgMFMGPfKjKpMGujDpyrwAjw==}
     hasBin: true
 
-  '@aztec/foundation@0.64.0':
-    resolution: {integrity: sha512-aRh3gK9f3qZWPqkiBggaphIEN3v7ittupn50QgsA37zjW5Hzw+LsUt0LNWuIWhOKwZ7kFYpqtHwAoOVetokApw==}
+  '@aztec/foundation@0.65.2':
+    resolution: {integrity: sha512-oRwumLD1W6O5XpIfSGrFNthahME3TAJwO9McbZpm0w6TjHwW4wFtdc1M3eF3a1HVrNigRGhqVFbRtVeqfwIIGA==}
     engines: {node: '>=18'}
 
   '@babel/runtime@7.25.7':
@@ -4845,19 +4848,20 @@ snapshots:
       set-cookie-parser: 2.7.0
       svelte: 5.0.5
 
-  '@aztec/bb.js@0.64.0':
+  '@aztec/bb.js@0.65.2(patch_hash=dnucwh4qohajpoy4ns2dkouzc4)':
     dependencies:
       comlink: 4.4.1
       commander: 10.0.1
       debug: 4.3.7(supports-color@8.1.1)
       fflate: 0.8.2
+      pako: 2.1.0
       tslib: 2.7.0
     transitivePeerDependencies:
       - supports-color
 
-  '@aztec/foundation@0.64.0':
+  '@aztec/foundation@0.65.2':
     dependencies:
-      '@aztec/bb.js': 0.64.0
+      '@aztec/bb.js': 0.65.2(patch_hash=dnucwh4qohajpoy4ns2dkouzc4)
       '@koa/cors': 5.0.0
       '@noble/curves': 1.7.0
       bn.js: 5.2.1

@@ -68,6 +68,11 @@
   async function extendSessionInner() {
     assert(jwt, "no session");
 
+    // TODO: remove this
+    await lib.zkLogin.publicKeyRegistry.requestPublicKeysUpdate(
+      publicClient.chain.id,
+    );
+
     const result = await lib.zkLogin.proveJwt(jwt, await toJwtNonce(signer));
     if (!result) {
       Ui.toast.log(
