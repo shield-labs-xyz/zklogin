@@ -28,24 +28,12 @@ importers:
       '@auth/sveltekit':
         specifier: ^1.7.0
         version: 1.7.0(@sveltejs/kit@2.7.2(@sveltejs/vite-plugin-svelte@4.0.0(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(svelte@5.0.5)
-      '@aztec/foundation':
-        specifier: 0.55.0
-        version: 0.55.0
-      '@mach-34/noir-bignum-paramgen':
-        specifier: ^1.0.2
-        version: 1.0.2
       '@metamask/jazzicon':
         specifier: ^2.0.0
         version: 2.0.0
       '@noir-lang/acvm_js':
         specifier: 0.50.0
         version: 0.50.0
-      '@noir-lang/backend_barretenberg':
-        specifier: 0.34.0
-        version: 0.34.0
-      '@noir-lang/noir_js':
-        specifier: 0.34.0
-        version: 0.34.0
       '@noir-lang/noir_wasm':
         specifier: 0.34.0
         version: 0.34.0
