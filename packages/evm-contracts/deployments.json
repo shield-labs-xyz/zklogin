@@ -7,5 +7,14 @@
       "UltraVerifier": "0x320E2cc9C73B87e47c18a07B6F18CF575894dCA8"
     },
     "name": "baseSepolia"
+  },
+  "911867": {
+    "chainId": "911867",
+    "contracts": {
+      "PublicKeyRegistry": "0xd78a91e41E6C15673686c263F29EE69b55aF5d1f",
+      "SimpleAccountFactory": "0xd242c5192C5ca0dCc460a3f92c729d9689481c5a",
+      "UltraVerifier": "0x80BEB4A9bFF75bF2b277A7A0C000F47b55C32639"
+    },
+    "name": "odysseyTestnet"
   }
 }

@@ -38,8 +38,7 @@
     "lucide-svelte": "^0.441.0",
     "ms": "^2.1.3",
     "ts-essentials": "^10.0.2",
-    "ufo": "^1.5.4",
-    "viem": "^2.21.22",
+    "viem": "^2.21.54",
     "zod": "^3.23.8"
   },
   "devDependencies": {

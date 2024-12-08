@@ -9,9 +9,14 @@ import { z } from "zod";
 import { decodeJwt, HOSTED_SERVICE_URL } from "./utils.js";
 
 export class PublicKeyRegistryService {
-  async requestPublicKeysUpdate() {
+  // TODO: more specific chainId type
+  async requestPublicKeysUpdate(chainId: number) {
     const { hash } = await ky
-      .post(utils.joinUrl(HOSTED_SERVICE_URL, "/api/register-public-keys"))
+      .post(utils.joinUrl(HOSTED_SERVICE_URL, "/api/register-public-keys"), {
+        json: {
+          chainId,
+        },
+      })
       .json<{ hash: string | null }>();
 
     if (!hash) {
