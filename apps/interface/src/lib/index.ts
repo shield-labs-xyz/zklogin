@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
 const chain = new ChainService();
 const queries = new QueriesService(queryClient);
 const jwtProver = new zklogin.JwtProverService(
-  new zklogin.PublicKeyRegistryService(),
+  new zklogin.PublicKeyRegistryService(""),
 );
 const jwtAccount = new JwtAccountService(
   publicClient,

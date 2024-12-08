@@ -55,7 +55,10 @@ export class JwtAccountService {
 
     const account = await this.getAccount(jwt, owner);
 
-    await this.publicKeyRegistry.requestPublicKeysUpdate(chain.id);
+    const hash = await this.publicKeyRegistry.requestPublicKeysUpdate(chain.id);
+    if (hash) {
+      await this.publicClient.waitForTransactionReceipt({ hash });
+    }
 
     const bundlerClient = getBundlerClient(
       await ethersSignerToWalletClient(owner),

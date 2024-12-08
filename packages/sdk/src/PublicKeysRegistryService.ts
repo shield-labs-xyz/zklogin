@@ -4,24 +4,28 @@ import {
 } from "@mach-34/noir-bignum-paramgen";
 import { utils } from "@shield-labs/utils";
 import ky from "ky";
-import { Base64, Bytes, Hash } from "ox";
+import { Base64, Bytes, Hash, Hex } from "ox";
 import { z } from "zod";
 import { decodeJwt, HOSTED_SERVICE_URL } from "./utils.js";
 
 export class PublicKeyRegistryService {
+  constructor(private apiUrl = HOSTED_SERVICE_URL) {}
+
   // TODO: more specific chainId type
   async requestPublicKeysUpdate(chainId: number) {
     const { hash } = await ky
-      .post(utils.joinUrl(HOSTED_SERVICE_URL, "/api/register-public-keys"), {
+      .post(utils.joinUrl(this.apiUrl, "/api/register-public-keys"), {
         json: {
           chainId,
         },
       })
-      .json<{ hash: string | null }>();
+      .json<{ hash: Hex.Hex | null }>();
 
     if (!hash) {
       return;
     }
+
+    return hash;
 
     // TODO: wait for transaction
     // await provider.waitForTransaction(hash);
