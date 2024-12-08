@@ -21,11 +21,7 @@ const queries = new QueriesService(queryClient);
 const jwtProver = new zklogin.JwtProverService(
   new zklogin.PublicKeyRegistryService(""),
 );
-const jwtAccount = new JwtAccountService(
-  publicClient,
-  provider,
-  jwtProver.publicKeyRegistry,
-);
+const jwtAccount = new JwtAccountService(publicClient, provider, jwtProver);
 
 const APP_NAME = "zkLogin";
 export const lib = {

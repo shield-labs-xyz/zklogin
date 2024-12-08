@@ -1,8 +1,10 @@
 import { bnToLimbStrArray } from "@mach-34/noir-bignum-paramgen";
 import { utils } from "@shield-labs/utils";
+import deployments from "@shield-labs/zklogin-contracts/deployments.json";
 import circuit from "@shield-labs/zklogin-contracts/noir/target/jwt_account.json";
 import { isEqual } from "lodash-es";
-import { Base64, Bytes } from "ox";
+import { Base64, Bytes, type Hex } from "ox";
+import { assert } from "ts-essentials";
 import type { PublicKeyRegistryService } from "./PublicKeysRegistryService.js";
 import { decodeJwt, noirPackBytes, splitJwt, toBoundedVec } from "./utils.js";
 
@@ -41,6 +43,33 @@ export class JwtProverService {
     return {
       proof: Bytes.toHex(proof),
       input,
+    };
+  }
+
+  async getAccountDataFromJwt(jwt: string, chainId: number) {
+    const decoded = decodeJwt(jwt);
+    const { accountId, salt } = await getAccountIdFromJwt(decoded);
+
+    const checkedChainId = chainId.toString() as keyof typeof deployments;
+    assert(
+      checkedChainId in deployments,
+      `deployments for ${checkedChainId} not found`,
+    );
+    const publicKeyRegistry = deployments[checkedChainId].contracts
+      .PublicKeyRegistry as Hex.Hex;
+    const proofVerifier = deployments[checkedChainId].contracts
+      .UltraVerifier as Hex.Hex;
+
+    const publicKey = await this.publicKeyRegistry.getPublicKeyByKid(
+      decoded.header.kid,
+    );
+
+    return {
+      accountId,
+      authProviderId: publicKey.authProviderId,
+      publicKeyRegistry,
+      proofVerifier,
+      salt,
     };
   }
 
@@ -127,11 +156,10 @@ const getNoir = utils.lazyValue(async () => {
   return { noir, backend };
 });
 
-export async function getAccountIdFromJwt(
-  jwtDecoded: ReturnType<typeof decodeJwt>,
-) {
+async function getAccountIdFromJwt(jwtDecoded: ReturnType<typeof decodeJwt>) {
+  const { Fr } = await import("@aztec/foundation/fields");
   const { pedersenHash } = await import("@aztec/foundation/crypto");
-  const salt = 0;
+  const salt = Fr.zero();
   const accountId = pedersenHash([
     ...noirPackBytes(
       utils.arrayPadEnd(
@@ -149,7 +177,8 @@ export async function getAccountIdFromJwt(
     ),
     salt,
   ]).toString();
-  return { accountId, salt };
+
+  return { accountId, salt: salt.toString() };
 }
 
 function toNoirNonce(nonce: string) {

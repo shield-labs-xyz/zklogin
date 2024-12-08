@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getBundlerClient, lib, publicClient } from "$lib";
-  import { chain, provider } from "$lib/chain.js";
+  import { provider } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
   import { now } from "$lib/now.svelte.js";
   import SendEthCard from "$lib/SendEthCard.svelte";
@@ -170,7 +170,7 @@
                       variant="ghost"
                     />
                   </div>
-                  <div>Network: {chain.name}</div>
+                  <div>Network: {publicClient.chain.name}</div>
                   <div>
                     {#if data.ownerInfo == null}
                       No session
