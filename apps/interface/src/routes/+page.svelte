@@ -5,7 +5,7 @@
   import { now } from "$lib/now.svelte.js";
   import SendEthCard from "$lib/SendEthCard.svelte";
   import { Ui } from "@repo/ui";
-  import { utils } from "@repo/utils";
+  import { utils } from "@shield-labs/utils";
   import { createQuery } from "@tanstack/svelte-query";
   import { formatDuration, intervalToDuration } from "date-fns";
   import { ethers } from "ethers";

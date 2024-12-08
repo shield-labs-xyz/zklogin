@@ -1,0 +1,53 @@
+{
+  "name": "@shield-labs/zklogin-contracts",
+  "version": "0.2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "compile": "hardhat compile --typecheck",
+    "test": "hardhat test --typecheck",
+    "test:no-typecheck": "hardhat test",
+    "deploy": "hardhat deploy-and-export --tags all",
+    "deploy:clean": "rm -rf deployments/localhost && pnpm run deploy",
+    "prepublishOnly": "pnpm compile"
+  },
+  "devDependencies": {
+    "@account-abstraction/contracts": "0.7.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
+    "@nomicfoundation/hardhat-ethers": "^3.0.5",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.4",
+    "@nomicfoundation/hardhat-viem": "^2.0.5",
+    "@openzeppelin/contracts": "5.1.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^4.3.11",
+    "@types/lodash": "^4.14.202",
+    "@types/mocha": "^10.0.1",
+    "@types/ms": "^0.7.31",
+    "@types/node": "^20.10.5",
+    "chai": "^4.3.6",
+    "dotenv": "^16.0.3",
+    "ethers": "^6.11.0",
+    "hardhat": "^2.19.5",
+    "hardhat-deploy": "^0.11.45",
+    "hardhat-gas-reporter": "^1.0.10",
+    "hardhat-plugin-noir": "^0.0.3",
+    "json-stringify-deterministic": "^1.0.12",
+    "lodash": "^4.17.21",
+    "ms": "^2.1.3",
+    "prettier": "^3.2.5",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "prettier-plugin-solidity": "^1.3.1",
+    "solady": "0.0.267",
+    "solidity-coverage": "^0.8.7",
+    "ts-essentials": "^9.4.1",
+    "ts-node": "^10.9.1",
+    "typechain": "^8.3.2",
+    "typescript": "^5.3.3",
+    "viem": "^2.21.28",
+    "zod": "^3.22.4"
+  }
+}

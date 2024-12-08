@@ -1,11 +1,12 @@
 {
-  "name": "@repo/utils",
+  "name": "@shield-labs/utils",
   "version": "0.0.1",
   "type": "module",
-  "private": true,
   "main": "src/index.ts",
   "module": "src/index.ts",
   "publishConfig": {
+    "main": "dist/index.js",
+    "module": "dist/index.js",
     "types": "dist/index.d.ts",
     "access": "public"
   },
@@ -20,7 +21,7 @@
     "test:unit": "pnpm _chore && vitest run",
     "test:lint": "pnpm _chore && tsc --noEmit --emitDeclarationOnly false && prettier --check .",
     "test:lint:fix": "pnpm _chore && prettier --write . && eslint . --fix",
-    "prepublishOnly": "pnpm test:lint && pnpm build",
+    "prepublishOnly": "pnpm test && pnpm build",
     "_chore": "pnpm i"
   },
   "dependencies": {
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@types/ms": "^0.7.34",
     "prettier": "^3.2.5",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.2",
+    "vitest": "^2.1.3"
   }
 }

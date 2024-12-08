@@ -1,15 +1,14 @@
-import deployments from "@repo/contracts/deployments.json";
+import { utils } from "@shield-labs/utils";
+import { zklogin } from "@shield-labs/zklogin";
+import deployments from "@shield-labs/zklogin-contracts/deployments.json";
 import {
   SimpleAccount__factory,
   SimpleAccountFactory__factory,
-  type SimpleAccount,
-} from "@repo/contracts/typechain-types";
-import type { JwtVerifier } from "@repo/contracts/typechain-types/contracts/SimpleAccount.js";
-import { utils } from "@repo/utils";
-import { zklogin } from "@shield-labs/zklogin";
+} from "@shield-labs/zklogin-contracts/typechain-types";
+import type { ZkLogin } from "@shield-labs/zklogin-contracts/typechain-types/contracts/SimpleAccount.js";
 import { ethers } from "ethers";
 import { assert } from "ts-essentials";
-import type { Address, Hex, PublicClient, SignableMessage } from "viem";
+import type { Address, Chain, Hex, PublicClient, SignableMessage } from "viem";
 import {
   entryPoint07Abi,
   entryPoint07Address,
@@ -24,21 +23,23 @@ import {
 
 export class JwtAccountService {
   constructor(
-    private publicClient: PublicClient,
+    private publicClient: PublicClient & { chain: Chain },
     private provider: ethers.Provider,
-    private publicKeyRegistry: zklogin.PublicKeyRegistryService,
+    private zkLogin: zklogin.ZkLogin,
   ) {}
 
   async getAccount(
     jwt: string,
     owner: ethers.Signer,
   ): Promise<JwtSmartAccount> {
-    const publicKey = await this.publicKeyRegistry.getPublicKeyByJwt(jwt);
+    const accountData = await this.zkLogin.getAccountDataFromJwt(
+      jwt,
+      this.publicClient.chain.id,
+    );
     const account = await toJwtSmartAccount(
       owner,
-      jwt,
-      publicKey.authProviderId,
       this.publicClient,
+      accountData,
     );
     return account;
   }
@@ -46,7 +47,7 @@ export class JwtAccountService {
   async setOwner(
     jwt: string,
     owner: ethers.Signer,
-    params: Omit<JwtVerifier.VerificationDataStruct, "jwtNonce">,
+    params: Omit<ZkLogin.VerificationDataStruct, "jwtNonce">,
   ) {
     const verificationData = {
       ...params,
@@ -55,7 +56,12 @@ export class JwtAccountService {
 
     const account = await this.getAccount(jwt, owner);
 
-    await this.publicKeyRegistry.requestPublicKeysUpdate();
+    const hash = await this.zkLogin.publicKeyRegistry.requestPublicKeysUpdate(
+      this.publicClient.chain.id,
+    );
+    if (hash) {
+      await this.publicClient.waitForTransactionReceipt({ hash });
+    }
 
     const bundlerClient = getBundlerClient(
       await ethersSignerToWalletClient(owner),
@@ -104,9 +110,8 @@ export interface JwtSmartAccount
 
 async function toJwtSmartAccount(
   owner: ethers.Signer,
-  jwt: string,
-  authProviderId: string,
   client: PublicClient,
+  accountData: ZkLogin.AccountDataStruct,
 ) {
   const accountIface = SimpleAccount__factory.createInterface();
   const unrestrictedSelectors = [accountIface.getFunction("setOwner")].map(
@@ -120,7 +125,7 @@ async function toJwtSmartAccount(
   const factory = SimpleAccountFactory__factory.connect(factoryAddress, owner);
   const factoryCalldata = factory.interface.encodeFunctionData(
     "createAccount",
-    [await getJwtAccountInitParams({ jwt, authProviderId })],
+    [accountData],
   ) as Hex;
 
   const entryPoint = {
@@ -183,9 +188,7 @@ async function toJwtSmartAccount(
       return sig;
     },
     async getAddress() {
-      return (await factory.getAccountAddress(
-        await getJwtAccountInitParams({ jwt, authProviderId }),
-      )) as Address;
+      return (await factory.getAccountAddress(accountData)) as Address;
     },
     async encodeCalls(calls) {
       if (calls.length === 1) {
@@ -227,20 +230,4 @@ async function toJwtSmartAccount(
   });
 
   return account;
-}
-
-async function getJwtAccountInitParams({
-  jwt,
-  authProviderId,
-}: {
-  jwt: string;
-  authProviderId: string;
-}): Promise<SimpleAccount.InitializeParamsStruct> {
-  const { accountId } = await zklogin.getAccountIdFromJwt(
-    zklogin.decodeJwt(jwt),
-  );
-  return {
-    accountId,
-    authProviderId,
-  };
 }

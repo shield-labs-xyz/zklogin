@@ -1,6 +1,7 @@
 import type { ethers } from "ethers";
 import {
   type Address,
+  type Chain,
   type Client,
   createPublicClient,
   createWalletClient,
@@ -17,7 +18,7 @@ import { chain } from "./chain.js";
 export const publicClient = createPublicClient({
   chain,
   transport: http(),
-}) as PublicClient;
+}) as PublicClient & { chain: Chain };
 
 const paymasterClient = createPaymasterClient({
   transport: http(

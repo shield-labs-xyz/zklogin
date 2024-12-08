@@ -1,10 +1,10 @@
 import { chain, provider, relayer } from "$lib/chain";
 import * as web2Auth from "@auth/sveltekit/client";
-import deployments from "@repo/contracts/deployments.json";
-import { EoaAccount__factory } from "@repo/contracts/typechain-types";
 import { Ui } from "@repo/ui";
-import { utils } from "@repo/utils";
+import { utils } from "@shield-labs/utils";
 import { zklogin } from "@shield-labs/zklogin";
+import deployments from "@shield-labs/zklogin-contracts/deployments.json";
+import { EoaAccount__factory } from "@shield-labs/zklogin-contracts/typechain-types";
 import { ethers } from "ethers";
 import { assert } from "ts-essentials";
 import {
@@ -12,6 +12,7 @@ import {
   http,
   slice,
   type Account,
+  type Chain,
   type Client,
   type Hex,
 } from "viem";
@@ -20,8 +21,8 @@ import { parsePublicKey, sign } from "webauthn-p256";
 
 export class Eip7702Service {
   constructor(
-    private jwtProver: zklogin.JwtProverService,
-    private client: Client,
+    private zkLogin: zklogin.ZkLogin,
+    private client: Client & { chain: Chain },
   ) {}
 
   async requestJwt({ webAuthnPublicKey }: { webAuthnPublicKey: Hex }) {
@@ -60,26 +61,15 @@ export class Eip7702Service {
       transport: http(),
     });
 
-    const { accountId } = await zklogin.getAccountIdFromJwt(
-      zklogin.decodeJwt(jwt),
+    const accountData = await this.zkLogin.getAccountDataFromJwt(
+      jwt,
+      this.client.chain.id,
     );
-    const publicKey =
-      await this.jwtProver.publicKeyRegistry.getPublicKeyByJwt(jwt);
-    const publicKeyRegistry = deployments[chain.id].contracts
-      .PublicKeyRegistry as `0x${string}`;
-    const proofVerifier = deployments[chain.id].contracts
-      .UltraVerifier as `0x${string}`;
     const hash = await accountClient.writeContract({
       abi: EoaAccount__factory.abi,
       address: account.address,
       functionName: "setAccountId",
-      args: [
-        parsePublicKey(webAuthnPublicKey),
-        accountId,
-        publicKey.authProviderId,
-        publicKeyRegistry,
-        proofVerifier,
-      ],
+      args: [parsePublicKey(webAuthnPublicKey), accountData],
       authorizationList: [auth],
       account: account,
       chain: this.client.chain,
@@ -101,9 +91,11 @@ export class Eip7702Service {
       throw new Error("jwt invalid");
     }
 
-    await this.jwtProver.publicKeyRegistry.requestPublicKeysUpdate();
+    await this.zkLogin.publicKeyRegistry.requestPublicKeysUpdate(
+      this.client.chain.id,
+    );
 
-    const result = await this.jwtProver.proveJwt(
+    const result = await this.zkLogin.proveJwt(
       jwt,
       this.#toNonce(webAuthnPublicKey).slice("0x".length),
     );
@@ -171,7 +163,7 @@ export class Eip7702Service {
     jwt: string;
     webAuthnPublicKey: Hex;
   }): Promise<boolean> {
-    const isValid: boolean = await this.jwtProver.checkJwt(
+    const isValid: boolean = await this.zkLogin.checkJwt(
       jwt,
       this.#toNonce(webAuthnPublicKey).slice("0x".length),
     );
