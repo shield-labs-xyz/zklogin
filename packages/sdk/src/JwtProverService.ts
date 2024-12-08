@@ -1,6 +1,6 @@
 import { bnToLimbStrArray } from "@mach-34/noir-bignum-paramgen";
 import circuit from "@repo/contracts/noir/target/jwt_account.json";
-import { utils } from "@repo/utils";
+import { utils } from "@shield-labs/utils";
 import { isEqual } from "lodash-es";
 import { Base64, Bytes } from "ox";
 import type { PublicKeyRegistryService } from "./PublicKeysRegistryService.js";

@@ -55,7 +55,7 @@ importers:
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@repo/utils':
+      '@shield-labs/utils':
         specifier: workspace:*
         version: link:../../packages/utils
       '@shield-labs/zklogin':
@@ -275,7 +275,7 @@ importers:
       '@repo/contracts':
         specifier: workspace:*
         version: link:../evm-contracts
-      '@repo/utils':
+      '@shield-labs/utils':
         specifier: workspace:*
         version: link:../utils
       ky:

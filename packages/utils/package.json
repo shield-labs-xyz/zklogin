@@ -1,11 +1,12 @@
 {
-  "name": "@repo/utils",
+  "name": "@shield-labs/utils",
   "version": "0.0.1",
   "type": "module",
-  "private": true,
   "main": "src/index.ts",
   "module": "src/index.ts",
   "publishConfig": {
+    "main": "dist/index.js",
+    "module": "dist/index.js",
     "types": "dist/index.d.ts",
     "access": "public"
   },

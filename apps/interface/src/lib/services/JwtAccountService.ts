@@ -4,7 +4,7 @@ import {
   SimpleAccountFactory__factory,
 } from "@repo/contracts/typechain-types";
 import type { JwtVerifier } from "@repo/contracts/typechain-types/contracts/SimpleAccount.js";
-import { utils } from "@repo/utils";
+import { utils } from "@shield-labs/utils";
 import { zklogin } from "@shield-labs/zklogin";
 import { ethers } from "ethers";
 import { assert } from "ts-essentials";

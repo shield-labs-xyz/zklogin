@@ -2,7 +2,7 @@ import { lib } from "$lib";
 import { chain, provider } from "$lib/chain";
 import deployments from "@repo/contracts/deployments.json";
 import { PublicKeyRegistry__factory } from "@repo/contracts/typechain-types";
-import { utils } from "@repo/utils";
+import { utils } from "@shield-labs/utils";
 import { error } from "@sveltejs/kit";
 import { config } from "dotenv";
 import { ethers } from "ethers";

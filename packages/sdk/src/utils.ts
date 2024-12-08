@@ -1,4 +1,4 @@
-import { utils } from "@repo/utils";
+import { utils } from "@shield-labs/utils";
 import { Base64 } from "ox";
 import { assert } from "ts-essentials";
 import { z } from "zod";

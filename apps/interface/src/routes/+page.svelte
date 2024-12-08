@@ -8,7 +8,7 @@
   import { EXTEND_SESSION_SEARCH_PARAM } from "$lib/utils.js";
   import * as web2Auth from "@auth/sveltekit/client";
   import { Ui } from "@repo/ui";
-  import { utils } from "@repo/utils";
+  import { utils } from "@shield-labs/utils";
   import { createQuery } from "@tanstack/svelte-query";
   import { formatDistance, formatDuration, intervalToDuration } from "date-fns";
   import { ethers } from "ethers";

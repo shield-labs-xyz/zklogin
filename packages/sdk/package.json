@@ -31,7 +31,7 @@
     "@noir-lang/backend_barretenberg": "0.34.0",
     "@noir-lang/noir_js": "0.34.0",
     "@repo/contracts": "workspace:*",
-    "@repo/utils": "workspace:*",
+    "@shield-labs/utils": "workspace:*",
     "ky": "^1.7.2",
     "lodash-es": "^4.17.21",
     "ox": "^0.4.0",
