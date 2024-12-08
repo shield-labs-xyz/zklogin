@@ -17,7 +17,7 @@ const config: HardhatUserConfig = {
     },
   },
   noir: {
-    version: "0.34.0",
+    version: "1.0.0-beta.0",
   },
   defaultNetwork: "localhost",
   networks: {

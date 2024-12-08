@@ -49,19 +49,19 @@ export class JwtAccountService {
     owner: ethers.Signer,
     params: Omit<ZkLogin.VerificationDataStruct, "jwtNonce">,
   ) {
-    const verificationData = {
-      ...params,
-      jwtNonce: ethers.zeroPadValue(await owner.getAddress(), 32),
-    };
-
-    const account = await this.getAccount(jwt, owner);
-
     const hash = await this.zkLogin.publicKeyRegistry.requestPublicKeysUpdate(
       this.publicClient.chain.id,
     );
     if (hash) {
       await this.publicClient.waitForTransactionReceipt({ hash });
     }
+
+    const verificationData = {
+      ...params,
+      jwtNonce: ethers.zeroPadValue(await owner.getAddress(), 32),
+    };
+
+    const account = await this.getAccount(jwt, owner);
 
     const bundlerClient = getBundlerClient(
       await ethersSignerToWalletClient(owner),

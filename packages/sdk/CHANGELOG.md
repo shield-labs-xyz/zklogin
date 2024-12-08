@@ -1,5 +1,17 @@
 # @shield-labs/zklogin
 
+## 0.3.0
+
+### Minor Changes
+
+- ea7d5c0: feat: update to Noir 1 beta
+
+### Patch Changes
+
+- Updated dependencies [cd1ca54]
+- Updated dependencies [ea7d5c0]
+  - @shield-labs/zklogin-contracts@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

@@ -2,10 +2,10 @@ import { sveltekit } from "@sveltejs/kit/vite";
 import fs from "node:fs";
 import path from "node:path";
 import copy from "rollup-plugin-copy";
-import { defineConfig, type Plugin, type UserConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import resolve from "vite-plugin-resolve";
 
-export default defineConfig({
+export default defineConfig(() => ({
   plugins: [
     sveltekit(),
     copy({
@@ -21,7 +21,7 @@ export default defineConfig({
       ...(process.env.NODE_ENV === "production"
         ? {
             // `unreachable` error in wasm is caused by incorrect version of bb.js. Consult pnpm-lock.yaml
-            "@aztec/bb.js": `export * from "https://unpkg.com/@aztec/bb.js@0.55.0/dest/browser/index.js"`,
+            "@aztec/bb.js": `export * from "https://unpkg.com/@aztec/bb.js@0.63.1/dest/browser/index.js"`,
           }
         : {}),
     }),
@@ -39,7 +39,7 @@ export default defineConfig({
     testTimeout: 99999999,
     teardownTimeout: 99999999,
   },
-} satisfies UserConfig);
+}));
 
 function wasmContentTypePlugin(): Plugin {
   return {

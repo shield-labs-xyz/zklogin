@@ -1,5 +1,12 @@
 # @shield-labs/zklogin-contracts
 
+## 0.3.0
+
+### Minor Changes
+
+- cd1ca54: refactor: move evm-contracts -> contracts
+- ea7d5c0: feat: update to Noir 1 beta
+
 ## 0.2.0
 
 ### Minor Changes
