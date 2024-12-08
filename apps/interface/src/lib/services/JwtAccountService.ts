@@ -2,7 +2,6 @@ import deployments from "@repo/contracts/deployments.json";
 import {
   SimpleAccount__factory,
   SimpleAccountFactory__factory,
-  type SimpleAccount,
 } from "@repo/contracts/typechain-types";
 import type { JwtVerifier } from "@repo/contracts/typechain-types/contracts/SimpleAccount.js";
 import { utils } from "@repo/utils";
@@ -16,6 +15,7 @@ import {
   getUserOperationHash,
   toSmartAccount,
 } from "viem/account-abstraction";
+import { chain } from "../chain";
 import { isDeployed } from "../utils";
 import {
   ethersSignerToWalletClient,
@@ -235,12 +235,18 @@ async function getJwtAccountInitParams({
 }: {
   jwt: string;
   authProviderId: string;
-}): Promise<SimpleAccount.InitializeParamsStruct> {
+}): Promise<JwtVerifier.AccountDataStruct> {
   const { accountId } = await zklogin.getAccountIdFromJwt(
     zklogin.decodeJwt(jwt),
   );
+  const publicKeyRegistry = deployments[chain.id].contracts
+    .PublicKeyRegistry as `0x${string}`;
+  const proofVerifier = deployments[chain.id].contracts
+    .UltraVerifier as `0x${string}`;
   return {
     accountId,
     authProviderId,
+    publicKeyRegistry,
+    proofVerifier,
   };
 }

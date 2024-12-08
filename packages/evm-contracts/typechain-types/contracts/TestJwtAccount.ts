@@ -8,6 +8,7 @@ import type {
   FunctionFragment,
   Result,
   Interface,
+  AddressLike,
   ContractRunner,
   ContractMethod,
   Listener,
@@ -21,6 +22,25 @@ import type {
 } from "../common";
 
 export declare namespace JwtVerifier {
+  export type AccountDataStruct = {
+    accountId: BytesLike;
+    authProviderId: BytesLike;
+    publicKeyRegistry: AddressLike;
+    proofVerifier: AddressLike;
+  };
+
+  export type AccountDataStructOutput = [
+    accountId: string,
+    authProviderId: string,
+    publicKeyRegistry: string,
+    proofVerifier: string
+  ] & {
+    accountId: string;
+    authProviderId: string;
+    publicKeyRegistry: string;
+    proofVerifier: string;
+  };
+
   export type VerificationDataStruct = {
     proof: BytesLike;
     jwtIat: BigNumberish;
@@ -42,26 +62,10 @@ export declare namespace JwtVerifier {
 }
 
 export interface TestJwtAccountInterface extends Interface {
-  getFunction(
-    nameOrSignature:
-      | "accountId"
-      | "authProviderId"
-      | "proofVerifier"
-      | "publicKeyRegistry"
-      | "verify"
-  ): FunctionFragment;
+  getFunction(nameOrSignature: "accountData" | "verify"): FunctionFragment;
 
-  encodeFunctionData(functionFragment: "accountId", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "authProviderId",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "proofVerifier",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "publicKeyRegistry",
+    functionFragment: "accountData",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -69,17 +73,8 @@ export interface TestJwtAccountInterface extends Interface {
     values: [JwtVerifier.VerificationDataStruct]
   ): string;
 
-  decodeFunctionResult(functionFragment: "accountId", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "authProviderId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "proofVerifier",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "publicKeyRegistry",
+    functionFragment: "accountData",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "verify", data: BytesLike): Result;
@@ -128,13 +123,18 @@ export interface TestJwtAccount extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  accountId: TypedContractMethod<[], [string], "view">;
-
-  authProviderId: TypedContractMethod<[], [string], "view">;
-
-  proofVerifier: TypedContractMethod<[], [string], "view">;
-
-  publicKeyRegistry: TypedContractMethod<[], [string], "view">;
+  accountData: TypedContractMethod<
+    [],
+    [
+      [string, string, string, string] & {
+        accountId: string;
+        authProviderId: string;
+        publicKeyRegistry: string;
+        proofVerifier: string;
+      }
+    ],
+    "view"
+  >;
 
   verify: TypedContractMethod<
     [verificationData: JwtVerifier.VerificationDataStruct],
@@ -147,17 +147,19 @@ export interface TestJwtAccount extends BaseContract {
   ): T;
 
   getFunction(
-    nameOrSignature: "accountId"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "authProviderId"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "proofVerifier"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "publicKeyRegistry"
-  ): TypedContractMethod<[], [string], "view">;
+    nameOrSignature: "accountData"
+  ): TypedContractMethod<
+    [],
+    [
+      [string, string, string, string] & {
+        accountId: string;
+        authProviderId: string;
+        publicKeyRegistry: string;
+        proofVerifier: string;
+      }
+    ],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "verify"
   ): TypedContractMethod<

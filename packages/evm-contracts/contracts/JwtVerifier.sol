@@ -6,23 +6,11 @@ import {Strings} from "./Strings.sol";
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 
 contract JwtVerifier {
-    UltraVerifier public immutable proofVerifier;
-    PublicKeyRegistry public immutable publicKeyRegistry;
-
-    bytes32 public accountId;
-    bytes32 public authProviderId;
-
-    constructor(address proofVerifier_, PublicKeyRegistry publicKeyRegistry_) {
-        proofVerifier = UltraVerifier(proofVerifier_);
-        publicKeyRegistry = publicKeyRegistry_;
-    }
-
-    function __JwtVerifier_initialize(
-        bytes32 accountId_,
-        bytes32 authProviderId_
-    ) internal {
-        accountId = accountId_;
-        authProviderId = authProviderId_;
+    struct AccountData {
+        bytes32 accountId;
+        bytes32 authProviderId;
+        PublicKeyRegistry publicKeyRegistry;
+        UltraVerifier proofVerifier;
     }
 
     struct VerificationData {
@@ -33,11 +21,12 @@ contract JwtVerifier {
     }
 
     function _verifyJwtProof(
+        AccountData memory accountData,
         VerificationData memory verificationData
     ) internal view returns (bool) {
         require(
-            publicKeyRegistry.checkPublicKey(
-                authProviderId,
+            accountData.publicKeyRegistry.checkPublicKey(
+                accountData.authProviderId,
                 verificationData.publicKeyHash
             ),
             "public key hash mismatch"
@@ -52,7 +41,7 @@ contract JwtVerifier {
             staticInputLength + jwtNonce.length
         );
         uint256 j = 0;
-        publicInputs[j++] = accountId;
+        publicInputs[j++] = accountData.accountId;
         publicInputs[j++] = bytes32(verificationData.jwtIat);
         publicInputs[j++] = verificationData.publicKeyHash;
 
@@ -60,6 +49,10 @@ contract JwtVerifier {
             publicInputs[j++] = bytes32(uint256(uint8(jwtNonce[i])));
         }
 
-        return proofVerifier.verify(verificationData.proof, publicInputs);
+        return
+            accountData.proofVerifier.verify(
+                verificationData.proof,
+                publicInputs
+            );
     }
 }

@@ -7,6 +7,7 @@ import type {
   FunctionFragment,
   Result,
   Interface,
+  AddressLike,
   ContractRunner,
   ContractMethod,
   Listener,
@@ -19,16 +20,25 @@ import type {
   TypedContractMethod,
 } from "../common";
 
-export declare namespace SimpleAccount {
-  export type InitializeParamsStruct = {
+export declare namespace JwtVerifier {
+  export type AccountDataStruct = {
     accountId: BytesLike;
     authProviderId: BytesLike;
+    publicKeyRegistry: AddressLike;
+    proofVerifier: AddressLike;
   };
 
-  export type InitializeParamsStructOutput = [
+  export type AccountDataStructOutput = [
     accountId: string,
-    authProviderId: string
-  ] & { accountId: string; authProviderId: string };
+    authProviderId: string,
+    publicKeyRegistry: string,
+    proofVerifier: string
+  ] & {
+    accountId: string;
+    authProviderId: string;
+    publicKeyRegistry: string;
+    proofVerifier: string;
+  };
 }
 
 export interface SimpleAccountFactoryInterface extends Interface {
@@ -45,11 +55,11 @@ export interface SimpleAccountFactoryInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createAccount",
-    values: [SimpleAccount.InitializeParamsStruct]
+    values: [JwtVerifier.AccountDataStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "getAccountAddress",
-    values: [SimpleAccount.InitializeParamsStruct]
+    values: [JwtVerifier.AccountDataStruct]
   ): string;
 
   decodeFunctionResult(
@@ -112,13 +122,13 @@ export interface SimpleAccountFactory extends BaseContract {
   accountImplementation: TypedContractMethod<[], [string], "view">;
 
   createAccount: TypedContractMethod<
-    [params: SimpleAccount.InitializeParamsStruct],
+    [params: JwtVerifier.AccountDataStruct],
     [string],
     "nonpayable"
   >;
 
   getAccountAddress: TypedContractMethod<
-    [params: SimpleAccount.InitializeParamsStruct],
+    [params: JwtVerifier.AccountDataStruct],
     [string],
     "view"
   >;
@@ -133,14 +143,14 @@ export interface SimpleAccountFactory extends BaseContract {
   getFunction(
     nameOrSignature: "createAccount"
   ): TypedContractMethod<
-    [params: SimpleAccount.InitializeParamsStruct],
+    [params: JwtVerifier.AccountDataStruct],
     [string],
     "nonpayable"
   >;
   getFunction(
     nameOrSignature: "getAccountAddress"
   ): TypedContractMethod<
-    [params: SimpleAccount.InitializeParamsStruct],
+    [params: JwtVerifier.AccountDataStruct],
     [string],
     "view"
   >;

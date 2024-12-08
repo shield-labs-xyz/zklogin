@@ -5,17 +5,14 @@ import {JwtVerifier} from "./JwtVerifier.sol";
 import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 
 contract TestJwtAccount is JwtVerifier {
-    constructor(
-        bytes32 accountId_,
-        bytes32 authProviderId_,
-        address proofVerifier,
-        PublicKeyRegistry publicKeyRegistry_
-    ) JwtVerifier(proofVerifier, publicKeyRegistry_) {
-        __JwtVerifier_initialize(accountId_, authProviderId_);
+    AccountData public accountData;
+
+    constructor(AccountData memory accountData_) {
+        accountData = accountData_;
     }
 
     function verify(VerificationData calldata verificationData) external {
-        bool result = _verifyJwtProof(verificationData);
+        bool result = _verifyJwtProof(accountData, verificationData);
         require(result, "JwtAccount: invalid proof");
     }
 }

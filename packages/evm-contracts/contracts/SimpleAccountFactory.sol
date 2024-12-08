@@ -16,16 +16,8 @@ import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
 contract SimpleAccountFactory {
     SimpleAccount public immutable accountImplementation;
 
-    constructor(
-        IEntryPoint _entryPoint,
-        address _proofVerifier,
-        PublicKeyRegistry _publicKeyRegistry
-    ) {
-        accountImplementation = new SimpleAccount(
-            _entryPoint,
-            _proofVerifier,
-            _publicKeyRegistry
-        );
+    constructor(IEntryPoint _entryPoint) {
+        accountImplementation = new SimpleAccount(_entryPoint);
     }
 
     /**
@@ -35,7 +27,7 @@ contract SimpleAccountFactory {
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
     function createAccount(
-        SimpleAccount.InitializeParams calldata params
+        SimpleAccount.AccountData calldata params
     ) public returns (SimpleAccount ret) {
         // TODO: create2 address should depend only on accountId and jwt.aud (and maybe "jwt.iss"?)
         ret = SimpleAccount(
@@ -52,7 +44,7 @@ contract SimpleAccountFactory {
      * calculate the counterfactual address of this account as it would be returned by createAccount()
      */
     function getAccountAddress(
-        SimpleAccount.InitializeParams calldata params
+        SimpleAccount.AccountData calldata params
     ) public view returns (address) {
         return
             Create2.computeAddress(

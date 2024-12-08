@@ -14,12 +14,12 @@ const deploy: DeployFunction = async ({
 }) => {
   const { deployer } = await safeGetNamedAccounts({ deployer: true });
 
-  const publicKeyRegistry = await typedDeployments.deploy("PublicKeyRegistry", {
+  await typedDeployments.deploy("PublicKeyRegistry", {
     from: deployer,
     log: true,
   });
 
-  const proofVerifier = await typedDeployments.deploy("UltraVerifier", {
+  await typedDeployments.deploy("UltraVerifier", {
     from: deployer,
     log: true,
   });
@@ -28,7 +28,7 @@ const deploy: DeployFunction = async ({
   await typedDeployments.deploy("SimpleAccountFactory", {
     from: deployer,
     log: true,
-    args: [entryPoint, proofVerifier.address, publicKeyRegistry.address],
+    args: [entryPoint],
   });
 };
 

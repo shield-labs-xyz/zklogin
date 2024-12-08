@@ -69,19 +69,28 @@ export declare namespace SimpleAccount {
     value: bigint,
     data: string
   ] & { target: string; value: bigint; data: string };
-
-  export type InitializeParamsStruct = {
-    accountId: BytesLike;
-    authProviderId: BytesLike;
-  };
-
-  export type InitializeParamsStructOutput = [
-    accountId: string,
-    authProviderId: string
-  ] & { accountId: string; authProviderId: string };
 }
 
 export declare namespace JwtVerifier {
+  export type AccountDataStruct = {
+    accountId: BytesLike;
+    authProviderId: BytesLike;
+    publicKeyRegistry: AddressLike;
+    proofVerifier: AddressLike;
+  };
+
+  export type AccountDataStructOutput = [
+    accountId: string,
+    authProviderId: string,
+    publicKeyRegistry: string,
+    proofVerifier: string
+  ] & {
+    accountId: string;
+    authProviderId: string;
+    publicKeyRegistry: string;
+    proofVerifier: string;
+  };
+
   export type VerificationDataStruct = {
     proof: BytesLike;
     jwtIat: BigNumberish;
@@ -106,9 +115,8 @@ export interface SimpleAccountInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "UPGRADE_INTERFACE_VERSION"
-      | "accountId"
+      | "accountData"
       | "addDeposit"
-      | "authProviderId"
       | "currentOwner"
       | "entryPoint"
       | "execute"
@@ -120,9 +128,7 @@ export interface SimpleAccountInterface extends Interface {
       | "onERC1155Received"
       | "onERC721Received"
       | "ownerInfo"
-      | "proofVerifier"
       | "proxiableUUID"
-      | "publicKeyRegistry"
       | "setOwner"
       | "supportsInterface"
       | "upgradeToAndCall"
@@ -136,13 +142,12 @@ export interface SimpleAccountInterface extends Interface {
     functionFragment: "UPGRADE_INTERFACE_VERSION",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "accountId", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "addDeposit",
+    functionFragment: "accountData",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "authProviderId",
+    functionFragment: "addDeposit",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -168,7 +173,7 @@ export interface SimpleAccountInterface extends Interface {
   encodeFunctionData(functionFragment: "getNonce", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [SimpleAccount.InitializeParamsStruct]
+    values: [JwtVerifier.AccountDataStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "onERC1155BatchReceived",
@@ -190,15 +195,7 @@ export interface SimpleAccountInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "ownerInfo", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "proofVerifier",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "proxiableUUID",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "publicKeyRegistry",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -226,12 +223,11 @@ export interface SimpleAccountInterface extends Interface {
     functionFragment: "UPGRADE_INTERFACE_VERSION",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "accountId", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "addDeposit", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "authProviderId",
+    functionFragment: "accountData",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "addDeposit", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "currentOwner",
     data: BytesLike
@@ -259,15 +255,7 @@ export interface SimpleAccountInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "ownerInfo", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "proofVerifier",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "proxiableUUID",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "publicKeyRegistry",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
@@ -358,11 +346,20 @@ export interface SimpleAccount extends BaseContract {
 
   UPGRADE_INTERFACE_VERSION: TypedContractMethod<[], [string], "view">;
 
-  accountId: TypedContractMethod<[], [string], "view">;
+  accountData: TypedContractMethod<
+    [],
+    [
+      [string, string, string, string] & {
+        accountId: string;
+        authProviderId: string;
+        publicKeyRegistry: string;
+        proofVerifier: string;
+      }
+    ],
+    "view"
+  >;
 
   addDeposit: TypedContractMethod<[], [void], "payable">;
-
-  authProviderId: TypedContractMethod<[], [string], "view">;
 
   currentOwner: TypedContractMethod<[], [string], "view">;
 
@@ -385,7 +382,7 @@ export interface SimpleAccount extends BaseContract {
   getNonce: TypedContractMethod<[], [bigint], "view">;
 
   initialize: TypedContractMethod<
-    [params: SimpleAccount.InitializeParamsStruct],
+    [accountData_: JwtVerifier.AccountDataStruct],
     [void],
     "nonpayable"
   >;
@@ -426,11 +423,7 @@ export interface SimpleAccount extends BaseContract {
     "view"
   >;
 
-  proofVerifier: TypedContractMethod<[], [string], "view">;
-
   proxiableUUID: TypedContractMethod<[], [string], "view">;
-
-  publicKeyRegistry: TypedContractMethod<[], [string], "view">;
 
   setOwner: TypedContractMethod<
     [verificationData: JwtVerifier.VerificationDataStruct],
@@ -474,14 +467,22 @@ export interface SimpleAccount extends BaseContract {
     nameOrSignature: "UPGRADE_INTERFACE_VERSION"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "accountId"
-  ): TypedContractMethod<[], [string], "view">;
+    nameOrSignature: "accountData"
+  ): TypedContractMethod<
+    [],
+    [
+      [string, string, string, string] & {
+        accountId: string;
+        authProviderId: string;
+        publicKeyRegistry: string;
+        proofVerifier: string;
+      }
+    ],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "addDeposit"
   ): TypedContractMethod<[], [void], "payable">;
-  getFunction(
-    nameOrSignature: "authProviderId"
-  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "currentOwner"
   ): TypedContractMethod<[], [string], "view">;
@@ -511,7 +512,7 @@ export interface SimpleAccount extends BaseContract {
   getFunction(
     nameOrSignature: "initialize"
   ): TypedContractMethod<
-    [params: SimpleAccount.InitializeParamsStruct],
+    [accountData_: JwtVerifier.AccountDataStruct],
     [void],
     "nonpayable"
   >;
@@ -556,13 +557,7 @@ export interface SimpleAccount extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "proofVerifier"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
     nameOrSignature: "proxiableUUID"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "publicKeyRegistry"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "setOwner"

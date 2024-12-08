@@ -45,18 +45,11 @@ contract SimpleAccount is
     }
     Owner public ownerInfo;
 
-    constructor(
-        IEntryPoint anEntryPoint,
-        address proofVerifier_,
-        PublicKeyRegistry publicKeyRegistry_
-    ) JwtVerifier(proofVerifier_, publicKeyRegistry_) {
+    AccountData public accountData;
+
+    constructor(IEntryPoint anEntryPoint) {
         _entryPoint = anEntryPoint;
         _disableInitializers();
-    }
-
-    struct InitializeParams {
-        bytes32 accountId;
-        bytes32 authProviderId;
     }
 
     /**
@@ -65,9 +58,9 @@ contract SimpleAccount is
      * the implementation by calling `upgradeTo()`
      */
     function initialize(
-        InitializeParams calldata params
+        AccountData calldata accountData_
     ) public virtual initializer {
-        __JwtVerifier_initialize(params.accountId, params.authProviderId);
+        accountData = accountData_;
     }
 
     /// implement template method of BaseAccount
@@ -111,7 +104,7 @@ contract SimpleAccount is
             verificationData.jwtIat + JWT_EXPIRATION_TIME >= block.timestamp,
             "JwtAccount: expired proof"
         );
-        bool result = _verifyJwtProof(verificationData);
+        bool result = _verifyJwtProof(accountData, verificationData);
         require(result, "JwtAccount: invalid proof");
 
         ownerInfo = Owner({

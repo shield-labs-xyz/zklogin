@@ -118,10 +118,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Strings__factory>;
     getContractFactory(
-      name: "JwtVerifier",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.JwtVerifier__factory>;
-    getContractFactory(
       name: "PublicKeyRegistry",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.PublicKeyRegistry__factory>;
@@ -281,11 +277,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Strings>;
     getContractAt(
-      name: "JwtVerifier",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.JwtVerifier>;
-    getContractAt(
       name: "PublicKeyRegistry",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -425,10 +416,6 @@ declare module "hardhat/types/runtime" {
       name: "Strings",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
-    deployContract(
-      name: "JwtVerifier",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.JwtVerifier>;
     deployContract(
       name: "PublicKeyRegistry",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -588,11 +575,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
-    deployContract(
-      name: "JwtVerifier",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.JwtVerifier>;
     deployContract(
       name: "PublicKeyRegistry",
       args: any[],
