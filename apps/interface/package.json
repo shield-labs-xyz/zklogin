@@ -1,7 +1,6 @@
 {
   "name": "@repo/interface",
   "type": "module",
-  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "pnpm _chore && vite dev --port 5193",
