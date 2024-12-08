@@ -29,8 +29,8 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0(@sveltejs/kit@2.7.2(@sveltejs/vite-plugin-svelte@4.0.0(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(svelte@5.0.5)
       '@aztec/foundation':
-        specifier: 0.63.1
-        version: 0.63.1
+        specifier: 0.64.0
+        version: 0.64.0
       '@metamask/jazzicon':
         specifier: ^2.0.0
         version: 2.0.0
@@ -255,11 +255,11 @@ importers:
   packages/sdk:
     dependencies:
       '@aztec/bb.js':
-        specifier: 0.63.1
-        version: 0.63.1
+        specifier: 0.64.0
+        version: 0.64.0
       '@aztec/foundation':
-        specifier: 0.63.1
-        version: 0.63.1
+        specifier: 0.64.0
+        version: 0.64.0
       '@mach-34/noir-bignum-paramgen':
         specifier: 1.1.0
         version: 1.1.0
@@ -463,12 +463,12 @@ packages:
       nodemailer:
         optional: true
 
-  '@aztec/bb.js@0.63.1':
-    resolution: {integrity: sha512-pSWh1PsOZISVpdbJch1gXUAa3jfohL6IhbjGKjaRY1QaLf3Fnz33AomB/vqAZs7Uy2VMVqlDdbc9b1QUHTcpzQ==}
+  '@aztec/bb.js@0.64.0':
+    resolution: {integrity: sha512-sQYmIfn6NddGFw2ZWO4miMDB9I79yFza79eiLdSdApoVURg3XW7g9rFAkbm6rZ0036xU53fO3yhnR7diPT/cng==}
     hasBin: true
 
-  '@aztec/foundation@0.63.1':
-    resolution: {integrity: sha512-ElCNZL/1cvaebE0hG0crbQHN3rBhKVI5CN/JhC+RtFvYM+yR2r5VLCXlIVYb5Qz8jssVhLfoT1z/FVuZOAW+rg==}
+  '@aztec/foundation@0.64.0':
+    resolution: {integrity: sha512-aRh3gK9f3qZWPqkiBggaphIEN3v7ittupn50QgsA37zjW5Hzw+LsUt0LNWuIWhOKwZ7kFYpqtHwAoOVetokApw==}
     engines: {node: '>=18'}
 
   '@babel/runtime@7.25.7':
@@ -4845,7 +4845,7 @@ snapshots:
       set-cookie-parser: 2.7.0
       svelte: 5.0.5
 
-  '@aztec/bb.js@0.63.1':
+  '@aztec/bb.js@0.64.0':
     dependencies:
       comlink: 4.4.1
       commander: 10.0.1
@@ -4855,9 +4855,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@aztec/foundation@0.63.1':
+  '@aztec/foundation@0.64.0':
     dependencies:
-      '@aztec/bb.js': 0.63.1
+      '@aztec/bb.js': 0.64.0
       '@koa/cors': 5.0.0
       '@noble/curves': 1.7.0
       bn.js: 5.2.1
