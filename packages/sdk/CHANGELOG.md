@@ -1,5 +1,17 @@
 # @shield-labs/zklogin
 
+## 0.2.0
+
+### Minor Changes
+
+- 1fa141f: refactor: rename sdk classes
+- 8aef1fe: feat: get account data from jwt and chain id
+
+### Patch Changes
+
+- Updated dependencies [ff08ac7]
+  - @shield-labs/zklogin-contracts@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes
