@@ -1,8 +1,8 @@
 import { lib } from "$lib";
 import { chain, provider } from "$lib/chain";
-import deployments from "@repo/contracts/deployments.json";
-import { PublicKeyRegistry__factory } from "@repo/contracts/typechain-types";
 import { utils } from "@shield-labs/utils";
+import deployments from "@shield-labs/zklogin-contracts/deployments.json";
+import { PublicKeyRegistry__factory } from "@shield-labs/zklogin-contracts/typechain-types";
 import { error } from "@sveltejs/kit";
 import { config } from "dotenv";
 import { ethers } from "ethers";

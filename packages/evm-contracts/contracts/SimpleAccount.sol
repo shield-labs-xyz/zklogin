@@ -34,8 +34,7 @@ contract SimpleAccount is
     BaseAccount,
     TokenCallbackHandler,
     UUPSUpgradeable,
-    Initializable,
-    JwtVerifier
+    Initializable
 {
     IEntryPoint private immutable _entryPoint;
 
@@ -45,7 +44,7 @@ contract SimpleAccount is
     }
     Owner public ownerInfo;
 
-    AccountData public accountData;
+    JwtVerifier.AccountData public accountData;
 
     constructor(IEntryPoint anEntryPoint) {
         _entryPoint = anEntryPoint;
@@ -58,7 +57,7 @@ contract SimpleAccount is
      * the implementation by calling `upgradeTo()`
      */
     function initialize(
-        AccountData calldata accountData_
+        JwtVerifier.AccountData calldata accountData_
     ) public virtual initializer {
         accountData = accountData_;
     }
@@ -99,12 +98,14 @@ contract SimpleAccount is
         return ownerInfo_.owner;
     }
 
-    function setOwner(VerificationData calldata verificationData) public {
+    function setOwner(
+        JwtVerifier.VerificationData calldata verificationData
+    ) public {
         require(
             verificationData.jwtIat + JWT_EXPIRATION_TIME >= block.timestamp,
             "JwtAccount: expired proof"
         );
-        bool result = _verifyJwtProof(accountData, verificationData);
+        bool result = JwtVerifier.verifyJwtProof(accountData, verificationData);
         require(result, "JwtAccount: invalid proof");
 
         ownerInfo = Owner({

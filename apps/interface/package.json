@@ -1,7 +1,6 @@
 {
   "name": "@repo/interface",
   "type": "module",
-  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "pnpm _chore && vite dev --port 5193",
@@ -23,7 +22,7 @@
     "@noir-lang/noir_js": "0.34.0",
     "@noir-lang/noir_wasm": "0.34.0",
     "@noir-lang/noirc_abi": "0.34.0",
-    "@repo/contracts": "workspace:*",
+    "@shield-labs/zklogin-contracts": "workspace:*",
     "@repo/ui": "workspace:*",
     "@shield-labs/utils": "workspace:*",
     "@shield-labs/zklogin": "workspace:*",
