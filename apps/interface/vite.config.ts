@@ -21,7 +21,7 @@ export default defineConfig(() => ({
       ...(process.env.NODE_ENV === "production"
         ? {
             // `unreachable` error in wasm is caused by incorrect version of bb.js. Consult pnpm-lock.yaml
-            "@aztec/bb.js": `export * from "https://unpkg.com/@aztec/bb.js@0.55.0/dest/browser/index.js"`,
+            "@aztec/bb.js": `export * from "https://unpkg.com/@aztec/bb.js@0.63.1/dest/browser/index.js"`,
           }
         : {}),
     }),

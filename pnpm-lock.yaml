@@ -29,20 +29,23 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0(@sveltejs/kit@2.7.2(@sveltejs/vite-plugin-svelte@4.0.0(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(svelte@5.0.5)(vite@5.4.8(@types/node@20.16.11)))(svelte@5.0.5)
       '@aztec/foundation':
-        specifier: 0.55.0
-        version: 0.55.0
+        specifier: 0.63.1
+        version: 0.63.1
       '@metamask/jazzicon':
         specifier: ^2.0.0
         version: 2.0.0
       '@noir-lang/acvm_js':
-        specifier: 0.50.0
-        version: 0.50.0
+        specifier: 1.0.0-beta.0
+        version: 1.0.0-beta.0
+      '@noir-lang/noir_js':
+        specifier: 1.0.0-beta.0
+        version: 1.0.0-beta.0
       '@noir-lang/noir_wasm':
-        specifier: 0.34.0
-        version: 0.34.0
+        specifier: 1.0.0-beta.0
+        version: 1.0.0-beta.0
       '@noir-lang/noirc_abi':
-        specifier: 0.34.0
-        version: 0.34.0
+        specifier: 1.0.0-beta.0
+        version: 1.0.0-beta.0
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -210,8 +213,8 @@ importers:
         specifier: ^1.0.10
         version: 1.0.10(hardhat@2.22.13(ts-node@10.9.2(@types/node@20.16.11)(typescript@5.6.3))(typescript@5.6.3))
       hardhat-plugin-noir:
-        specifier: ^0.0.3
-        version: 0.0.3(hardhat@2.22.13(ts-node@10.9.2(@types/node@20.16.11)(typescript@5.6.3))(typescript@5.6.3))
+        specifier: ^0.2.0
+        version: 0.2.0(hardhat@2.22.13(ts-node@10.9.2(@types/node@20.16.11)(typescript@5.6.3))(typescript@5.6.3))
       json-stringify-deterministic:
         specifier: ^1.0.12
         version: 1.0.12
@@ -251,18 +254,18 @@ importers:
 
   packages/sdk:
     dependencies:
+      '@aztec/bb.js':
+        specifier: 0.63.1
+        version: 0.63.1
       '@aztec/foundation':
-        specifier: 0.55.0
-        version: 0.55.0
+        specifier: 0.63.1
+        version: 0.63.1
       '@mach-34/noir-bignum-paramgen':
-        specifier: 1.0.2
-        version: 1.0.2
-      '@noir-lang/backend_barretenberg':
-        specifier: 0.34.0
-        version: 0.34.0
+        specifier: 1.1.0
+        version: 1.1.0
       '@noir-lang/noir_js':
-        specifier: 0.34.0
-        version: 0.34.0
+        specifier: 1.0.0-beta.0
+        version: 1.0.0-beta.0
       '@shield-labs/utils':
         specifier: workspace:*
         version: link:../utils
@@ -460,12 +463,12 @@ packages:
       nodemailer:
         optional: true
 
-  '@aztec/bb.js@0.55.0':
-    resolution: {integrity: sha512-hdSn5qba/OVyDAPuNBxpF+nFodcv+lK16YPIqkgaaNJ/6hURSLXClbkfnXNg7egwmnvrBQrJb5dVuaoydm8y6w==}
+  '@aztec/bb.js@0.63.1':
+    resolution: {integrity: sha512-pSWh1PsOZISVpdbJch1gXUAa3jfohL6IhbjGKjaRY1QaLf3Fnz33AomB/vqAZs7Uy2VMVqlDdbc9b1QUHTcpzQ==}
     hasBin: true
 
-  '@aztec/foundation@0.55.0':
-    resolution: {integrity: sha512-2XE7DJ4GnehRkbjtD+dc9rkUA9khUoUMI2xX5XuPdJ780Tw7x5CPosTIqbBL254vobgzYQU0r5IkbXIVj8Cb3w==}
+  '@aztec/foundation@0.63.1':
+    resolution: {integrity: sha512-ElCNZL/1cvaebE0hG0crbQHN3rBhKVI5CN/JhC+RtFvYM+yR2r5VLCXlIVYb5Qz8jssVhLfoT1z/FVuZOAW+rg==}
     engines: {node: '>=18'}
 
   '@babel/runtime@7.25.7':
@@ -1111,8 +1114,8 @@ packages:
     resolution: {integrity: sha512-x/iUDjcS90W69PryLDIMgFyV21YLTnG9zOpPXS7Bkt2b8AsY3zZsIpOLBkYr9fBcF3HbkKaER5hOBZLfpLgYNw==}
     engines: {node: '>= 14.0.0'}
 
-  '@mach-34/noir-bignum-paramgen@1.0.2':
-    resolution: {integrity: sha512-80+8KcYR4RNxgYGBaJkZlmSDLUJcj0QIpKWUCUrShjqIQh4LGKi/dgf6JdziEzDVxKr4AkmCkA7pdwLcsD5xag==}
+  '@mach-34/noir-bignum-paramgen@1.1.0':
+    resolution: {integrity: sha512-jiD5BzwZEeFPy5Bzro8Bu5JVixG0LT3DhlNwHH2ntuogc56jbejHSGZLhanhwjMMTvIvRKHc3D1sk/eCpWEs6Q==}
 
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
@@ -1188,23 +1191,20 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
-  '@noir-lang/acvm_js@0.50.0':
-    resolution: {integrity: sha512-tmD3eZ8GbkkD001S/YVIrp91sy+XW1ZeVRObio1WgvX9081kJS1xptBglMO4ITzdHOLLuIeaChlUhCgNtwFB9Q==}
+  '@noir-lang/acvm_js@1.0.0-beta.0':
+    resolution: {integrity: sha512-92GBgWF9B73vXMxUZF3MKcvIgOM8YX05ZdRyvCx0Xq80jttTrr1A1xVDUsHU640Btm9oPzzdYQqggb+aJkW+pw==}
 
-  '@noir-lang/backend_barretenberg@0.34.0':
-    resolution: {integrity: sha512-yDW+IN0wrbjtlVNzz0MMWpwIdzBvJ98ZdEt1jXXQItPQ8BZW7324oexWZTAtHb0oLsktdTpxyx6uM6AVpQG5ug==}
+  '@noir-lang/noir_js@1.0.0-beta.0':
+    resolution: {integrity: sha512-ZSn615HHO7bHlEW1/L3CwysElDqyjUnN6PMezkmOhx2qz1U0iUqvcTiqdXklH40MbISifGmly2VsKe0vVwtjXw==}
 
-  '@noir-lang/noir_js@0.34.0':
-    resolution: {integrity: sha512-NprF+UlG05d2SkUQDcJ+GBHiWvkkVp5QczsFGmAHtGjpETAj5fqaSE8iTzdp/QTl2K9OtrsNrDLYoK/PPCLgFQ==}
+  '@noir-lang/noir_wasm@1.0.0-beta.0':
+    resolution: {integrity: sha512-rM+tjYwIvEE09Gys99EDTqx6sSByQayIa3cj4X6lyRXb9fQA936/2gQYy0qwJfx1FRFc9k3Nc1Fh4WuFtC0sZg==}
 
-  '@noir-lang/noir_wasm@0.34.0':
-    resolution: {integrity: sha512-cci4nOOT1Tn728ILnF7ZjQ/JGgZgJiZ7LuyJUgNr4a6tbOQnHj1wolnzhvdhbMRPbFd+Q54aAd9aUSGpYw9G4w==}
+  '@noir-lang/noirc_abi@1.0.0-beta.0':
+    resolution: {integrity: sha512-RvEVLtKnVeY1yTOVvBll/gHpAtWi6sqp1jZWqt7VK+dzG7l8i9S9deCrn1I321xamkgebWgscfkdhKKUBCKaHQ==}
 
-  '@noir-lang/noirc_abi@0.34.0':
-    resolution: {integrity: sha512-GrdOG0qQfjFN2llYOKEDenaNpMp1JAtB5NxRM+8hB69VDKmAFGJJRgcMxzWgbRcRhX5AOp/7CHqV2OVVqgTMYA==}
-
-  '@noir-lang/types@0.34.0':
-    resolution: {integrity: sha512-04A14JMPt5G6/cCD4n59W0DUtAbcN8YByvSJ6gj0VQramd11tWK3ZqhKadnQrzhA0GwEvROd6jvn/blKdHlSXQ==}
+  '@noir-lang/types@1.0.0-beta.0':
+    resolution: {integrity: sha512-+LGd8GpZfGh/gir3LX/VjphHG9wWfF/YaZWOUcaxX/TJDU/Lk+THJQnaNhxNG0z2qn/LJVlCOT65L+BLZKBidw==}
 
   '@nomicfoundation/edr-darwin-arm64@0.6.3':
     resolution: {integrity: sha512-hqtI7tYDqKG5PDmZ//Z65EH5cgH8VL/SAAu50rpHP7WAVfJWkOCcYbecywwF6nhHdonJbRTDGAeG1/+VOy6zew==}
@@ -2872,8 +2872,8 @@ packages:
     peerDependencies:
       hardhat: ^2.0.2
 
-  hardhat-plugin-noir@0.0.3:
-    resolution: {integrity: sha512-EIcDsvms1ewLRJDcID5iZy9pTGsXMAAeOpRXuYXhHadRj/MPrt0QRc/GcO/Ll4TbbXaIg46IpeSosHpkUsnDCA==}
+  hardhat-plugin-noir@0.2.0:
+    resolution: {integrity: sha512-HbKfWwxN3pRVXJyCHSalJop2nbjz6lg+sxAt9XLJ/HKhiZ+VbhYxR8WkEzzGT0ZZ5nhtrGABKow/MIx6VZKpPA==}
     peerDependencies:
       hardhat: ^2.0.0
 
@@ -4845,18 +4845,19 @@ snapshots:
       set-cookie-parser: 2.7.0
       svelte: 5.0.5
 
-  '@aztec/bb.js@0.55.0':
+  '@aztec/bb.js@0.63.1':
     dependencies:
       comlink: 4.4.1
       commander: 10.0.1
       debug: 4.3.7(supports-color@8.1.1)
+      fflate: 0.8.2
       tslib: 2.7.0
     transitivePeerDependencies:
       - supports-color
 
-  '@aztec/foundation@0.55.0':
+  '@aztec/foundation@0.63.1':
     dependencies:
-      '@aztec/bb.js': 0.55.0
+      '@aztec/bb.js': 0.63.1
       '@koa/cors': 5.0.0
       '@noble/curves': 1.7.0
       bn.js: 5.2.1
@@ -5576,7 +5577,7 @@ snapshots:
     dependencies:
       vary: 1.1.2
 
-  '@mach-34/noir-bignum-paramgen@1.0.2': {}
+  '@mach-34/noir-bignum-paramgen@1.1.0': {}
 
   '@manypkg/find-root@1.1.0':
     dependencies:
@@ -5674,32 +5675,24 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.17.1
 
-  '@noir-lang/acvm_js@0.50.0': {}
+  '@noir-lang/acvm_js@1.0.0-beta.0': {}
 
-  '@noir-lang/backend_barretenberg@0.34.0':
+  '@noir-lang/noir_js@1.0.0-beta.0':
     dependencies:
-      '@aztec/bb.js': 0.55.0
-      '@noir-lang/types': 0.34.0
-      fflate: 0.8.2
-    transitivePeerDependencies:
-      - supports-color
+      '@noir-lang/acvm_js': 1.0.0-beta.0
+      '@noir-lang/noirc_abi': 1.0.0-beta.0
+      '@noir-lang/types': 1.0.0-beta.0
 
-  '@noir-lang/noir_js@0.34.0':
+  '@noir-lang/noir_wasm@1.0.0-beta.0':
     dependencies:
-      '@noir-lang/acvm_js': 0.50.0
-      '@noir-lang/noirc_abi': 0.34.0
-      '@noir-lang/types': 0.34.0
-
-  '@noir-lang/noir_wasm@0.34.0':
-    dependencies:
-      '@noir-lang/types': 0.34.0
+      '@noir-lang/types': 1.0.0-beta.0
       pako: 2.1.0
 
-  '@noir-lang/noirc_abi@0.34.0':
+  '@noir-lang/noirc_abi@1.0.0-beta.0':
     dependencies:
-      '@noir-lang/types': 0.34.0
+      '@noir-lang/types': 1.0.0-beta.0
 
-  '@noir-lang/types@0.34.0': {}
+  '@noir-lang/types@1.0.0-beta.0': {}
 
   '@nomicfoundation/edr-darwin-arm64@0.6.3': {}
 
@@ -7649,7 +7642,7 @@ snapshots:
       - debug
       - utf-8-validate
 
-  hardhat-plugin-noir@0.0.3(hardhat@2.22.13(ts-node@10.9.2(@types/node@20.16.11)(typescript@5.6.3))(typescript@5.6.3)):
+  hardhat-plugin-noir@0.2.0(hardhat@2.22.13(ts-node@10.9.2(@types/node@20.16.11)(typescript@5.6.3))(typescript@5.6.3)):
     dependencies:
       glob: 11.0.0
       hardhat: 2.22.13(ts-node@10.9.2(@types/node@20.16.11)(typescript@5.6.3))(typescript@5.6.3)
