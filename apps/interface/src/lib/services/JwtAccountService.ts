@@ -5,7 +5,7 @@ import {
   SimpleAccount__factory,
   SimpleAccountFactory__factory,
 } from "@shield-labs/zklogin-contracts/typechain-types";
-import type { ZkLogin } from "@shield-labs/zklogin-contracts/typechain-types/contracts/SimpleAccount.js";
+import type { ZkLogin } from "@shield-labs/zklogin-contracts/typechain-types/contracts/product/SimpleAccount.js";
 import { ethers } from "ethers";
 import { assert } from "ts-essentials";
 import type { Address, Chain, Hex, PublicClient, SignableMessage } from "viem";

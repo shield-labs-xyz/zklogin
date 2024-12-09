@@ -18,7 +18,7 @@ import type {
   TypedEventLog,
   TypedListener,
   TypedContractMethod,
-} from "../common";
+} from "../../common";
 
 export declare namespace ZkLogin {
   export type AccountDataStruct = {

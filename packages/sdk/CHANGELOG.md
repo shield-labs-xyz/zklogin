@@ -1,5 +1,34 @@
 # @shield-labs/zklogin
 
+## 0.5.0
+
+### Minor Changes
+
+- e349915: fix: actually build js
+
+### Patch Changes
+
+- Updated dependencies [e349915]
+  - @shield-labs/utils@0.1.0
+
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [a506d72]
+  - @shield-labs/zklogin-contracts@0.5.0
+
+## 0.4.0
+
+### Minor Changes
+
+- 8c5413a: feat: update bb version
+
+### Patch Changes
+
+- Updated dependencies [8c5413a]
+  - @shield-labs/zklogin-contracts@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

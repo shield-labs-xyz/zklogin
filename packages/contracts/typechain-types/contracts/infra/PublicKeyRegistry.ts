@@ -20,7 +20,7 @@ import type {
   TypedLogDescription,
   TypedListener,
   TypedContractMethod,
-} from "../common";
+} from "../../common";
 
 export declare namespace PublicKeyRegistry {
   export type PublicKeyValidityStruct = {

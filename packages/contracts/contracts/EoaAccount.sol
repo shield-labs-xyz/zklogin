@@ -2,10 +2,10 @@
 pragma solidity ^0.8.27;
 
 import {ZkLogin} from "./ZkLogin.sol";
-import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
+import {IPublicKeyRegistry} from "./infra/IPublicKeyRegistry.sol";
 import {UltraVerifier} from "../noir/target/jwt_account.sol";
-import {WebAuthnP256} from "./WebAuthnP256.sol";
-import {ECDSA} from "./ECDSA.sol";
+import {WebAuthnP256} from "./utils/WebAuthnP256.sol";
+import {ECDSA} from "./utils/ECDSA.sol";
 
 contract EoaAccount {
     ZkLogin.AccountData public accountData;

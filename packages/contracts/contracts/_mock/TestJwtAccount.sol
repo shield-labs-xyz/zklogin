@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.27;
 
-import {ZkLogin} from "./ZkLogin.sol";
-import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
+import {ZkLogin} from "../ZkLogin.sol";
 
 contract TestJwtAccount {
     ZkLogin.AccountData public accountData;

@@ -5,8 +5,7 @@ import "@openzeppelin/contracts/utils/Create2.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {SimpleAccount, IEntryPoint} from "./SimpleAccount.sol";
-import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
-import {ZkLogin} from "./ZkLogin.sol";
+import {ZkLogin} from "../ZkLogin.sol";
 
 /**
  * A sample factory contract for SimpleAccount

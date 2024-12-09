@@ -13,8 +13,7 @@ import "@account-abstraction/contracts/core/BaseAccount.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";
 import "@account-abstraction/contracts/samples/callback/TokenCallbackHandler.sol";
 
-import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
-import {ZkLogin} from "./ZkLogin.sol";
+import {ZkLogin} from "../ZkLogin.sol";
 
 // Note: keep in sync with JS
 // How long owner session is valid for
