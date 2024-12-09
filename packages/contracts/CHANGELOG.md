@@ -1,5 +1,11 @@
 # @shield-labs/zklogin-contracts
 
+## 0.5.0
+
+### Minor Changes
+
+- a506d72: feat: restructure solidity contracts
+
 ## 0.4.0
 
 ### Minor Changes
