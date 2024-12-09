@@ -118,9 +118,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Strings__factory>;
     getContractFactory(
+      name: "TestJwtAccount",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TestJwtAccount__factory>;
+    getContractFactory(
+      name: "IPublicKeyRegistry",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPublicKeyRegistry__factory>;
+    getContractFactory(
       name: "PublicKeyRegistry",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.PublicKeyRegistry__factory>;
+    getContractFactory(
+      name: "IProofVerifier",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IProofVerifier__factory>;
     getContractFactory(
       name: "SimpleAccount",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -133,10 +145,6 @@ declare module "hardhat/types/runtime" {
       name: "Strings",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Strings__factory>;
-    getContractFactory(
-      name: "TestJwtAccount",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.TestJwtAccount__factory>;
     getContractFactory(
       name: "BaseUltraVerifier",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -277,10 +285,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Strings>;
     getContractAt(
+      name: "TestJwtAccount",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TestJwtAccount>;
+    getContractAt(
+      name: "IPublicKeyRegistry",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPublicKeyRegistry>;
+    getContractAt(
       name: "PublicKeyRegistry",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.PublicKeyRegistry>;
+    getContractAt(
+      name: "IProofVerifier",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IProofVerifier>;
     getContractAt(
       name: "SimpleAccount",
       address: string | ethers.Addressable,
@@ -296,11 +319,6 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.Strings>;
-    getContractAt(
-      name: "TestJwtAccount",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.TestJwtAccount>;
     getContractAt(
       name: "BaseUltraVerifier",
       address: string | ethers.Addressable,
@@ -417,9 +435,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
     deployContract(
+      name: "TestJwtAccount",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TestJwtAccount>;
+    deployContract(
+      name: "IPublicKeyRegistry",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPublicKeyRegistry>;
+    deployContract(
       name: "PublicKeyRegistry",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.PublicKeyRegistry>;
+    deployContract(
+      name: "IProofVerifier",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IProofVerifier>;
     deployContract(
       name: "SimpleAccount",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -432,10 +462,6 @@ declare module "hardhat/types/runtime" {
       name: "Strings",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
-    deployContract(
-      name: "TestJwtAccount",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.TestJwtAccount>;
     deployContract(
       name: "BaseUltraVerifier",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -576,10 +602,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
     deployContract(
+      name: "TestJwtAccount",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TestJwtAccount>;
+    deployContract(
+      name: "IPublicKeyRegistry",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPublicKeyRegistry>;
+    deployContract(
       name: "PublicKeyRegistry",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.PublicKeyRegistry>;
+    deployContract(
+      name: "IProofVerifier",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IProofVerifier>;
     deployContract(
       name: "SimpleAccount",
       args: any[],
@@ -595,11 +636,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
-    deployContract(
-      name: "TestJwtAccount",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.TestJwtAccount>;
     deployContract(
       name: "BaseUltraVerifier",
       args: any[],

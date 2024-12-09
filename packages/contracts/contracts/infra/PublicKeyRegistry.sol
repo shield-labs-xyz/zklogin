@@ -3,7 +3,9 @@ pragma solidity ^0.8.27;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract PublicKeyRegistry is Ownable(msg.sender) {
+import {IPublicKeyRegistry} from "./IPublicKeyRegistry.sol";
+
+contract PublicKeyRegistry is Ownable(msg.sender), IPublicKeyRegistry {
     /// providerId => publicKeyHash => isValid
     mapping(bytes32 => mapping(bytes32 => bool)) public isPublicKeyHashValid;
 

@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.27;
 
-import {UltraVerifier} from "../noir/target/jwt_account.sol";
-import {Strings} from "./Strings.sol";
-import {PublicKeyRegistry} from "./PublicKeyRegistry.sol";
+import {IProofVerifier} from "./IProofVerifier.sol";
+import {Strings} from "./utils/Strings.sol";
+import {IPublicKeyRegistry} from "./infra/IPublicKeyRegistry.sol";
 
 library ZkLogin {
     struct AccountData {
         bytes32 accountId;
         bytes32 authProviderId;
-        PublicKeyRegistry publicKeyRegistry;
-        UltraVerifier proofVerifier;
+        address publicKeyRegistry;
+        address proofVerifier;
     }
 
     struct VerificationData {
@@ -25,7 +25,7 @@ library ZkLogin {
         VerificationData memory verificationData
     ) internal view returns (bool) {
         require(
-            accountData.publicKeyRegistry.checkPublicKey(
+            IPublicKeyRegistry(accountData.publicKeyRegistry).checkPublicKey(
                 accountData.authProviderId,
                 verificationData.publicKeyHash
             ),
@@ -48,9 +48,10 @@ library ZkLogin {
         for (uint256 i = 0; i < jwtNonce.length; i++) {
             publicInputs[j++] = bytes32(uint256(uint8(jwtNonce[i])));
         }
+        assert(j == publicInputs.length);
 
         return
-            accountData.proofVerifier.verify(
+            IProofVerifier(accountData.proofVerifier).verify(
                 verificationData.proof,
                 publicInputs
             );

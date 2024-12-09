@@ -3,7 +3,9 @@
 /* eslint-disable */
 import type {
   BaseContract,
+  BytesLike,
   FunctionFragment,
+  Result,
   Interface,
   ContractRunner,
   ContractMethod,
@@ -14,15 +16,28 @@ import type {
   TypedDeferredTopicFilter,
   TypedEventLog,
   TypedListener,
-} from "../common";
+  TypedContractMethod,
+} from "../../common";
 
-export interface StringsInterface extends Interface {}
+export interface IPublicKeyRegistryInterface extends Interface {
+  getFunction(nameOrSignature: "checkPublicKey"): FunctionFragment;
 
-export interface Strings extends BaseContract {
-  connect(runner?: ContractRunner | null): Strings;
+  encodeFunctionData(
+    functionFragment: "checkPublicKey",
+    values: [BytesLike, BytesLike]
+  ): string;
+
+  decodeFunctionResult(
+    functionFragment: "checkPublicKey",
+    data: BytesLike
+  ): Result;
+}
+
+export interface IPublicKeyRegistry extends BaseContract {
+  connect(runner?: ContractRunner | null): IPublicKeyRegistry;
   waitForDeployment(): Promise<this>;
 
-  interface: StringsInterface;
+  interface: IPublicKeyRegistryInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -61,9 +76,23 @@ export interface Strings extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  checkPublicKey: TypedContractMethod<
+    [providerId: BytesLike, publicKeyHash: BytesLike],
+    [boolean],
+    "view"
+  >;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
+
+  getFunction(
+    nameOrSignature: "checkPublicKey"
+  ): TypedContractMethod<
+    [providerId: BytesLike, publicKeyHash: BytesLike],
+    [boolean],
+    "view"
+  >;
 
   filters: {};
 }
