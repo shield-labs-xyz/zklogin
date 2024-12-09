@@ -7,6 +7,8 @@ Sign in with Apple/Google on Base. Self-custodial. Try it now: <https://zklogin.
 <a href="https://zklogin.oleh.wtf">
 <img src="https://github.com/user-attachments/assets/6c3a34c9-7f11-4275-9c55-8714ac55ffa3" width="200"></a>
 
+> ## WARNING: zkLogin is not audited and should not be used in production
+
 ## How it works
 
 Create a Base(or any EVM) account using "Sign in with Google" flow (Apple is in progress). The account is tied to your Google account and can only be controlled by you.
