@@ -1,5 +1,11 @@
 # @shield-labs/zklogin
 
+## 0.5.1
+
+### Patch Changes
+
+- 6d6f773: docs: add disclaimer
+
 ## 0.5.0
 
 ### Minor Changes
