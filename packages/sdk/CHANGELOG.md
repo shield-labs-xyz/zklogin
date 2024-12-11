@@ -1,5 +1,11 @@
 # @shield-labs/zklogin
 
+## 0.5.2
+
+### Patch Changes
+
+- 0306af5: chore: move to shield-labs org
+
 ## 0.5.1
 
 ### Patch Changes
