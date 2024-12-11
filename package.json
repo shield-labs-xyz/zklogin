@@ -2,6 +2,9 @@
   "name": "@repo/monorepo",
   "type": "module",
   "private": true,
+  "scripts": {
+    "release": "pnpm changeset version && git add . && git commit -m\"chore: release\" && pnpm changeset publish && git push && git push --tags"
+  },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
     "prettier-plugin-svelte": "^3.2.7",
