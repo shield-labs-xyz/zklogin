@@ -57,9 +57,8 @@ export class GoogleProvider {
     // Generate a random state
     const state = Math.random().toString(36).substring(2, 15);
 
-    // Store the state and nonce in localStorage
-    localStorage.setItem(localStorageKeys.GoogleOAuthState, state);
-    localStorage.setItem(localStorageKeys.GoogleOAuthNonce, nonce);
+    sessionStorage.setItem(storageKeys.GoogleOAuthState, state);
+    sessionStorage.setItem(storageKeys.GoogleOAuthNonce, nonce);
 
     // Construct the Google OAuth URL
     const redirectUri = `${window.location.origin}/auth/callback/google`;
@@ -75,7 +74,11 @@ export class GoogleProvider {
     }).toString();
 
     // Open the auth window
-    const authWindow = window.open(authUrl, undefined, "width=500,height=600");
+    const authWindow = window.open(
+      authUrl,
+      "Google Sign In",
+      "width=500,height=600",
+    );
 
     return new Promise((resolve, reject) => {
       const handleMessage = (event: MessageEvent) => {
@@ -95,7 +98,7 @@ export class GoogleProvider {
           // Verify the state
           if (
             returnedState !==
-            localStorage.getItem(localStorageKeys.GoogleOAuthState)
+            sessionStorage.getItem(storageKeys.GoogleOAuthState)
           ) {
             cleanup();
             reject(new Error("Invalid state parameter"));
@@ -137,8 +140,8 @@ export class GoogleProvider {
       );
 
       function cleanup() {
-        localStorage.removeItem(localStorageKeys.GoogleOAuthState);
-        localStorage.removeItem(localStorageKeys.GoogleOAuthNonce);
+        sessionStorage.removeItem(storageKeys.GoogleOAuthState);
+        sessionStorage.removeItem(storageKeys.GoogleOAuthNonce);
         clearInterval(checkInterval);
         clearTimeout(timeout);
         window.removeEventListener("message", handleMessage);
@@ -160,7 +163,7 @@ export class GoogleProvider {
   });
 }
 
-const localStorageKeys = {
+const storageKeys = {
   GoogleOAuthState: "googleOAuthState",
   GoogleOAuthNonce: "googleOAuthNonce",
 };
