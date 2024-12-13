@@ -5,18 +5,7 @@ export class GoogleProvider {
   constructor(private authGoogleClientId: string) {}
 
   async signInWithGoogle({ nonce }: { nonce: string }): Promise<string> {
-    let jwtStr: string;
-    try {
-      // First, try One Tap sign-in
-      jwtStr = await this.#signInWithGoogleOneTap({ nonce });
-    } catch (error) {
-      console.log(
-        "One Tap sign-in failed, falling back to popup method",
-        error,
-      );
-      // If One Tap fails, fall back to popup method
-      jwtStr = await this.#signInWithGooglePopup({ nonce });
-    }
+    const jwtStr = await this.#signInWithGooglePopup({ nonce });
     const jwt = decodeJwt(jwtStr);
 
     if (jwt.payload.nonce !== nonce) {
@@ -24,33 +13,6 @@ export class GoogleProvider {
     }
 
     return jwtStr;
-  }
-
-  async #signInWithGoogleOneTap({ nonce }: { nonce: string }): Promise<string> {
-    await this.#loadGoogleOAuthScript();
-
-    return new Promise((resolve, reject) => {
-      window.google!.accounts.id.initialize({
-        client_id: this.authGoogleClientId,
-        callback: (response: { credential: string; error: string }) => {
-          if (response.error) {
-            reject(response.error);
-          } else {
-            const idTokenStr = response.credential;
-            resolve(idTokenStr);
-          }
-        },
-        nonce: nonce,
-        context: "signin",
-      });
-
-      // @ts-expect-error its valid to pass this callback
-      window.google!.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          reject("One Tap not displayed or skipped");
-        }
-      });
-    });
   }
 
   async #signInWithGooglePopup({ nonce }: { nonce: string }): Promise<string> {
