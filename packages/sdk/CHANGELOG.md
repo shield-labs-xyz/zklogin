@@ -1,5 +1,11 @@
 # @shield-labs/zklogin
 
+## 0.6.0
+
+### Minor Changes
+
+- feat: custom Google auth provider
+
 ## 0.5.2
 
 ### Patch Changes

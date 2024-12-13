@@ -1,6 +1,6 @@
 {
   "name": "@shield-labs/zklogin",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "type": "module",
   "main": "src/index.ts",
   "module": "src/index.ts",
