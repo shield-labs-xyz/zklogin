@@ -128,27 +128,6 @@
     </div>
   </section>
 
-  <Ui.LoadingButton
-    variant="default"
-    onclick={extendSession}
-    loading={extendSessionStart != null}
-  >
-    session
-  </Ui.LoadingButton>
-  {#if extendSessionStart}
-    {@const estimatedDuration = ms("1.5 min")}
-    Remaining time: {formatDuration(
-      intervalToDuration({
-        start: now.value,
-        end: extendSessionStart + estimatedDuration,
-      }),
-    )}
-    <Ui.Progress
-      value={now.value - extendSessionStart}
-      max={estimatedDuration}
-    />
-  {/if}
-
   <Ui.Card.Root>
     <Ui.Card.Header>
       <Ui.Card.Title>Google account</Ui.Card.Title>
