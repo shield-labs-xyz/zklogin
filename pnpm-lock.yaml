@@ -37,18 +37,6 @@ importers:
       '@metamask/jazzicon':
         specifier: ^2.0.0
         version: 2.0.0
-      '@noir-lang/acvm_js':
-        specifier: 1.0.0-beta.0
-        version: 1.0.0-beta.0
-      '@noir-lang/noir_js':
-        specifier: 1.0.0-beta.0
-        version: 1.0.0-beta.0
-      '@noir-lang/noir_wasm':
-        specifier: 1.0.0-beta.0
-        version: 1.0.0-beta.0
-      '@noir-lang/noirc_abi':
-        specifier: 1.0.0-beta.0
-        version: 1.0.0-beta.0
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -1199,9 +1187,6 @@ packages:
 
   '@noir-lang/noir_js@1.0.0-beta.0':
     resolution: {integrity: sha512-ZSn615HHO7bHlEW1/L3CwysElDqyjUnN6PMezkmOhx2qz1U0iUqvcTiqdXklH40MbISifGmly2VsKe0vVwtjXw==}
-
-  '@noir-lang/noir_wasm@1.0.0-beta.0':
-    resolution: {integrity: sha512-rM+tjYwIvEE09Gys99EDTqx6sSByQayIa3cj4X6lyRXb9fQA936/2gQYy0qwJfx1FRFc9k3Nc1Fh4WuFtC0sZg==}
 
   '@noir-lang/noirc_abi@1.0.0-beta.0':
     resolution: {integrity: sha512-RvEVLtKnVeY1yTOVvBll/gHpAtWi6sqp1jZWqt7VK+dzG7l8i9S9deCrn1I321xamkgebWgscfkdhKKUBCKaHQ==}
@@ -5682,11 +5667,6 @@ snapshots:
       '@noir-lang/acvm_js': 1.0.0-beta.0
       '@noir-lang/noirc_abi': 1.0.0-beta.0
       '@noir-lang/types': 1.0.0-beta.0
-
-  '@noir-lang/noir_wasm@1.0.0-beta.0':
-    dependencies:
-      '@noir-lang/types': 1.0.0-beta.0
-      pako: 2.1.0
 
   '@noir-lang/noirc_abi@1.0.0-beta.0':
     dependencies:
