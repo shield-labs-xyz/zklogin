@@ -29,8 +29,9 @@
     "@aztec/foundation": "0.65.2",
     "@mach-34/noir-bignum-paramgen": "1.1.0",
     "@noir-lang/noir_js": "1.0.0-beta.0",
-    "@shield-labs/zklogin-contracts": "workspace:*",
     "@shield-labs/utils": "workspace:*",
+    "@shield-labs/zklogin-contracts": "workspace:*",
+    "js-cookie": "^3.0.5",
     "ky": "^1.7.2",
     "lodash-es": "^4.17.21",
     "ox": "^0.4.0",
@@ -38,6 +39,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
     "@types/lodash-es": "^4.17.12",
     "prettier": "^3.2.5",
     "typescript": "^5.5.2"

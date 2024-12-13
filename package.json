@@ -12,8 +12,7 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "@aztec/bb.js": "patches/@aztec__bb.js.patch",
-      "oauth4webapi@3.0.0": "patches/oauth4webapi@3.0.0.patch"
+      "@aztec/bb.js": "patches/@aztec__bb.js.patch"
     }
   }
 }
