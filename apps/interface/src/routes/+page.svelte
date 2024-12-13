@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { PUBLIC_AUTH_GOOGLE_ID } from "$env/static/public";
   import { getBundlerClient, lib, publicClient } from "$lib";
   import { provider } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
@@ -7,10 +6,8 @@
   import SendEthCard from "$lib/SendEthCard.svelte";
   import { toJwtNonce } from "$lib/services/JwtAccountService.js";
   import { EXTEND_SESSION_SEARCH_PARAM } from "$lib/utils.js";
-  import * as web2Auth from "@auth/sveltekit/client";
   import { Ui } from "@repo/ui";
   import { utils } from "@shield-labs/utils";
-  import { zklogin } from "@shield-labs/zklogin";
   import { createQuery } from "@tanstack/svelte-query";
   import { formatDistance, formatDuration, intervalToDuration } from "date-fns";
   import { ethers } from "ethers";
@@ -18,9 +15,8 @@
   import { onMount } from "svelte";
   import { assert } from "ts-essentials";
 
-  let { data } = $props();
-
-  let jwt = $derived(data.session?.id_token);
+  let jwtQuery = $derived(lib.queries.jwt());
+  let jwt = $derived($jwtQuery.data ?? undefined);
 
   const signerPrivateKey = new LocalStore<string | undefined>(
     "signer-private-key",
@@ -70,11 +66,6 @@
 
   async function extendSessionInner() {
     console.log("extend session");
-
-    const provider = new zklogin.GoogleProvider(PUBLIC_AUTH_GOOGLE_ID);
-    const jwt = await provider.signInWithGoogle({
-      nonce: await toJwtNonce(signer),
-    });
     assert(jwt, "no session");
 
     // TODO: remove this
@@ -113,20 +104,7 @@
     { extendSessionAfterLogin = false } = {},
   ) {
     const nonce = await toJwtNonce(signer);
-    const callbackUrl = new URL(location.href);
-    if (extendSessionAfterLogin) {
-      callbackUrl.searchParams.set(
-        EXTEND_SESSION_SEARCH_PARAM.key,
-        EXTEND_SESSION_SEARCH_PARAM.value,
-      );
-    }
-    await web2Auth.signIn(
-      "google",
-      { callbackUrl: callbackUrl.href },
-      {
-        nonce,
-      },
-    );
+    await lib.authProvider.signInWithRedirect({ nonce });
   }
 
   onMount(async () => {

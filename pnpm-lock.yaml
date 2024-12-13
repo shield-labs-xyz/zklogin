@@ -263,6 +263,9 @@ importers:
       '@shield-labs/zklogin-contracts':
         specifier: workspace:*
         version: link:../contracts
+      js-cookie:
+        specifier: ^3.0.5
+        version: 3.0.5
       ky:
         specifier: ^1.7.2
         version: 1.7.2
@@ -279,6 +282,9 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
+      '@types/js-cookie':
+        specifier: ^3.0.6
+        version: 3.0.6
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
@@ -1630,6 +1636,9 @@ packages:
 
   '@types/glob@7.2.0':
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
+
+  '@types/js-cookie@3.0.6':
+    resolution: {integrity: sha512-wkw9yd1kEXOPnvEeEV1Go1MmxtBJL0RR79aOTAApecWFVu7w0NNXNqhcWgvw2YgZDYadliXkl14pa3WXw5jlCQ==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -3086,6 +3095,10 @@ packages:
 
   jose@5.9.4:
     resolution: {integrity: sha512-WBBl6au1qg6OHj67yCffCgFR3BADJBXN8MdRvCgJDuMv3driV2nHr7jdGvaKX9IolosAsn+M0XRArqLXUhyJHQ==}
+
+  js-cookie@3.0.5:
+    resolution: {integrity: sha512-cEiJEAEoIbWfCZYKWhVwFuvPX1gETRYPw6LlaTKoxD3s2AkXzkCjnp6h0V77ozyqj0jakteJ4YqDJT830+lVGw==}
+    engines: {node: '>=14'}
 
   js-sha3@0.8.0:
     resolution: {integrity: sha512-gF1cRrHhIzNfToc802P800N8PpXS+evLLXfsVpowqmAFR9uwbi89WvXg2QspOmXL8QL86J4T1EpFu+yUkwJY3Q==}
@@ -6170,6 +6183,8 @@ snapshots:
       '@types/minimatch': 5.1.2
       '@types/node': 20.16.11
 
+  '@types/js-cookie@3.0.6': {}
+
   '@types/json-schema@7.0.15':
     optional: true
 
@@ -7870,6 +7885,8 @@ snapshots:
     optional: true
 
   jose@5.9.4: {}
+
+  js-cookie@3.0.5: {}
 
   js-sha3@0.8.0: {}
 

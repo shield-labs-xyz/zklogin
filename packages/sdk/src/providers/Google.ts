@@ -1,26 +1,17 @@
-import { utils } from "@shield-labs/utils";
-import { decodeJwt } from "../utils.js";
+import Cookies from "js-cookie";
 
 export class GoogleProvider {
   constructor(private authGoogleClientId: string) {}
 
-  async signInWithGoogle({ nonce }: { nonce: string }): Promise<string> {
-    const jwtStr = await this.#signInWithGooglePopup({ nonce });
-    const jwt = decodeJwt(jwtStr);
-
-    if (jwt.payload.nonce !== nonce) {
-      throw new Error("Invalid nonce");
-    }
-
-    return jwtStr;
+  async getJwt(): Promise<string | undefined> {
+    return Cookies.get(JWT_COOKIE_KEY);
   }
 
-  async #signInWithGooglePopup({ nonce }: { nonce: string }): Promise<string> {
+  async signInWithRedirect({ nonce }: { nonce: string }): Promise<never> {
     // Generate a random state
-    const state = Math.random().toString(36).substring(2, 15);
+    const state = crypto.randomUUID();
 
-    sessionStorage.setItem(storageKeys.GoogleOAuthState, state);
-    sessionStorage.setItem(storageKeys.GoogleOAuthNonce, nonce);
+    await this.#setOauthState(state);
 
     // Construct the Google OAuth URL
     const redirectUri = `${window.location.origin}/auth/callback/google`;
@@ -34,85 +25,56 @@ export class GoogleProvider {
       state,
       nonce,
     }).toString();
+    window.location.href = authUrl.toString();
+    return await new Promise<never>(() => {}); // never resolves
+  }
 
-    // Open the auth window
-    const authWindow = window.open(
-      authUrl,
-      "Google Sign In",
-      "width=500,height=600",
-    );
+  async signOut() {
+    Cookies.remove(JWT_COOKIE_KEY);
+  }
 
-    return new Promise((resolve, reject) => {
-      const handleMessage = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) {
-          return;
-        }
+  async handleRedirect(
+    loc: Pick<URL, "hash"> = window.location,
+  ): Promise<void> {
+    const savedState = await this.#useOauthState(); // must be consumed as the first step to prevent replay attacks
 
-        if (event.data.type === "GOOGLE_SIGN_IN_ERROR") {
-          cleanup();
-          reject(new Error(event.data.error));
-          return;
-        }
+    const hashParams = new URLSearchParams(loc.hash.slice(1));
+    const idToken = hashParams.get("id_token");
+    const state = hashParams.get("state");
+    const error = hashParams.get("error");
 
-        if (event.data.type === "GOOGLE_SIGN_IN_SUCCESS") {
-          const { idToken, state: returnedState } = event.data;
+    if (error) {
+      throw new Error(error);
+    }
 
-          // Verify the state
-          if (
-            returnedState !==
-            sessionStorage.getItem(storageKeys.GoogleOAuthState)
-          ) {
-            cleanup();
-            reject(new Error("Invalid state parameter"));
-            return;
-          }
+    if (!idToken || !state) {
+      throw new Error("Invalid Google OAuth response");
+    }
 
-          cleanup();
-          resolve(idToken);
-          return;
-        }
+    if (savedState !== state) {
+      throw new Error("Invalid Google OAuth state");
+    }
 
-        console.error(`Invalid message type: ${event.data.type}`);
-      };
+    await this.#setJwt(idToken);
+  }
 
-      window.addEventListener("message", handleMessage);
+  async #setJwt(jwt: string) {
+    Cookies.set(JWT_COOKIE_KEY, jwt);
+  }
 
-      // Periodically check if the auth window is still open
-      const checkInterval = setInterval(() => {
-        if (authWindow && authWindow.closed) {
-          console.log("auth window closed", authWindow.closed);
-          cleanup();
-          reject(new Error("Authentication cancelled"));
-        }
-      }, 1000);
+  async #setOauthState(state: string) {
+    sessionStorage.setItem(OAUTH_STATE_STORAGE_KEY, state);
+  }
 
-      // Set a timeout for the authentication process
-      const timeout = setTimeout(() => {
-        cleanup();
-        reject(new Error("Authentication timed out"));
-      }, 120000); // 2 minutes timeout
-
-      // Clean up the timeout if authentication succeeds
-      window.addEventListener(
-        "message",
-        () => {
-          cleanup();
-        },
-        { once: true },
-      );
-
-      function cleanup() {
-        sessionStorage.removeItem(storageKeys.GoogleOAuthState);
-        sessionStorage.removeItem(storageKeys.GoogleOAuthNonce);
-        clearInterval(checkInterval);
-        clearTimeout(timeout);
-        window.removeEventListener("message", handleMessage);
-      }
-    });
+  async #useOauthState() {
+    const state = sessionStorage.getItem(OAUTH_STATE_STORAGE_KEY);
+    sessionStorage.removeItem(OAUTH_STATE_STORAGE_KEY);
+    if (!state) {
+      throw new Error("Invalid Google OAuth saved state");
+    }
+    return state;
   }
 }
 
-const storageKeys = {
-  GoogleOAuthState: "googleOAuthState",
-  GoogleOAuthNonce: "googleOAuthNonce",
-};
+const OAUTH_STATE_STORAGE_KEY = "zklogin-google-oauth-state";
+const JWT_COOKIE_KEY = "zklogin-google-jwt";
