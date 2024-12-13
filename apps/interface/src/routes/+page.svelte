@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { PUBLIC_AUTH_GOOGLE_ID } from "$env/static/public";
   import { getBundlerClient, lib, publicClient } from "$lib";
   import { provider } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
@@ -9,6 +10,7 @@
   import * as web2Auth from "@auth/sveltekit/client";
   import { Ui } from "@repo/ui";
   import { utils } from "@shield-labs/utils";
+  import { zklogin } from "@shield-labs/zklogin";
   import { createQuery } from "@tanstack/svelte-query";
   import { formatDistance, formatDuration, intervalToDuration } from "date-fns";
   import { ethers } from "ethers";
@@ -65,7 +67,14 @@
       extendSessionStart = undefined;
     }
   }
+
   async function extendSessionInner() {
+    console.log("extend session");
+
+    const provider = new zklogin.GoogleProvider(PUBLIC_AUTH_GOOGLE_ID);
+    const jwt = await provider.signInWithGoogle({
+      nonce: await toJwtNonce(signer),
+    });
     assert(jwt, "no session");
 
     // TODO: remove this
@@ -140,6 +149,27 @@
       <h2>{lib.APP_NAME}</h2>
     </div>
   </section>
+
+  <Ui.LoadingButton
+    variant="default"
+    onclick={extendSession}
+    loading={extendSessionStart != null}
+  >
+    session
+  </Ui.LoadingButton>
+  {#if extendSessionStart}
+    {@const estimatedDuration = ms("1.5 min")}
+    Remaining time: {formatDuration(
+      intervalToDuration({
+        start: now.value,
+        end: extendSessionStart + estimatedDuration,
+      }),
+    )}
+    <Ui.Progress
+      value={now.value - extendSessionStart}
+      max={estimatedDuration}
+    />
+  {/if}
 
   <Ui.Card.Root>
     <Ui.Card.Header>
