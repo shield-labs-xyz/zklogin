@@ -9,10 +9,10 @@
       <div class="mb-4 md:mb-0">
         <p class="text-sm text-gray-600">
           Created by <a
-            href="https://oleh.wtf"
+            href="https://shield-labs.xyz"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold hover:underline">oleh.wtf</a
+            class="font-semibold hover:underline">Shield Labs</a
           >
         </p>
         <p>
@@ -38,7 +38,7 @@
       <div class="flex space-x-4">
         <Ui.Button variant="ghost" size="icon">
           <a
-            href="https://github.com/olehmisar/zklogin"
+            href="https://github.com/shield-labs-xyz/zklogin"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub"
