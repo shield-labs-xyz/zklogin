@@ -110,35 +110,9 @@ export class GoogleProvider {
       }
     });
   }
-
-  #loadGoogleOAuthScript = utils.lazyValue(() => {
-    return new Promise<void>((resolve) => {
-      if (typeof window.google !== "undefined" && window.google.accounts) {
-        resolve();
-        return;
-      }
-      const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.onload = () => resolve();
-      document.body.appendChild(script);
-    });
-  });
 }
 
 const storageKeys = {
   GoogleOAuthState: "googleOAuthState",
   GoogleOAuthNonce: "googleOAuthNonce",
 };
-
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (params: object) => void;
-          prompt: () => void;
-        };
-      };
-    };
-  }
-}
