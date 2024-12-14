@@ -1,3 +1,4 @@
+import type { Fr } from "@aztec/bb.js";
 import { utils } from "@shield-labs/utils";
 import { Base64 } from "ox";
 import { assert } from "ts-essentials";
@@ -67,4 +68,17 @@ export function noirPackBytes(arr: number[]) {
     }
     return asField;
   }
+}
+
+const getSharedBackend = utils.lazyValue(async () => {
+  // TODO: use `Barretenberg` instead of `BarretenbergSync`. Right now, I am getting `Error: Inline worker is not supported` in SSR context.
+  const { BarretenbergSync } = await import("@aztec/bb.js");
+  return BarretenbergSync.getSingleton();
+});
+
+export async function pedersenHash(input: (bigint | Fr)[], index = 0) {
+  const { Fr } = await import("@aztec/bb.js");
+  const api = await getSharedBackend();
+  const inputFields = input.map((x) => (typeof x === "bigint" ? new Fr(x) : x));
+  return api.pedersenHash(inputFields, index);
 }

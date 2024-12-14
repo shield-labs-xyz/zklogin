@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "@aztec/bb.js": "0.65.2",
-    "@aztec/foundation": "0.65.2",
     "@mach-34/noir-bignum-paramgen": "1.1.0",
     "@noir-lang/noir_js": "1.0.0-beta.0",
     "@shield-labs/utils": "workspace:*",

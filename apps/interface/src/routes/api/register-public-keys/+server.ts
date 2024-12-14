@@ -1,3 +1,5 @@
+import "$lib/polyfills.js";
+
 import { lib } from "$lib";
 import { ChainIdSchema } from "$lib/chain";
 import deployments from "@shield-labs/zklogin-contracts/deployments.json";
