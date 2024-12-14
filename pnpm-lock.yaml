@@ -234,8 +234,8 @@ importers:
         specifier: 0.65.2
         version: 0.65.2(patch_hash=dnucwh4qohajpoy4ns2dkouzc4)
       '@mach-34/noir-bignum-paramgen':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: 1.1.2
+        version: 1.1.2
       '@noir-lang/noir_js':
         specifier: 1.0.0-beta.0
         version: 1.0.0-beta.0
@@ -1052,8 +1052,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@mach-34/noir-bignum-paramgen@1.1.0':
-    resolution: {integrity: sha512-jiD5BzwZEeFPy5Bzro8Bu5JVixG0LT3DhlNwHH2ntuogc56jbejHSGZLhanhwjMMTvIvRKHc3D1sk/eCpWEs6Q==}
+  '@mach-34/noir-bignum-paramgen@1.1.2':
+    resolution: {integrity: sha512-9U/PETHR4Yf8/ezyQgXE5Qz+7mo1wlTv2JuxW90uwXEV3pFlfl5c/Sl95vaHP+ldTllZkUdTXjDnGiirbiUn3w==}
 
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
@@ -5203,7 +5203,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@mach-34/noir-bignum-paramgen@1.1.0': {}
+  '@mach-34/noir-bignum-paramgen@1.1.2': {}
 
   '@manypkg/find-root@1.1.0':
     dependencies:

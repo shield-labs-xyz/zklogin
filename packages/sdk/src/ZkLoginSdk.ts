@@ -3,7 +3,7 @@ import { utils } from "@shield-labs/utils";
 import deployments from "@shield-labs/zklogin-contracts/deployments.json";
 import circuit from "@shield-labs/zklogin-contracts/noir/target/jwt_account.json";
 import { isEqual } from "lodash-es";
-import { Base64, Bytes, type Hex } from "ox";
+import { Base64, Bytes, Hex } from "ox";
 import { assert } from "ts-essentials";
 import { PublicKeyRegistry } from "./PublicKeyRegistry.js";
 import {
@@ -101,9 +101,8 @@ export class ZkLogin {
       global payload_json_padded = ${JSON.stringify(Bytes.toString(Uint8Array.from(payload_json)))}.as_bytes();`,
       );
     }
-    const signature_limbs = bnToLimbStrArray(
-      Bytes.toBigInt(Base64.toBytes(signatureBase64Url)),
-    );
+    const sigHex = Base64.toHex(signatureBase64Url);
+    const signature_limbs = bnToLimbStrArray(sigHex, Hex.size(sigHex) * 8);
     const jwtDecoded = decodeJwt(jwt);
     const publicKey = await this.publicKeyRegistry.getPublicKeyByKid(
       jwtDecoded.header.kid,
