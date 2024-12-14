@@ -1,3 +1,4 @@
+import type { Fr } from "@aztec/bb.js";
 import { utils } from "@shield-labs/utils";
 import { Base64 } from "ox";
 import { assert } from "ts-essentials";
@@ -67,4 +68,11 @@ export function noirPackBytes(arr: number[]) {
     }
     return asField;
   }
+}
+
+export async function pedersenHash(input: (bigint | Fr)[], index = 0) {
+  const { Fr, BarretenbergSync } = await import("@aztec/bb.js");
+  const api = BarretenbergSync.getSingleton();
+  const inputFields = input.map((x) => (typeof x === "bigint" ? new Fr(x) : x));
+  return api.pedersenHash(inputFields, index);
 }

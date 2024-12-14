@@ -6,7 +6,13 @@ import { isEqual } from "lodash-es";
 import { Base64, Bytes, type Hex } from "ox";
 import { assert } from "ts-essentials";
 import { PublicKeyRegistry } from "./PublicKeyRegistry.js";
-import { decodeJwt, noirPackBytes, splitJwt, toBoundedVec } from "./utils.js";
+import {
+  decodeJwt,
+  noirPackBytes,
+  pedersenHash,
+  splitJwt,
+  toBoundedVec,
+} from "./utils.js";
 
 // Note: keep in sync with Noir
 const JWT_HEADER_MAX_LEN = 256;
@@ -155,28 +161,29 @@ const getNoir = utils.lazyValue(async () => {
 });
 
 async function getAccountIdFromJwt(jwtDecoded: ReturnType<typeof decodeJwt>) {
-  const { Fr } = await import("@aztec/foundation/fields");
-  const { pedersenHash } = await import("@aztec/foundation/crypto");
-  const salt = Fr.zero();
-  const accountId = pedersenHash([
-    ...noirPackBytes(
-      utils.arrayPadEnd(
-        Array.from(Bytes.fromString(jwtDecoded.payload.sub)),
-        JWT_SUB_MAX_LEN,
-        0,
+  const { Fr } = await import("@aztec/bb.js");
+  const salt = Fr.ZERO;
+  const accountId = (
+    await pedersenHash([
+      ...noirPackBytes(
+        utils.arrayPadEnd(
+          Array.from(Bytes.fromString(jwtDecoded.payload.sub)),
+          JWT_SUB_MAX_LEN,
+          0,
+        ),
       ),
-    ),
-    ...noirPackBytes(
-      utils.arrayPadEnd(
-        Array.from(Bytes.fromString(jwtDecoded.payload.aud)),
-        JWT_AUD_MAX_LEN,
-        0,
+      ...noirPackBytes(
+        utils.arrayPadEnd(
+          Array.from(Bytes.fromString(jwtDecoded.payload.aud)),
+          JWT_AUD_MAX_LEN,
+          0,
+        ),
       ),
-    ),
-    salt,
-  ]).toString();
+      salt,
+    ])
+  ).toString() as `0x${string}`;
 
-  return { accountId, salt: salt.toString() };
+  return { accountId, salt: salt.toString() as `0x${string}` };
 }
 
 function toNoirNonce(nonce: string) {

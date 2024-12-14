@@ -6,7 +6,7 @@ import { utils } from "@shield-labs/utils";
 import ky from "ky";
 import { Base64, Bytes, Hash, Hex } from "ox";
 import { z } from "zod";
-import { decodeJwt, HOSTED_SERVICE_URL } from "./utils.js";
+import { decodeJwt, HOSTED_SERVICE_URL, pedersenHash } from "./utils.js";
 
 export class PublicKeyRegistry {
   constructor(private apiUrl = HOSTED_SERVICE_URL) {}
@@ -92,10 +92,11 @@ async function getPublicKeyHash(publicKey: {
   public_key_redc_limbs: string[];
 }) {
   // TODO(perf): change pedersen to poseidon2
-  const { pedersenHash } = await import("@aztec/foundation/crypto");
-  return pedersenHash(
-    [...publicKey.public_key_limbs, ...publicKey.public_key_redc_limbs].map(
-      (x) => BigInt(x),
-    ),
-  ).toString();
+  return (
+    await pedersenHash(
+      [...publicKey.public_key_limbs, ...publicKey.public_key_redc_limbs].map(
+        (x) => BigInt(x),
+      ),
+    )
+  ).toString() as `0x${string}`;
 }

@@ -1,14 +1,8 @@
 import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vite";
-import resolve from "vite-plugin-resolve";
 
 export default defineConfig(() => ({
-  plugins: [
-    sveltekit(),
-    resolve({
-      util: `export const inspect = {}`,
-    }),
-  ],
+  plugins: [sveltekit()],
   build: {
     target: "esnext",
   },
