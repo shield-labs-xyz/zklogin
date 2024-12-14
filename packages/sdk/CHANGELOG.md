@@ -1,5 +1,11 @@
 # @shield-labs/zklogin
 
+## 0.6.1
+
+### Patch Changes
+
+- fbeb22f: fix: get rid of @aztec/foundation and polyfills
+
 ## 0.6.0
 
 ### Minor Changes
