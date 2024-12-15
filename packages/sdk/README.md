@@ -1,5 +1,7 @@
 # zkLogin SDK
 
+> ## WARNING: zkLogin is not audited and should not be used in production
+
 ## Usage
 
 ### Solidity contract

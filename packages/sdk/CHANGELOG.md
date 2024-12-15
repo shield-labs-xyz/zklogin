@@ -1,5 +1,29 @@
 # @shield-labs/zklogin
 
+## 0.6.1
+
+### Patch Changes
+
+- fbeb22f: fix: get rid of @aztec/foundation and polyfills
+
+## 0.6.0
+
+### Minor Changes
+
+- feat: custom Google auth provider
+
+## 0.5.2
+
+### Patch Changes
+
+- 0306af5: chore: move to shield-labs org
+
+## 0.5.1
+
+### Patch Changes
+
+- 6d6f773: docs: add disclaimer
+
 ## 0.5.0
 
 ### Minor Changes

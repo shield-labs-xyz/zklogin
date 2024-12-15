@@ -3,10 +3,16 @@ import { utils } from "@shield-labs/utils";
 import deployments from "@shield-labs/zklogin-contracts/deployments.json";
 import circuit from "@shield-labs/zklogin-contracts/noir/target/jwt_account.json";
 import { isEqual } from "lodash-es";
-import { Base64, Bytes, type Hex } from "ox";
+import { Base64, Bytes, Hex } from "ox";
 import { assert } from "ts-essentials";
 import { PublicKeyRegistry } from "./PublicKeyRegistry.js";
-import { decodeJwt, noirPackBytes, splitJwt, toBoundedVec } from "./utils.js";
+import {
+  decodeJwt,
+  noirPackBytes,
+  pedersenHash,
+  splitJwt,
+  toBoundedVec,
+} from "./utils.js";
 
 // Note: keep in sync with Noir
 const JWT_HEADER_MAX_LEN = 256;
@@ -95,9 +101,8 @@ export class ZkLogin {
       global payload_json_padded = ${JSON.stringify(Bytes.toString(Uint8Array.from(payload_json)))}.as_bytes();`,
       );
     }
-    const signature_limbs = bnToLimbStrArray(
-      Bytes.toBigInt(Base64.toBytes(signatureBase64Url)),
-    );
+    const sigHex = Base64.toHex(signatureBase64Url);
+    const signature_limbs = bnToLimbStrArray(sigHex, Hex.size(sigHex) * 8);
     const jwtDecoded = decodeJwt(jwt);
     const publicKey = await this.publicKeyRegistry.getPublicKeyByKid(
       jwtDecoded.header.kid,
@@ -155,28 +160,29 @@ const getNoir = utils.lazyValue(async () => {
 });
 
 async function getAccountIdFromJwt(jwtDecoded: ReturnType<typeof decodeJwt>) {
-  const { Fr } = await import("@aztec/foundation/fields");
-  const { pedersenHash } = await import("@aztec/foundation/crypto");
-  const salt = Fr.zero();
-  const accountId = pedersenHash([
-    ...noirPackBytes(
-      utils.arrayPadEnd(
-        Array.from(Bytes.fromString(jwtDecoded.payload.sub)),
-        JWT_SUB_MAX_LEN,
-        0,
+  const { Fr } = await import("@aztec/bb.js");
+  const salt = Fr.ZERO;
+  const accountId = (
+    await pedersenHash([
+      ...noirPackBytes(
+        utils.arrayPadEnd(
+          Array.from(Bytes.fromString(jwtDecoded.payload.sub)),
+          JWT_SUB_MAX_LEN,
+          0,
+        ),
       ),
-    ),
-    ...noirPackBytes(
-      utils.arrayPadEnd(
-        Array.from(Bytes.fromString(jwtDecoded.payload.aud)),
-        JWT_AUD_MAX_LEN,
-        0,
+      ...noirPackBytes(
+        utils.arrayPadEnd(
+          Array.from(Bytes.fromString(jwtDecoded.payload.aud)),
+          JWT_AUD_MAX_LEN,
+          0,
+        ),
       ),
-    ),
-    salt,
-  ]).toString();
+      salt,
+    ])
+  ).toString() as `0x${string}`;
 
-  return { accountId, salt: salt.toString() };
+  return { accountId, salt: salt.toString() as `0x${string}` };
 }
 
 function toNoirNonce(nonce: string) {

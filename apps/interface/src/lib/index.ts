@@ -1,4 +1,5 @@
 import { browser } from "$app/environment";
+import { PUBLIC_AUTH_GOOGLE_ID } from "$env/static/public";
 import { zklogin } from "@shield-labs/zklogin";
 import { QueryClient } from "@tanstack/svelte-query";
 import { ChainService } from "./chain.js";
@@ -18,10 +19,11 @@ const queryClient = new QueryClient({
 });
 
 const chain = new ChainService();
-const queries = new QueriesService(queryClient);
 const webAuthn = new WebAuthnService();
 const zkLogin = new zklogin.ZkLogin(new zklogin.PublicKeyRegistry(""));
-const eip7702 = new Eip7702Service(zkLogin, publicClient);
+const authProvider = new zklogin.GoogleProvider(PUBLIC_AUTH_GOOGLE_ID);
+const eip7702 = new Eip7702Service(zkLogin, publicClient, authProvider);
+const queries = new QueriesService(authProvider, queryClient);
 
 const APP_NAME = "zkLogin";
 export const lib = {
@@ -30,5 +32,6 @@ export const lib = {
   chain,
   zkLogin,
   eip7702,
+  authProvider,
   webAuthn,
 };

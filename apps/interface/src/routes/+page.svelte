@@ -18,9 +18,8 @@
     privateKeyToAddress,
   } from "viem/accounts";
 
-  let { data } = $props();
-
-  let jwt = $derived(data.session?.id_token);
+  let jwtQuery = $derived(lib.queries.jwt());
+  let jwt = $derived($jwtQuery.data ?? undefined);
 
   const accStore = new LocalStore<
     | {

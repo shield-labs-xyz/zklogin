@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import { lib } from "$lib";
-  import { signOut } from "@auth/sveltekit/client";
   import { Ui } from "@repo/ui";
   import Menu from "lucide-svelte/icons/menu";
 
@@ -11,6 +10,8 @@
     }
     return $page.url.pathname.startsWith(href);
   }
+
+  let jwt = $derived(lib.queries.jwt());
 </script>
 
 <header
@@ -43,8 +44,15 @@
     class="flex w-full items-center gap-4 md:ml-auto md:w-auto md:gap-2 lg:gap-4"
   >
     <div class="grow"></div>
-    {#if $page.data.session}
-      <Ui.Button onclick={() => signOut()}>Sign out of Google</Ui.Button>
+    {#if $jwt.data}
+      <Ui.Button
+        onclick={async () => {
+          await lib.authProvider.signOut();
+          lib.queries.invalidateAll();
+        }}
+      >
+        Sign out
+      </Ui.Button>
     {/if}
   </div>
 </header>

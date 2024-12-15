@@ -1,9 +1,10 @@
+import type { Fr } from "@aztec/bb.js";
 import { utils } from "@shield-labs/utils";
 import { Base64 } from "ox";
 import { assert } from "ts-essentials";
 import { z } from "zod";
 
-export const HOSTED_SERVICE_URL = "https://zklogin.oleh.wtf";
+export const HOSTED_SERVICE_URL = "https://zklogin.shield-labs.xyz";
 
 export function decodeJwt(jwt: string) {
   const [headerBase64Url, payloadBase64Url] = splitJwt(jwt);
@@ -67,4 +68,11 @@ export function noirPackBytes(arr: number[]) {
     }
     return asField;
   }
+}
+
+export async function pedersenHash(input: (bigint | Fr)[], index = 0) {
+  const { Fr, BarretenbergSync } = await import("@aztec/bb.js");
+  const api = BarretenbergSync.getSingleton();
+  const inputFields = input.map((x) => (typeof x === "bigint" ? new Fr(x) : x));
+  return api.pedersenHash(inputFields, index);
 }

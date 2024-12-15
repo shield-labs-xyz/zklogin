@@ -2,6 +2,9 @@
   "name": "@repo/monorepo",
   "type": "module",
   "private": true,
+  "scripts": {
+    "release": "pnpm changeset version && git add . && git commit -m\"chore: release\" && pnpm changeset publish && git push && git push --tags"
+  },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
     "prettier-plugin-svelte": "^3.2.7",
@@ -9,8 +12,7 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "@aztec/bb.js": "patches/@aztec__bb.js.patch",
-      "oauth4webapi@3.0.0": "patches/oauth4webapi@3.0.0.patch"
+      "@aztec/bb.js": "patches/@aztec__bb.js.patch"
     }
   }
 }

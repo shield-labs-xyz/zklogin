@@ -1,5 +1,4 @@
 import { chain, provider, relayer } from "$lib/chain";
-import * as web2Auth from "@auth/sveltekit/client";
 import { Ui } from "@repo/ui";
 import { utils } from "@shield-labs/utils";
 import { zklogin } from "@shield-labs/zklogin";
@@ -23,16 +22,12 @@ export class Eip7702Service {
   constructor(
     private zkLogin: zklogin.ZkLogin,
     private client: Client & { chain: Chain },
+    private authProvider: zklogin.GoogleProvider,
   ) {}
 
   async requestJwt({ webAuthnPublicKey }: { webAuthnPublicKey: Hex }) {
     const nonce = this.#toNonce(webAuthnPublicKey).slice("0x".length);
-    const callbackUrl = new URL(location.href);
-    await web2Auth.signIn(
-      "google",
-      { callbackUrl: callbackUrl.href },
-      { nonce },
-    );
+    await this.authProvider.signInWithRedirect({ nonce });
   }
 
   async authorize({
