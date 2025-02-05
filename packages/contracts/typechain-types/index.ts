@@ -64,6 +64,8 @@ export type { Strings } from "./@openzeppelin/contracts/utils/Strings";
 export { Strings__factory } from "./factories/@openzeppelin/contracts/utils/Strings__factory";
 export type { TestJwtAccount } from "./contracts/_mock/TestJwtAccount";
 export { TestJwtAccount__factory } from "./factories/contracts/_mock/TestJwtAccount__factory";
+export type { EoaAccount } from "./contracts/EoaAccount";
+export { EoaAccount__factory } from "./factories/contracts/EoaAccount__factory";
 export type { IPublicKeyRegistry } from "./contracts/infra/IPublicKeyRegistry";
 export { IPublicKeyRegistry__factory } from "./factories/contracts/infra/IPublicKeyRegistry__factory";
 export type { PublicKeyRegistry } from "./contracts/infra/PublicKeyRegistry";

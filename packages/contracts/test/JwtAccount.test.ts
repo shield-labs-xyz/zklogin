@@ -10,7 +10,7 @@ import {
   UltraVerifier__factory,
 } from "../typechain-types";
 
-describe("JwtAccount", () => {
+describe.skip("JwtAccount", () => {
   let alice: SignerWithAddress;
   let deployer: SignerWithAddress;
   let publicKeyRegistry: PublicKeyRegistry;

@@ -9,4 +9,5 @@ import type * as product from "./product";
 export type { product };
 import type * as utils from "./utils";
 export type { utils };
+export type { EoaAccount } from "./EoaAccount";
 export type { IProofVerifier } from "./IProofVerifier";

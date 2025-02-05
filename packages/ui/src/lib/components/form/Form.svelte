@@ -10,10 +10,12 @@
 
   let {
     schema,
+    initialValues = {},
     onsubmit,
     children,
   }: {
     schema: T;
+    initialValues?: Partial<z.infer<T>>;
     onsubmit: (data: z.infer<T>) => Promise<void>;
     children: (
       form: ReturnType<typeof superForm<Infer<T>>>,
@@ -22,24 +24,29 @@
   } = $props();
 
   let formElement: HTMLFormElement | undefined = $state();
-  const form = superForm(defaults(zod(schema)), {
-    validators: zodClient(schema),
-    SPA: true,
-    async onSubmit(input) {
-      try {
-        const result = await superValidate(input.formData, zod(schema));
-        if (!result.valid) {
-          throw new Error("Invalid form data");
+  const form = superForm(
+    defaults(zod(schema), {
+      defaults: initialValues,
+    } as any),
+    {
+      validators: zodClient(schema),
+      SPA: true,
+      async onSubmit(input) {
+        try {
+          const result = await superValidate(input.formData, zod(schema));
+          if (!result.valid) {
+            throw new Error("Invalid form data");
+          }
+          const data = result.data;
+          await onsubmit(data);
+          // formElement?.reset();
+        } catch (e) {
+          toast.error(e);
+          throw e;
         }
-        const data = result.data;
-        await onsubmit(data);
-        // formElement?.reset();
-      } catch (e) {
-        toast.error(e);
-        throw e;
-      }
+      },
     },
-  });
+  );
 
   const { form: formDataStore, enhance } = form;
   let formData = toRuneObject(formDataStore);
