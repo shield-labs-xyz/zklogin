@@ -1,11 +1,9 @@
-<img align="right" width="150" height="150" top="100" src="https://github.com/user-attachments/assets/1494344f-f013-4872-bed6-ac7f116f35e3">
 
 # zkLogin for Ethereum/Base
 
 Sign in with Apple/Google on any EVM chain. Self-custodial. Try it now: <https://zklogin.shield-labs.xyz>
 
 <a href="https://zklogin.shield-labs.xyz">
-<img src="https://github.com/user-attachments/assets/6c3a34c9-7f11-4275-9c55-8714ac55ffa3" width="200"></a>
 
 > ## WARNING: zkLogin is not audited and should not be used in production
 
