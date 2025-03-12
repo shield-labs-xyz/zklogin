@@ -5,11 +5,16 @@ import type { z } from "zod";
 import { zUnionFromArray } from "./utils";
 
 /** @deprecated use {@link ChainService} */
-export const chain = baseSepolia;
+export const chain = odysseyTestnet;
 
-const RPC_URL = "https://sepolia.base.org";
+const RPC_URL = "https://odyssey.ithaca.xyz";
 /** @deprecated migrate to viem */
 export const provider = new ethers.JsonRpcProvider(RPC_URL);
+/** @deprecated migrate to viem */
+export const relayer = new ethers.Wallet(
+  "0x4e560d1db4456119f9256bb65b4321ad54b860882c46b5ecb6ba92ca4d725dad",
+  provider,
+);
 
 const chains = [baseSepolia, odysseyTestnet] as const;
 

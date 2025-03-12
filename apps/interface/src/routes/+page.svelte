@@ -1,52 +1,50 @@
 <script lang="ts">
-  import { getBundlerClient, lib, publicClient } from "$lib";
-  import { provider } from "$lib/chain.js";
+  import { lib } from "$lib";
+  import { chain, provider, relayer } from "$lib/chain.js";
   import { LocalStore } from "$lib/localStorage.svelte.js";
   import { now } from "$lib/now.svelte.js";
   import SendEthCard from "$lib/SendEthCard.svelte";
-  import { toJwtNonce } from "$lib/services/JwtAccountService.js";
-  import { EXTEND_SESSION_SEARCH_PARAM } from "$lib/utils.js";
   import { Ui } from "@repo/ui";
   import { utils } from "@shield-labs/utils";
   import { createQuery } from "@tanstack/svelte-query";
-  import { formatDistance, formatDuration, intervalToDuration } from "date-fns";
+  import { formatDuration, intervalToDuration } from "date-fns";
   import { ethers } from "ethers";
   import ms from "ms";
-  import { onMount } from "svelte";
   import { assert } from "ts-essentials";
+  import { isAddress, type Hex } from "viem";
+  import {
+    generatePrivateKey,
+    privateKeyToAccount,
+    privateKeyToAddress,
+  } from "viem/accounts";
 
   let jwtQuery = $derived(lib.queries.jwt());
   let jwt = $derived($jwtQuery.data ?? undefined);
 
-  const signerPrivateKey = new LocalStore<string | undefined>(
-    "signer-private-key",
-    undefined,
-  );
-  if (!signerPrivateKey.value) {
-    signerPrivateKey.value = ethers.Wallet.createRandom().privateKey;
-  }
+  const accStore = new LocalStore<
+    | {
+        type: "address";
+        address: Hex;
+      }
+    | {
+        type: "privateKey";
+        privateKey: Hex;
+        address: Hex;
+      }
+    | undefined
+  >("eoa-account", undefined);
+  let acc = $derived(accStore.value);
 
-  let signer = $derived(new ethers.Wallet(signerPrivateKey.value, provider));
-
-  let jwtAccountInfo = $derived(
+  let codeConnectedQuery = $derived(
     createQuery(
       {
-        queryKey: ["jwtCurrentOwner", jwt, signer.address],
+        queryKey: ["codeSize", acc?.address],
         queryFn: async () => {
-          if (!jwt) {
-            return null;
+          if (!acc) {
+            return false;
           }
-          const account = await lib.jwtAccount.getAccount(jwt, signer);
-          const ownerInfo = await lib.jwtAccount.currentOwner(account);
-          return {
-            address: account.address,
-            ownerInfo:
-              ownerInfo && utils.isAddressEqual(ownerInfo.owner, signer.address)
-                ? ownerInfo.expirationTimestamp > Math.floor(Date.now() / 1000)
-                  ? ownerInfo
-                  : ("expired" as const)
-                : undefined,
-          };
+          const code = await provider.provider.getCode(acc?.address);
+          return ethers.dataLength(code) > 0;
         },
         refetchInterval: ms("10 sec"),
       },
@@ -54,71 +52,90 @@
     ),
   );
 
-  let extendSessionStart = $state<number | undefined>();
-  async function extendSession() {
-    try {
-      extendSessionStart = Date.now();
-      await extendSessionInner();
-    } finally {
-      extendSessionStart = undefined;
-    }
-  }
+  let credentialIsCorrectQuery = $derived(
+    createQuery(
+      {
+        queryKey: ["credentialIsCorrect", chain.id, acc?.address],
+        queryFn: async () => {
+          if (!acc) {
+            return true;
+          }
+          const cred = await lib.webAuthn.getCredential();
+          if (!cred) {
+            return false;
+          }
+          const isCorrect = await lib.eip7702.isWebAuthnPublicKeyCorrect({
+            address: acc.address,
+            webAuthnPublicKey: cred.publicKey,
+          });
+          return isCorrect;
+        },
+        refetchInterval: ms("10 sec"),
+      },
+      lib.queries.queryClient,
+    ),
+  );
 
-  async function extendSessionInner() {
-    console.log("extend session");
+  let balanceQuery = $derived(
+    createQuery(
+      {
+        queryKey: ["balance", chain.id, acc?.address],
+        queryFn: async () => {
+          return acc ? await provider.getBalance(acc.address) : 0n;
+        },
+        refetchInterval: ms("10 sec"),
+      },
+      lib.queries.queryClient,
+    ),
+  );
+
+  async function connect() {
     assert(jwt, "no session");
+    utils.assertConnected(acc);
+    assert(acc.type === "privateKey", "cannot connect to a recovered account");
 
-    // TODO: remove this
-    await lib.zkLogin.publicKeyRegistry.requestPublicKeysUpdate(
-      publicClient.chain.id,
-    );
-
-    const result = await lib.zkLogin.proveJwt(jwt, await toJwtNonce(signer));
-    if (!result) {
-      Ui.toast.log(
-        "Sign in again please to link your wallet to your Google account",
-      );
-      await utils.sleep("2 sec");
-      await signIn(signer, { extendSessionAfterLogin: true });
-      return;
-    }
-    const { proof, input } = result;
-
-    console.log("proof", proof);
-
-    const tx = await lib.jwtAccount.setOwner(jwt, signer, {
-      proof,
-      jwtIat: input.jwt_iat,
-      publicKeyHash: input.public_key_hash,
+    const accountWithPrivateKey = privateKeyToAccount(acc.privateKey);
+    const cred = await lib.webAuthn.getOrCreateCredential({ name: "me" });
+    const tx = await lib.eip7702.authorize({
+      jwt,
+      account: accountWithPrivateKey,
+      webAuthnPublicKey: cred.publicKey,
     });
-    console.log("recovery tx", tx);
-    await getBundlerClient(publicClient).waitForUserOperationReceipt({
-      hash: tx,
-    });
-    Ui.toast.success("Session extended successfully");
+    console.log("tx", tx);
+    await provider.provider.waitForTransaction(tx);
+
+    Ui.toast.success("Connected Passkeys and Google account successfully");
     lib.queries.invalidateAll();
   }
 
-  async function signIn(
-    signer: ethers.Signer,
-    { extendSessionAfterLogin = false } = {},
-  ) {
-    const nonce = await toJwtNonce(signer);
-    await lib.authProvider.signInWithRedirect({ nonce });
-  }
+  let extendSessionStart = $state<number | undefined>();
+  async function recover() {
+    assert(jwt, "no session");
+    utils.assertConnected(acc);
 
-  onMount(async () => {
-    const url = new URL(location.href);
-    if (
-      url.searchParams.get(EXTEND_SESSION_SEARCH_PARAM.key) !==
-      EXTEND_SESSION_SEARCH_PARAM.value
-    ) {
-      return;
+    const recoverCred = await lib.webAuthn.getOrCreateCredential({
+      name: "me recover",
+    });
+
+    let recTxHash: string | undefined;
+
+    extendSessionStart = Date.now();
+    try {
+      recTxHash = await lib.eip7702.recover({
+        jwt,
+        address: acc.address,
+        webAuthnPublicKey: recoverCred.publicKey,
+      });
+    } finally {
+      extendSessionStart = undefined;
     }
-    url.searchParams.delete(EXTEND_SESSION_SEARCH_PARAM.key);
-    history.replaceState(null, "", url.href);
-    await extendSession();
-  });
+
+    console.log("recTxHash", recTxHash);
+    await provider.provider.waitForTransaction(recTxHash);
+
+    Ui.toast.success("Recovered successfully");
+    lib.queries.invalidateAll();
+  }
 </script>
 
 <Ui.GapContainer class="container">
@@ -133,82 +150,154 @@
       <Ui.Card.Title>Google account</Ui.Card.Title>
     </Ui.Card.Header>
     <Ui.Card.Content>
-      {#if !jwt}
+      {#if acc}
+        <div>
+          Address: {utils.shortAddress(acc.address)}
+          <Ui.CopyButton
+            text={acc.address}
+            class="size-[1em]"
+            iconClass="size-[1em]"
+            variant="ghost"
+          />
+        </div>
+
+        <div>
+          Passkeys and Google connected:
+          <Ui.Query query={$codeConnectedQuery}>
+            {#snippet success(data)}
+              {data}
+            {/snippet}
+          </Ui.Query>
+        </div>
+        <div>
+          Balance: <Ui.Query query={$balanceQuery}>
+            {#snippet success(data)}
+              {ethers.formatEther(data)} ETH
+            {/snippet}
+          </Ui.Query>
+
+          {#if $balanceQuery.data === 0n}
+            <Ui.LoadingButton
+              variant="default"
+              size="sm"
+              onclick={async () => {
+                const tx = await relayer.sendTransaction({
+                  to: acc.address,
+                  value: ethers.parseEther("0.001"),
+                });
+                await tx.wait();
+              }}
+            >
+              Top up
+            </Ui.LoadingButton>
+          {/if}
+        </div>
+        <div>Network: {chain.name}</div>
+
         <Ui.GapContainer class="gap-2">
-          <Ui.LoadingButton
-            variant="default"
-            style="width: 100%;"
-            onclick={() => signIn(signer)}
-          >
-            Sign in with Google
-          </Ui.LoadingButton>
+          {#if !jwt}
+            <Ui.LoadingButton
+              variant="default"
+              style="width: 100%;"
+              onclick={async () => {
+                const cred = await lib.webAuthn.getOrCreateCredential({
+                  name: "me",
+                });
+                await lib.eip7702.requestJwt({
+                  webAuthnPublicKey: cred.publicKey,
+                });
+              }}
+            >
+              Create passkeys and sign in with Google
+            </Ui.LoadingButton>
+          {:else if $codeConnectedQuery.data === false}
+            <Ui.LoadingButton variant="default" onclick={connect}>
+              Connect Passkeys and Google
+              {#if $balanceQuery.data === 0n}
+                <Ui.Badge variant="destructive" class="ml-2">
+                  Top up your balance first
+                </Ui.Badge>
+              {/if}
+            </Ui.LoadingButton>
+          {:else if $credentialIsCorrectQuery.data === false}
+            <Ui.LoadingButton variant="default" onclick={recover}>
+              Recover
+            </Ui.LoadingButton>
+            {#if extendSessionStart}
+              {@const estimatedDuration = ms("1.5 min")}
+              <div>
+                Remaining time: {formatDuration(
+                  intervalToDuration({
+                    start: now.value,
+                    end: extendSessionStart + estimatedDuration,
+                  }),
+                )}
+                <Ui.Progress
+                  value={now.value - extendSessionStart}
+                  max={estimatedDuration}
+                />
+              </div>
+            {/if}
+          {/if}
           <Ui.Button href="/how" variant="secondary">How it works</Ui.Button>
         </Ui.GapContainer>
       {:else}
-        <Ui.Query query={$jwtAccountInfo}>
-          {#snippet pending()}
-            <div>Loading...</div>
-          {/snippet}
-          {#snippet success(data)}
-            {#if data}
-              <Ui.GapContainer class="gap-2">
-                <section>
-                  <div>
-                    Address: {utils.shortAddress(data.address)}
-                    <Ui.CopyButton
-                      text={data.address}
-                      class="size-[1em]"
-                      iconClass="size-[1em]"
-                      variant="ghost"
-                    />
-                  </div>
-                  <div>Network: {publicClient.chain.name}</div>
-                  <div>
-                    {#if data.ownerInfo == null}
-                      No session
-                    {:else if data.ownerInfo === "expired"}
-                      Session expired
-                    {:else}
-                      Session expiration: in {formatDistance(
-                        data.ownerInfo.expirationTimestamp * 1000,
-                        now.value,
-                      )}
-                    {/if}
-                  </div>
-                </section>
-                <Ui.LoadingButton
-                  variant="default"
-                  onclick={extendSession}
-                  loading={extendSessionStart != null}
-                >
-                  {data.ownerInfo == null ? "Create" : "Extend"} session
-                </Ui.LoadingButton>
-                {#if extendSessionStart}
-                  {@const estimatedDuration = ms("1.5 min")}
-                  Remaining time: {formatDuration(
-                    intervalToDuration({
-                      start: now.value,
-                      end: extendSessionStart + estimatedDuration,
-                    }),
-                  )}
-                  <Ui.Progress
-                    value={now.value - extendSessionStart}
-                    max={estimatedDuration}
-                  />
-                {/if}
-              </Ui.GapContainer>
-            {/if}
-          {/snippet}
-        </Ui.Query>
+        <Ui.GapContainer>
+          <Ui.LoadingButton
+            variant="default"
+            onclick={async () => {
+              const privateKey = generatePrivateKey();
+              accStore.value = {
+                type: "privateKey",
+                privateKey,
+                address: privateKeyToAddress(privateKey),
+              };
+            }}
+          >
+            Create account
+          </Ui.LoadingButton>
+
+          <Ui.GapContainer>
+            <Ui.LoadingButton
+              variant="default"
+              onclick={async () => {
+                const address = prompt("Enter the address you want to recover");
+                if (address == null) {
+                  return;
+                }
+                assert(isAddress(address), `Invalid address: ${address}`);
+                accStore.value = {
+                  type: "address",
+                  address,
+                };
+              }}
+            >
+              Recover
+            </Ui.LoadingButton>
+          </Ui.GapContainer>
+        </Ui.GapContainer>
       {/if}
     </Ui.Card.Content>
   </Ui.Card.Root>
 
-  <SendEthCard
-    {jwt}
-    {signer}
-    disabled={!jwt ||
-      !$jwtAccountInfo.data?.ownerInfo ||
-      $jwtAccountInfo.data.ownerInfo === "expired"}
-  />
+  {#if acc && $codeConnectedQuery.data === true}
+    <SendEthCard address={acc.address} />
+  {/if}
+
+  {#if acc}
+    <Ui.LoadingButton
+      variant="destructive"
+      onclick={async () => {
+        const result: boolean = await Ui.toast.confirm({
+          confirmText: "Are you sure you want to forget this account?",
+        });
+        if (!result) {
+          return;
+        }
+        accStore.value = undefined;
+      }}
+    >
+      Forget account
+    </Ui.LoadingButton>
+  {/if}
 </Ui.GapContainer>

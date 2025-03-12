@@ -1,4 +1,5 @@
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-viem";
 import "hardhat-deploy";
 import "hardhat-plugin-noir";
 import { HardhatUserConfig } from "hardhat/config";
@@ -19,6 +20,7 @@ const config: HardhatUserConfig = {
     version: "1.0.0-beta.0",
     bbVersion: "0.65.2",
   },
+  defaultNetwork: "localhost",
   networks: {
     baseSepolia: {
       url: "https://sepolia.base.org",

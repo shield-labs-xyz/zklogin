@@ -5,4 +5,5 @@ export * as mock from "./_mock";
 export * as infra from "./infra";
 export * as product from "./product";
 export * as utils from "./utils";
+export { EoaAccount__factory } from "./EoaAccount__factory";
 export { IProofVerifier__factory } from "./IProofVerifier__factory";
